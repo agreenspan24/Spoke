@@ -45,7 +45,7 @@ const campaignInfoFragment = `
   useOwnMessagingService
   messageserviceSid
   overrideOrganizationTextingHours
-  vanIsMyCampaign
+  vanDatabaseMode
   textingHoursEnforced
   textingHoursStart
   textingHoursEnd
@@ -368,7 +368,7 @@ export class AdminCampaignEdit extends React.Component {
           "logoImageUrl",
           "primaryColor",
           "introHtml",
-          "vanIsMyCampaign"
+          "vanDatabaseMode"
         ],
         blocksStarting: true,
         expandAfterCampaignStarts: true,
@@ -376,7 +376,18 @@ export class AdminCampaignEdit extends React.Component {
         checkCompleted: () =>
           this.state.campaignFormValues.title !== "" &&
           this.state.campaignFormValues.description !== "" &&
-          this.state.campaignFormValues.dueBy !== null
+          this.state.campaignFormValues.dueBy !== null,
+        extraProps: {
+          vanIntegrationEnabled:
+            (this.props.campaignData.campaign.ingestMethodsAvailable &&
+              this.props.campaignData.campaign.ingestMethodsAvailable.some(
+                x => x.name == "ngpvan"
+              )) ||
+            (this.props.campaignData.campaign.availableActions &&
+              this.props.campaignData.campaign.availableActions.some(
+                x => x.name == "ngpvan-action"
+              ))
+        }
       },
       {
         title: "Contacts",

@@ -59,7 +59,7 @@ const Campaign = thinky.createModel(
         .string()
         .required()
         .default("US/Eastern"),
-      van_is_my_campaign: type.boolean().allowNull(true)
+      van_database_mode: type.integer().allowNull(true)
     })
     .allowExtra(false),
   { noAutoCreation: true }

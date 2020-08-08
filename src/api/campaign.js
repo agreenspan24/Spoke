@@ -117,7 +117,7 @@ export const schema = gql`
     messageserviceSid: String
     useOwnMessagingService: Boolean
     phoneNumbers: [String]
-    vanIsMyCampaign: Boolean
+    vanDatabaseMode: Int
   }
 
   type CampaignsList {

@@ -20,7 +20,10 @@ const FormSchema = {
     .nullable(),
   primaryColor: yup.string().nullable(),
   introHtml: yup.string().nullable(),
-  vanIsMyCampaign: yup.boolean().nullable()
+  vanDatabaseMode: yup
+    .number()
+    .transform(value => (!value ? null : value))
+    .nullable()
 };
 
 const EnsureCompletedFormSchema = {
@@ -40,7 +43,10 @@ const EnsureCompletedFormSchema = {
     .string()
     .transform(value => (!value ? null : value))
     .nullable(),
-  vanIsMyCampaign: yup.boolean().nullable()
+  vanDatabaseMode: yup
+    .number()
+    .transform(value => (!value ? null : value))
+    .nullable()
 };
 
 export default class CampaignBasicsForm extends React.Component {
@@ -94,6 +100,20 @@ export default class CampaignBasicsForm extends React.Component {
             fullWidth
             utcOffset={0}
           />
+          {this.props.vanIntegrationEnabled && (
+            <Form.Field
+              name="vanDatabaseMode"
+              floatingLabelText="VAN Database Mode (if applicable)"
+              default={this.props.formValues.vanDatabaseMode}
+              type="select"
+              fullWidth
+              choices={[
+                { value: null, label: "" },
+                { value: 0, label: "My Voters" },
+                { value: 1, label: "My Campaign" }
+              ]}
+            />
+          )}
           <Form.Field name="introHtml" label="Intro HTML" multiLine fullWidth />
           <Form.Field
             name="logoImageUrl"
@@ -107,17 +127,6 @@ export default class CampaignBasicsForm extends React.Component {
             label="Primary color"
             defaultValue={this.props.formValues.primaryColor || "#ffffff"}
             type={ColorPicker}
-          />
-          <Form.Field
-            name="vanIsMyCampaign"
-            label="VAN Database Mode"
-            default={this.props.formValues.vanIsMyCampaign}
-            type="select"
-            choices={[
-              { value: null, label: "N/A" },
-              { value: false, label: "My Voters" },
-              { value: true, label: "My Campaign" }
-            ]}
           />
           <Form.Button
             type="submit"
@@ -138,11 +147,12 @@ CampaignBasicsForm.propTypes = {
     logoImageUrl: PropTypes.string,
     primaryColor: PropTypes.string,
     introHtml: PropTypes.string,
-    vanIsMyCampaign: PropTypes.bool
+    vanDatabaseMode: PropTypes.number
   }),
   onChange: PropTypes.func,
   onSubmit: PropTypes.func,
   saveLabel: PropTypes.string,
   saveDisabled: PropTypes.bool,
-  ensureComplete: PropTypes.bool
+  ensureComplete: PropTypes.bool,
+  vanIntegrationEnabled: PropTypes.bool
 };

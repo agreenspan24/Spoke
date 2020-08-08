@@ -3,7 +3,7 @@ import { getConfig } from "../../../server/api/lib/config";
 export const DEFAULT_NGP_VAN_API_BASE_URL = "https://api.securevan.com";
 
 export default class Van {
-  static getAuth = (organization, isMyCampaign) => {
+  static getAuth = (organization, vanDatabaseMode) => {
     const appName = getConfig("NGP_VAN_APP_NAME", organization);
     const apiKey = getConfig("NGP_VAN_API_KEY", organization);
 
@@ -14,7 +14,7 @@ export default class Van {
     }
 
     const buffer = Buffer.from(
-      `${appName}:${apiKey}|${isMyCampaign ? "1" : "0"}`
+      `${appName}:${apiKey}|${vanDatabaseMode || "0"}`
     );
     return `Basic ${buffer.toString("base64")}`;
   };

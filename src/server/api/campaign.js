@@ -294,7 +294,7 @@ export const resolvers = {
         "textingHoursStart",
         "textingHoursEnd",
         "timezone",
-        "vanIsMyCampaign"
+        "vanDatabaseMode"
       ],
       Campaign
     ),

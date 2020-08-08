@@ -1,13 +1,13 @@
-// Add van_is_my_campaign column to campaign
+// Add van_database_mode column to campaign
 exports.up = function(knex) {
   return knex.schema.alterTable("campaign", table => {
-    table.boolean("van_is_my_campaign").nullable();
+    table.integer("van_database_mode").nullable();
   });
 };
 
-// Drop van_is_my_campaign column from campaign
+// Drop van_database_mode column from campaign
 exports.down = function(knex) {
   return knex.schema.alterTable("campaign", table => {
-    table.dropColumn("van_is_my_campaign");
+    table.dropColumn("van_database_mode");
   });
 };

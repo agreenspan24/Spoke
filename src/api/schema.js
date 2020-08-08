@@ -86,7 +86,7 @@ const rootSchema = gql`
     textingHoursEnd: Int
     texterUIConfig: TexterUIConfigInput
     timezone: String
-    vanIsMyCampaign: Boolean
+    vanDatabaseMode: Int
   }
 
   input OrganizationInput {
