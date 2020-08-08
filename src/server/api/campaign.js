@@ -9,6 +9,10 @@ import {
 } from "../../integrations/contact-loaders";
 import twilio from "./lib/twilio";
 import { getConfig } from "./lib/config";
+import {
+  getAvailableActionHandlers,
+  getActionChoiceData
+} from "../../integrations/action-handlers";
 
 const title = 'lower("campaign"."title")';
 
@@ -289,7 +293,8 @@ export const resolvers = {
         "textingHoursEnforced",
         "textingHoursStart",
         "textingHoursEnd",
-        "timezone"
+        "timezone",
+        "vanIsMyCampaign"
       ],
       Campaign
     ),
@@ -380,6 +385,38 @@ export const resolvers = {
         deletedDupes: status.duplicate_contacts_count,
         updatedAt: status.updated_at ? new Date(status.updated_at) : null
       };
+    },
+    availableActions: async (campaign, _, { user, loaders }) => {
+      await accessRequired(user, campaign.organization_id, "SUPERVOLUNTEER");
+
+      const organization = await loaders.organization.load(
+        campaign.organization_id
+      );
+
+      const availableHandlers = await getAvailableActionHandlers(
+        organization,
+        user,
+        campaign
+      );
+
+      const promises = availableHandlers.map(handler => {
+        return getActionChoiceData(
+          handler,
+          organization,
+          campaign,
+          user,
+          loaders
+        ).then(clientChoiceData => {
+          return {
+            name: handler.name,
+            displayName: handler.displayName(),
+            instructions: handler.instructions(),
+            clientChoiceData
+          };
+        });
+      });
+
+      return Promise.all(promises);
     },
     completionStats: async campaign => {
       // must be cache-loaded or bust:

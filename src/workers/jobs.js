@@ -204,11 +204,14 @@ export async function processSqsMessages() {
 }
 
 export async function dispatchContactIngestLoad(job, organization) {
+  const campaign = await Campaign.get(job.campaign_id);
+
   if (!organization) {
-    const campaign = await Campaign.get(job.campaign_id);
     organization = await Organization.get(campaign.organization_id);
   }
+
   const ingestMethod = rawIngestMethod(job.job_type.replace("ingest.", ""));
+
   if (!ingestMethod) {
     console.error(
       "dispatchContactIngestLoad not found. invalid job type",
@@ -216,6 +219,7 @@ export async function dispatchContactIngestLoad(job, organization) {
     );
     return;
   }
+
   const orgFeatures = JSON.parse(organization.features || "{}");
   const maxContacts = parseInt(
     orgFeatures.hasOwnProperty("maxContacts")
@@ -223,7 +227,13 @@ export async function dispatchContactIngestLoad(job, organization) {
       : process.env.MAX_CONTACTS || 0,
     10
   );
-  await ingestMethod.processContactLoad(job, maxContacts, organization);
+
+  await ingestMethod.processContactLoad(
+    job,
+    maxContacts,
+    organization,
+    campaign
+  );
 }
 
 export async function failedContactLoad(

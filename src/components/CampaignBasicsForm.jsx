@@ -19,7 +19,8 @@ const FormSchema = {
     .transform(value => (!value ? null : value))
     .nullable(),
   primaryColor: yup.string().nullable(),
-  introHtml: yup.string().nullable()
+  introHtml: yup.string().nullable(),
+  vanIsMyCampaign: yup.boolean().nullable()
 };
 
 const EnsureCompletedFormSchema = {
@@ -38,7 +39,8 @@ const EnsureCompletedFormSchema = {
   introHtml: yup
     .string()
     .transform(value => (!value ? null : value))
-    .nullable()
+    .nullable(),
+  vanIsMyCampaign: yup.boolean().nullable()
 };
 
 export default class CampaignBasicsForm extends React.Component {
@@ -106,6 +108,17 @@ export default class CampaignBasicsForm extends React.Component {
             defaultValue={this.props.formValues.primaryColor || "#ffffff"}
             type={ColorPicker}
           />
+          <Form.Field
+            name="vanIsMyCampaign"
+            label="VAN Database Mode"
+            default={this.props.formValues.vanIsMyCampaign}
+            type="select"
+            choices={[
+              { value: null, label: "N/A" },
+              { value: false, label: "My Voters" },
+              { value: true, label: "My Campaign" }
+            ]}
+          />
           <Form.Button
             type="submit"
             label={this.props.saveLabel}
@@ -124,7 +137,8 @@ CampaignBasicsForm.propTypes = {
     dueBy: PropTypes.any,
     logoImageUrl: PropTypes.string,
     primaryColor: PropTypes.string,
-    introHtml: PropTypes.string
+    introHtml: PropTypes.string,
+    vanIsMyCampaign: PropTypes.bool
   }),
   onChange: PropTypes.func,
   onSubmit: PropTypes.func,

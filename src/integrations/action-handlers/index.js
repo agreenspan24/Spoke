@@ -3,10 +3,10 @@ import { r } from "../../server/models";
 import { log } from "../../lib";
 import _ from "lodash";
 
-export const availabilityCacheKey = (name, organization, userId) =>
+export const availabilityCacheKey = (name, organization, userId, campaign) =>
   `${getConfig("CACHE_PREFIX", organization) || ""}action-avail-${name}-${
     organization.id
-  }-${userId}`;
+  }-${userId}-${campaign.id}`;
 
 export const choiceDataCacheKey = (name, organization, suffix) =>
   `${getConfig("CACHE_PREFIX", organization) ||
@@ -96,18 +96,24 @@ export async function getActionHandlerAvailability(
   name,
   actionHandler,
   organization,
-  user
+  user,
+  campaign
 ) {
-  const fallbackFunction = async (_actionHandler, _organization, _user) => {
+  const fallbackFunction = async (
+    _actionHandler,
+    _organization,
+    _user,
+    _campaign
+  ) => {
     exports.validateActionHandler(_actionHandler);
-    return actionHandler.available(_organization, _user);
+    return actionHandler.available(_organization, _user, _campaign);
   };
 
   try {
     return (
       await getSetCacheableResult(
-        availabilityCacheKey(name, organization, user.id),
-        () => fallbackFunction(actionHandler, organization, user)
+        availabilityCacheKey(name, organization, user.id, campaign),
+        () => fallbackFunction(actionHandler, organization, user, campaign)
       )
     ).result;
   } catch (caughtError) {
@@ -131,29 +137,36 @@ export function rawAllTagUpdateActionHandlerNames() {
   return Object.keys(CONFIGURED_TAG_HANDLERS);
 }
 
-export async function getActionHandler(name, organization, user) {
+export async function getActionHandler(name, organization, user, campaign) {
   let isAvail;
   if (name in CONFIGURED_ACTION_HANDLERS) {
     isAvail = await getActionHandlerAvailability(
       name,
       CONFIGURED_ACTION_HANDLERS[name],
       organization,
-      user
+      user,
+      campaign
     );
   }
   return !!isAvail && CONFIGURED_ACTION_HANDLERS[name];
 }
 
-export async function getAvailableActionHandlers(organization, user) {
+export async function getAvailableActionHandlers(organization, user, campaign) {
   const actionHandlers = await Promise.all(
     Object.keys(CONFIGURED_ACTION_HANDLERS).map(name =>
-      getActionHandler(name, organization, user)
+      getActionHandler(name, organization, user, campaign)
     )
   );
   return actionHandlers.filter(x => x);
 }
 
-export async function getActionChoiceData(actionHandler, organization, user) {
+export async function getActionChoiceData(
+  actionHandler,
+  organization,
+  campaign,
+  user,
+  loaders
+) {
   const cacheKeyFunc =
     actionHandler.clientChoiceDataCacheKey || (org => `${org.id}`);
   const clientChoiceDataFunc =
@@ -164,7 +177,7 @@ export async function getActionChoiceData(actionHandler, organization, user) {
     cacheKey = exports.choiceDataCacheKey(
       actionHandler.name,
       organization,
-      cacheKeyFunc(organization, user)
+      cacheKeyFunc(organization, campaign, user, true)
     );
   } catch (caughtException) {
     log.error(
@@ -176,7 +189,7 @@ export async function getActionChoiceData(actionHandler, organization, user) {
   try {
     returned =
       (await exports.getSetCacheableResult(cacheKey, async () =>
-        clientChoiceDataFunc(organization, user)
+        clientChoiceDataFunc(organization, campaign, user)
       )) || {};
   } catch (caughtException) {
     log.error(

@@ -63,6 +63,18 @@ export const schema = gql`
     resultMessage: String
   }
 
+  type ActionChoice {
+    name: String!
+    details: String!
+  }
+
+  type Action {
+    name: String
+    displayName: String
+    instructions: String
+    clientChoiceData: [ActionChoice]
+  }
+
   type Campaign {
     id: ID
     organization: Organization
@@ -90,6 +102,7 @@ export const schema = gql`
     pendingJobs: [JobRequest]
     ingestMethodsAvailable: [IngestMethod]
     ingestMethod: IngestMethod
+    availableActions: [Action]
     useDynamicAssignment: Boolean
     introHtml: String
     primaryColor: String
@@ -104,6 +117,7 @@ export const schema = gql`
     messageserviceSid: String
     useOwnMessagingService: Boolean
     phoneNumbers: [String]
+    vanIsMyCampaign: Boolean
   }
 
   type CampaignsList {

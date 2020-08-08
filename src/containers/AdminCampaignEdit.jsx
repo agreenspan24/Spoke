@@ -45,6 +45,7 @@ const campaignInfoFragment = `
   useOwnMessagingService
   messageserviceSid
   overrideOrganizationTextingHours
+  vanIsMyCampaign
   textingHoursEnforced
   textingHoursStart
   textingHoursEnd
@@ -92,6 +93,15 @@ const campaignInfoFragment = `
     deletedOptouts
     deletedDupes
     updatedAt
+  }
+  availableActions {
+    name
+    displayName
+    instructions
+    clientChoiceData {
+      name
+      details
+    }
   }
   editors
   pendingJobs {
@@ -357,7 +367,8 @@ export class AdminCampaignEdit extends React.Component {
           "dueBy",
           "logoImageUrl",
           "primaryColor",
-          "introHtml"
+          "introHtml",
+          "vanIsMyCampaign"
         ],
         blocksStarting: true,
         expandAfterCampaignStarts: true,
@@ -428,8 +439,7 @@ export class AdminCampaignEdit extends React.Component {
         expandableBySuperVolunteers: true,
         extraProps: {
           customFields: this.props.campaignData.campaign.customFields,
-          availableActions: this.props.organizationData.organization
-            .availableActions
+          availableActions: this.props.campaignData.campaign.availableActions
         }
       },
       {
@@ -859,15 +869,6 @@ const queries = {
             firstName
             lastName
             displayName
-          }
-          availableActions {
-            name
-            displayName
-            instructions
-            clientChoiceData {
-              name
-              details
-            }
           }
         }
       }

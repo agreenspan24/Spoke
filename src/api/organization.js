@@ -1,18 +1,6 @@
 import gql from "graphql-tag";
 
 export const schema = gql`
-  type ActionChoice {
-    name: String!
-    details: String!
-  }
-
-  type Action {
-    name: String
-    displayName: String
-    instructions: String
-    clientChoiceData: [ActionChoice]
-  }
-
   type PhoneNumberCounts {
     areaCode: String!
     availableCount: Int!
@@ -29,7 +17,7 @@ export const schema = gql`
   }
 
   type ProfileField {
-    name: String!,
+    name: String!
     label: String!
   }
 
@@ -45,7 +33,6 @@ export const schema = gql`
     people(role: String, campaignId: String, sortBy: SortPeopleBy): [User]
     profileFields: [ProfileField]
     optOuts: [OptOut]
-    availableActions: [Action]
     optOutMessage: String
     textingHoursEnforced: Boolean
     textingHoursStart: Int

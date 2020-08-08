@@ -66,7 +66,7 @@ export async function processAction(
     .update("custom_fields", JSON.stringify(customFields));
 }
 
-export async function getClientChoiceData(organization, user) {
+export async function getClientChoiceData(organization, campaign, user) {
   const items = [
     {
       name: "firebrick",

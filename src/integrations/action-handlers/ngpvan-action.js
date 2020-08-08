@@ -37,7 +37,12 @@ export function clientChoiceDataCacheKey(organization) {
   return `${organization.id}`;
 }
 
-export const postCanvassResponse = async (contact, organization, body) => {
+export const postCanvassResponse = async (
+  contact,
+  organization,
+  body,
+  campaign
+) => {
   let vanId;
   try {
     vanId = JSON.parse(contact.custom_fields || "{}").VanID;
@@ -70,7 +75,7 @@ export const postCanvassResponse = async (contact, organization, body) => {
     retries: 0,
     timeout: 32000,
     headers: {
-      Authorization: Van.getAuth(organization),
+      Authorization: Van.getAuth(organization, campaign.van_is_my_campaign),
       "Content-Type": "application/json"
     },
     body: JSON.stringify(body),
@@ -86,7 +91,7 @@ export async function processAction(
   interactionStep,
   unusedCampaignContactId,
   contact,
-  unusedCampaign,
+  campaign,
   organization
 ) {
   try {
@@ -96,7 +101,7 @@ export async function processAction(
 
     const body = JSON.parse(answerActionsData.value);
 
-    return postCanvassResponse(contact, organization, body);
+    return postCanvassResponse(contact, organization, body, campaign);
   } catch (caughtError) {
     // eslint-disable-next-line no-console
     console.error("Encountered exception in ngpvan.processAction", caughtError);
@@ -104,14 +109,14 @@ export async function processAction(
   }
 }
 
-async function getContactTypeIdAndInputTypeId(organization) {
+async function getContactTypeIdAndInputTypeId(organization, campaign) {
   const contactTypesPromise = httpRequest(
     `https://api.securevan.com/v4/canvassResponses/contactTypes`,
     {
       method: "GET",
       timeout: 32000,
       headers: {
-        Authorization: Van.getAuth(organization)
+        Authorization: Van.getAuth(organization, campaign.van_is_my_campaign)
       }
     }
   )
@@ -129,7 +134,7 @@ async function getContactTypeIdAndInputTypeId(organization) {
       method: "GET",
       timeout: 32000,
       headers: {
-        Authorization: Van.getAuth(organization)
+        Authorization: Van.getAuth(organization, campaign.van_is_my_campaign)
       }
     }
   )
@@ -187,9 +192,10 @@ async function getContactTypeIdAndInputTypeId(organization) {
   return { contactTypeId, inputTypeId };
 }
 
-export async function getClientChoiceData(organization) {
+export async function getClientChoiceData(organization, campaign) {
   const { contactTypeId, inputTypeId } = await getContactTypeIdAndInputTypeId(
-    organization
+    organization,
+    campaign
   );
 
   if (!contactTypeId || !inputTypeId) {
@@ -209,7 +215,7 @@ export async function getClientChoiceData(organization) {
       method: "GET",
       timeout: 32000,
       headers: {
-        Authorization: Van.getAuth(organization)
+        Authorization: Van.getAuth(organization, campaign.van_is_my_campaign)
       }
     }
   )
@@ -227,7 +233,7 @@ export async function getClientChoiceData(organization) {
       method: "GET",
       timeout: 32000,
       headers: {
-        Authorization: Van.getAuth(organization)
+        Authorization: Van.getAuth(organization, campaign.van_is_my_campaign)
       }
     }
   )
@@ -245,7 +251,7 @@ export async function getClientChoiceData(organization) {
       method: "GET",
       timeout: 32000,
       headers: {
-        Authorization: Van.getAuth(organization)
+        Authorization: Van.getAuth(organization, campaign.van_is_my_campaign)
       }
     }
   )
@@ -351,7 +357,7 @@ export async function getClientChoiceData(organization) {
 // either in environment variables or organization.features json data
 // Besides this returning true, "test-action" will also need to be added to
 // process.env.ACTION_HANDLERS
-export async function available(organization) {
+export async function available(organization, user, campaign) {
   let result =
     !!getConfig("NGP_VAN_API_KEY", organization) &&
     !!getConfig("NGP_VAN_APP_NAME", organization);
@@ -365,7 +371,10 @@ export async function available(organization) {
 
   if (result) {
     try {
-      const { data } = await exports.getClientChoiceData(organization);
+      const { data } = await exports.getClientChoiceData(
+        organization,
+        campaign
+      );
       const parsedData = (data && JSON.parse(data)) || {};
       if (parsedData.error) {
         // eslint-disable-next-line no-console

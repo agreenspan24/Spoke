@@ -5,10 +5,6 @@ import { getTags } from "./tag";
 import { accessRequired } from "./errors";
 import { getCampaigns } from "./campaign";
 import { buildUsersQuery } from "./user";
-import {
-  getAvailableActionHandlers,
-  getActionChoiceData
-} from "../../integrations/action-handlers";
 
 export const resolvers = {
   Organization: {
@@ -54,28 +50,6 @@ export const resolvers = {
       typeof getFeatures(organization).profile_fields === "string"
         ? JSON.parse(getFeatures(organization).profile_fields)
         : getFeatures(organization).profile_fields || [],
-    availableActions: async (organization, _, { user, loaders }) => {
-      await accessRequired(user, organization.id, "SUPERVOLUNTEER");
-      const availableHandlers = await getAvailableActionHandlers(
-        organization,
-        user
-      );
-
-      const promises = availableHandlers.map(handler => {
-        return getActionChoiceData(handler, organization, user, loaders).then(
-          clientChoiceData => {
-            return {
-              name: handler.name,
-              displayName: handler.displayName(),
-              instructions: handler.instructions(),
-              clientChoiceData
-            };
-          }
-        );
-      });
-
-      return Promise.all(promises);
-    },
     textingHoursEnforced: organization => organization.texting_hours_enforced,
     optOutMessage: organization =>
       (organization.features &&
