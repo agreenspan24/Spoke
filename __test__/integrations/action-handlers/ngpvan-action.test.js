@@ -40,6 +40,9 @@ describe("ngpvn-action", () => {
   });
 
   describe("#getClientChoiceData", async () => {
+    let organization;
+    let campaign;
+
     let makeGetSurveyQuestionsNock;
     let makeGetActivistCodesNock;
     let makeGetCanvassResponsesResultCodesNock;
@@ -83,6 +86,16 @@ describe("ngpvn-action", () => {
         }
       );
     };
+
+    beforeEach(() => {
+      organization = {
+        id: 77
+      };
+
+      campaign = {
+        id: 78
+      };
+    });
 
     beforeEach(async () => {
       makeGetCanvassResponsesContactTypesNock = ({
@@ -343,7 +356,10 @@ describe("ngpvn-action", () => {
     it("returns what we expect", async () => {
       makeAllNocks({ getSurveyResultsStatusCode: 200 });
 
-      const clientChoiceData = await NgpVanAction.getClientChoiceData();
+      const clientChoiceData = await NgpVanAction.getClientChoiceData(
+        organization,
+        campaign
+      );
       const receivedItems = JSON.parse(clientChoiceData.data).items;
 
       const expectedItems = [
@@ -572,7 +588,7 @@ describe("ngpvn-action", () => {
           getSurveyResultsStatusCode: 200,
           getSurveyResponsesExtraParameters: "&cycle=2020"
         });
-        await NgpVanAction.getClientChoiceData();
+        await NgpVanAction.getClientChoiceData(organization, campaign);
         allNocksDone();
       });
     });
@@ -581,7 +597,10 @@ describe("ngpvn-action", () => {
       it("returns what we expect", async () => {
         makeAllNocks({ getSurveyResultsStatusCode: 404 });
 
-        const clientChoiceData = await NgpVanAction.getClientChoiceData();
+        const clientChoiceData = await NgpVanAction.getClientChoiceData(
+          organization,
+          campaign
+        );
         const receivedError = JSON.parse(clientChoiceData.data).error;
 
         expect(receivedError).toEqual(
@@ -596,7 +615,10 @@ describe("ngpvn-action", () => {
       it("throws an exception", async () => {
         makeAllNocks({ getCanvasResponsesContactTypesStatusCode: 404 });
 
-        const clientChoiceData = await NgpVanAction.getClientChoiceData();
+        const clientChoiceData = await NgpVanAction.getClientChoiceData(
+          organization,
+          campaign
+        );
         const receivedError = JSON.parse(clientChoiceData.data).error;
 
         expect(receivedError).toEqual(
@@ -611,7 +633,10 @@ describe("ngpvn-action", () => {
       it("throws an exception", async () => {
         makeAllNocks({ getCanvassResponsesContactTypesResult: [] });
 
-        const clientChoiceData = await NgpVanAction.getClientChoiceData();
+        const clientChoiceData = await NgpVanAction.getClientChoiceData(
+          organization,
+          campaign
+        );
         const receivedError = JSON.parse(clientChoiceData.data).error;
 
         expect(receivedError).toEqual(
@@ -626,7 +651,10 @@ describe("ngpvn-action", () => {
       it("throws an exception", async () => {
         makeAllNocks({ getCanvassResponsesInputTypesResult: [] });
 
-        const clientChoiceData = await NgpVanAction.getClientChoiceData();
+        const clientChoiceData = await NgpVanAction.getClientChoiceData(
+          organization,
+          campaign
+        );
         const receivedError = JSON.parse(clientChoiceData.data).error;
 
         expect(receivedError).toEqual(
@@ -651,7 +679,11 @@ describe("ngpvn-action", () => {
   describe("#available", () => {
     it("delegates to its dependencies and returns something indicating it's available", async () => {
       jest.spyOn(NgpVanAction, "getClientChoiceData").mockResolvedValueOnce({});
-      const result = await NgpVanAction.available(veryFakeOrganization);
+      const result = await NgpVanAction.available(
+        veryFakeOrganization,
+        {},
+        veryFakeCampaign
+      );
       expect(result).toEqual({
         result: true,
         expiresSeconds: 86400
@@ -667,7 +699,11 @@ describe("ngpvn-action", () => {
       });
       it("returns something indicating it's unavailble", async () => {
         jest.spyOn(NgpVanAction, "getClientChoiceData");
-        const result = await NgpVanAction.available(veryFakeOrganization);
+        const result = await NgpVanAction.available(
+          veryFakeOrganization,
+          {},
+          veryFakeCampaign
+        );
         expect(result).toEqual({
           result: false,
           expiresSeconds: 86400
@@ -685,7 +721,11 @@ describe("ngpvn-action", () => {
         });
       });
       it("returns something indicating it's unavailble", async () => {
-        const result = await NgpVanAction.available(veryFakeOrganization);
+        const result = await NgpVanAction.available(
+          veryFakeOrganization,
+          {},
+          veryFakeCampaign
+        );
         expect(result).toEqual({
           result: false,
           expiresSeconds: 86400
@@ -703,7 +743,11 @@ describe("ngpvn-action", () => {
           .mockRejectedValueOnce(new Error("Mercury is retrograde"));
       });
       it("returns something indicating it's unavailble", async () => {
-        const result = await NgpVanAction.available(veryFakeOrganization);
+        const result = await NgpVanAction.available(
+          veryFakeOrganization,
+          {},
+          veryFakeCampaign
+        );
         expect(result).toEqual({
           result: false,
           expiresSeconds: 86400
@@ -723,7 +767,7 @@ describe("ngpvn-action", () => {
 
     let unusedQuestionResponse;
     let unusedCampaignContactId;
-    let unusedCampaign;
+    let campaign;
 
     let makePostPeopleCanvassResponsesNock;
     let postPeopleCanvassResponsesNock;
@@ -744,6 +788,10 @@ describe("ngpvn-action", () => {
 
       organization = {
         id: 3
+      };
+
+      campaign = {
+        id: 78
       };
     });
 
@@ -767,7 +815,7 @@ describe("ngpvn-action", () => {
         interactionStep,
         unusedCampaignContactId,
         contact,
-        unusedCampaign,
+        campaign,
         organization
       );
 
@@ -787,7 +835,7 @@ describe("ngpvn-action", () => {
             interactionStep,
             unusedCampaignContactId,
             contact,
-            unusedCampaign,
+            campaign,
             organization
           );
         } catch (caughtException) {
@@ -836,7 +884,7 @@ describe("ngpvn-action", () => {
             interactionStep,
             unusedCampaignContactId,
             contact,
-            unusedCampaign,
+            campaign,
             organization
           );
         } catch (caughtException) {
@@ -857,6 +905,7 @@ describe("ngpvn-action", () => {
     let contact;
     let organization;
     let body;
+    let campaign;
 
     describe("happy path", () => {
       beforeEach(async () => {
@@ -873,6 +922,10 @@ describe("ngpvn-action", () => {
         body = {
           willVote: true
         };
+
+        campaign = {
+          id: 78
+        };
       });
 
       it("calls the people endpoint", async () => {
@@ -885,7 +938,12 @@ describe("ngpvn-action", () => {
           .post(`/v4/people/8675309/canvassResponses`, JSON.stringify(body))
           .reply(204);
 
-        await NgpVanAction.postCanvassResponse(contact, organization, body);
+        await NgpVanAction.postCanvassResponse(
+          contact,
+          organization,
+          body,
+          campaign
+        );
 
         postPeopleCanvassResponsesNock.done();
       });
@@ -904,7 +962,8 @@ describe("ngpvn-action", () => {
         const result = await NgpVanAction.postCanvassResponse(
           contact,
           organization,
-          body
+          body,
+          campaign
         );
 
         // eslint-disable-next-line no-console
@@ -928,7 +987,8 @@ describe("ngpvn-action", () => {
         const result = await NgpVanAction.postCanvassResponse(
           contact,
           organization,
-          body
+          body,
+          campaign
         );
 
         // eslint-disable-next-line no-console

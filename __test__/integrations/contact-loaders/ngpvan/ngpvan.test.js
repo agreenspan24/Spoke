@@ -79,6 +79,8 @@ describe("ngpvan", () => {
     let oldNgpVanCacheTtl;
     let oldNgpVanApiBaseUrl;
     let listItems;
+    let organization;
+    let campaign;
 
     beforeEach(async () => {
       oldMaximumListSize = process.env.NGP_VAN_MAXIMUM_LIST_SIZE;
@@ -131,6 +133,14 @@ describe("ngpvan", () => {
           doorCount: 263
         }
       ];
+
+      organization = {
+        id: 77
+      };
+
+      campaign = {
+        id: 78
+      };
     });
 
     afterEach(async () => {
@@ -157,7 +167,10 @@ describe("ngpvan", () => {
           nextPageLink: null,
           count: 5
         });
-      const savedListsResponse = await getClientChoiceData();
+      const savedListsResponse = await getClientChoiceData(
+        organization,
+        campaign
+      );
 
       expect(JSON.parse(savedListsResponse.data).items).toEqual(listItems);
       expect(savedListsResponse.expiresSeconds).toEqual(30);
@@ -177,7 +190,10 @@ describe("ngpvan", () => {
           )
           .reply(404);
 
-        const savedListsResponse = await getClientChoiceData();
+        const savedListsResponse = await getClientChoiceData(
+          organization,
+          campaign
+        );
 
         expect(JSON.parse(savedListsResponse.data)).toEqual({
           error: expect.stringMatching(
@@ -237,7 +253,7 @@ describe("ngpvan", () => {
 
       campaign = {
         id: 78,
-        van_database_mode: 1
+        van_database_mode: 0
       };
     });
 

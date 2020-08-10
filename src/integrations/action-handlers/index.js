@@ -177,7 +177,7 @@ export async function getActionChoiceData(
     cacheKey = exports.choiceDataCacheKey(
       actionHandler.name,
       organization,
-      cacheKeyFunc(organization, campaign, user, true)
+      cacheKeyFunc(organization, campaign, user)
     );
   } catch (caughtException) {
     log.error(

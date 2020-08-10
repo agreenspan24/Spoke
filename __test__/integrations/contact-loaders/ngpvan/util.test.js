@@ -17,7 +17,7 @@ describe("ngpvan/util", () => {
 
     campaign = {
       id: 78,
-      van_database_mode: 1
+      van_database_mode: 0
     };
   });
 
