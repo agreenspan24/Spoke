@@ -13,6 +13,7 @@ afterEach(async () => {
 
 describe("ngpvn-action", () => {
   let veryFakeOrganization;
+  let veryFakeCampaign;
 
   beforeEach(async () => {
     process.env.NGP_VAN_APP_NAME = "fake_app_name";
@@ -24,6 +25,10 @@ describe("ngpvn-action", () => {
 
     veryFakeOrganization = {
       id: 3
+    };
+
+    veryFakeCampaign = {
+      id: 78
     };
   });
 
@@ -636,7 +641,8 @@ describe("ngpvn-action", () => {
   describe("#clientChoiceDataCacheKey", () => {
     it("returns the organizationId as a string", async () => {
       const cacheKey = NgpVanAction.clientChoiceDataCacheKey(
-        veryFakeOrganization
+        veryFakeOrganization,
+        veryFakeCampaign
       );
       expect(cacheKey).toEqual("3");
     });
@@ -651,7 +657,7 @@ describe("ngpvn-action", () => {
         expiresSeconds: 86400
       });
       expect(NgpVanAction.getClientChoiceData.mock.calls).toEqual([
-        [veryFakeOrganization]
+        [veryFakeOrganization, veryFakeCampaign]
       ]);
     });
 
@@ -685,7 +691,7 @@ describe("ngpvn-action", () => {
           expiresSeconds: 86400
         });
         expect(NgpVanAction.getClientChoiceData.mock.calls).toEqual([
-          [veryFakeOrganization]
+          [veryFakeOrganization, veryFakeCampaign]
         ]);
       });
     });
@@ -703,7 +709,7 @@ describe("ngpvn-action", () => {
           expiresSeconds: 86400
         });
         expect(NgpVanAction.getClientChoiceData.mock.calls).toEqual([
-          [veryFakeOrganization]
+          [veryFakeOrganization, veryFakeCampaign]
         ]);
       });
     });
