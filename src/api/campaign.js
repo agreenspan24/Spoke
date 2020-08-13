@@ -1,5 +1,6 @@
 import gql from "graphql-tag";
 
+// TODO: rename phoneNumbers to messagingServiceNumbers or something like that
 export const schema = gql`
   input CampaignsFilter {
     isArchived: Boolean
@@ -75,6 +76,16 @@ export const schema = gql`
     clientChoiceData: [ActionChoice]
   }
 
+  type CampaignPhoneNumberCount {
+    areaCode: String!
+    count: Int!
+  }
+
+  input CampaignPhoneNumberInput {
+    areaCode: String!
+    count: Int!
+  }
+
   type Campaign {
     id: ID
     organization: Organization
@@ -82,9 +93,11 @@ export const schema = gql`
     description: String
     joinToken: String
     batchSize: Int
+    responseWindow: Float
     dueBy: Date
     isStarted: Boolean
     isArchived: Boolean
+    isArchivedPermanently: Boolean
     creator: User
     texters: [User]
     assignments(assignmentsFilter: AssignmentsFilter): [Assignment]
@@ -118,6 +131,7 @@ export const schema = gql`
     useOwnMessagingService: Boolean
     phoneNumbers: [String]
     vanDatabaseMode: Int
+    inventoryPhoneNumberCounts: [CampaignPhoneNumberCount]
   }
 
   type CampaignsList {
