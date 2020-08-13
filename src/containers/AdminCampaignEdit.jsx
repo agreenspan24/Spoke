@@ -78,6 +78,10 @@ const campaignInfoFragment = `
     id
     title
     text
+    actions {
+      action
+      actionData
+    }
   }
   ingestMethodsAvailable {
     name
