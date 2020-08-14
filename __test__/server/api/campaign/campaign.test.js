@@ -39,6 +39,7 @@ import {
   sleep
 } from "../../../test_helpers";
 
+const ActionHandlerFramework = require("../../../../src/extensions/action-handlers");
 jest.mock("../../../../src/server/api/lib/twilio");
 
 let testAdminUser;

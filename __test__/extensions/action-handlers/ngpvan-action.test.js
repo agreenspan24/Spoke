@@ -40,9 +40,6 @@ describe("ngpvn-action", () => {
   });
 
   describe("#getClientChoiceData", async () => {
-    let organization;
-    let campaign;
-
     let makeGetSurveyQuestionsNock;
     let makeGetActivistCodesNock;
     let makeGetCanvassResponsesResultCodesNock;
@@ -86,16 +83,6 @@ describe("ngpvn-action", () => {
         }
       );
     };
-
-    beforeEach(() => {
-      organization = {
-        id: 77
-      };
-
-      campaign = {
-        id: 78
-      };
-    });
 
     beforeEach(async () => {
       makeGetCanvassResponsesContactTypesNock = ({
@@ -357,8 +344,8 @@ describe("ngpvn-action", () => {
       makeAllNocks({ getSurveyResultsStatusCode: 200 });
 
       const clientChoiceData = await NgpVanAction.getClientChoiceData(
-        organization,
-        campaign
+        veryFakeOrganization,
+        veryFakeCampaign
       );
       const receivedItems = JSON.parse(clientChoiceData.data).items;
 
@@ -582,7 +569,10 @@ describe("ngpvn-action", () => {
       it("returns what we expect", async () => {
         makeAllNocks({ getSurveyResultsStatusCode: 200 });
 
-        const clientChoiceData = await NgpVanAction.getClientChoiceData();
+        const clientChoiceData = await NgpVanAction.getClientChoiceData(
+          veryFakeOrganization,
+          veryFakeCampaign
+        );
         const receivedItems = JSON.parse(clientChoiceData.data).items;
 
         const expectedItems = [
@@ -810,7 +800,10 @@ describe("ngpvn-action", () => {
           getSurveyResultsStatusCode: 200,
           getSurveyResponsesExtraParameters: "&cycle=2020"
         });
-        await NgpVanAction.getClientChoiceData(organization, campaign);
+        await NgpVanAction.getClientChoiceData(
+          veryFakeOrganization,
+          veryFakeCampaign
+        );
         allNocksDone();
       });
     });
@@ -820,8 +813,8 @@ describe("ngpvn-action", () => {
         makeAllNocks({ getSurveyResultsStatusCode: 404 });
 
         const clientChoiceData = await NgpVanAction.getClientChoiceData(
-          organization,
-          campaign
+          veryFakeOrganization,
+          veryFakeCampaign
         );
         const receivedError = JSON.parse(clientChoiceData.data).error;
 
@@ -838,8 +831,8 @@ describe("ngpvn-action", () => {
         makeAllNocks({ getCanvasResponsesContactTypesStatusCode: 404 });
 
         const clientChoiceData = await NgpVanAction.getClientChoiceData(
-          organization,
-          campaign
+          veryFakeOrganization,
+          veryFakeCampaign
         );
         const receivedError = JSON.parse(clientChoiceData.data).error;
 
@@ -856,8 +849,8 @@ describe("ngpvn-action", () => {
         makeAllNocks({ getCanvassResponsesContactTypesResult: [] });
 
         const clientChoiceData = await NgpVanAction.getClientChoiceData(
-          organization,
-          campaign
+          veryFakeOrganization,
+          veryFakeCampaign
         );
         const receivedError = JSON.parse(clientChoiceData.data).error;
 
@@ -878,8 +871,8 @@ describe("ngpvn-action", () => {
         makeAllNocks({ getCanvassResponsesInputTypesResult: [] });
 
         const clientChoiceData = await NgpVanAction.getClientChoiceData(
-          organization,
-          campaign
+          veryFakeOrganization,
+          veryFakeCampaign
         );
         const receivedError = JSON.parse(clientChoiceData.data).error;
 
