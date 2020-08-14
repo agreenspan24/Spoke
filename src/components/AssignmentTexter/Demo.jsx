@@ -577,6 +577,7 @@ export function generateDemoTexterContact(testName) {
         }}
         onOptOut={logFunction}
         onQuestionResponseChange={logFunction}
+        onCannedResponseChange={logFunction}
         onCreateCannedResponse={logFunction}
         onExitTexter={logFunction}
         onEditStatus={logFunction}

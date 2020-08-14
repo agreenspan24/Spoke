@@ -234,14 +234,11 @@ export class AssignmentTexterContactControls extends React.Component {
 
     if (cannedResponseScript.id === currentCannedResponseId) {
       // identical means we're cancelling it -- so it can be toggled
-      this.setState({
-        messageText: "",
-        cannedResponseScript: null
-      });
+      this.handleChangeScript("");
     } else {
-      this.handleChangeScript(cannedResponseScript.text);
+      this.handleChangeScript(cannedResponseScript.text, cannedResponseScript);
+
       this.setState({
-        cannedResponseScript,
         answerPopoverOpen: false
       });
     }
@@ -301,16 +298,23 @@ export class AssignmentTexterContactControls extends React.Component {
     );
   };
 
-  handleChangeScript = newScript => {
+  handleChangeScript = (newScript, cannedResponseScript) => {
     const messageText = this.props.getMessageTextFromScript(newScript) || "";
+
+    const previousCannedResponseScript = this.state.cannedResponseScript;
 
     this.setState({
       messageText,
-      cannedResponseScript: null
+      cannedResponseScript: cannedResponseScript
     });
+
+    if (previousCannedResponseScript != cannedResponseScript) {
+      this.props.onCannedResponseChange({ cannedResponseScript });
+    }
   };
 
-  handleMessageFormChange = ({ messageText }) => this.setState({ messageText });
+  handleMessageFormChange = ({ messageText }) =>
+    this.handleChangeScript(messageText);
 
   handleOpenAnswerPopover = event => {
     event.preventDefault();
@@ -1006,6 +1010,7 @@ AssignmentTexterContactControls.propTypes = {
   onOptOut: PropTypes.func,
   onUpdateTags: PropTypes.func,
   onQuestionResponseChange: PropTypes.func,
+  onCannedResponseChange: PropTypes.func,
   onCreateCannedResponse: PropTypes.func,
   onExitTexter: PropTypes.func,
   onEditStatus: PropTypes.func,

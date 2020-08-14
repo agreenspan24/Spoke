@@ -9,6 +9,7 @@ export const Tasks = Object.freeze({
   SEND_MESSAGE: "send_message",
   ACTION_HANDLER_QUESTION_RESPONSE: "action_handler:question_response",
   ACTION_HANDLER_TAG_UPDATE: "action_handler:tag_update",
+  ACTION_HANDLER_CANNED_RESPONSE: "action_handler:canned_response",
   CAMPAIGN_START_CACHE: "campaign_start_cache"
 });
 
@@ -42,8 +43,8 @@ const questionResponseActionHandler = async ({
   if (!wasDeleted) {
     // TODO: clean up processAction interface
     return handler.processAction({
-      questionResponse,
-      interactionStep,
+      action: (interactionStep || {}).answer_actions,
+      action_data: (interactionStep || {}).answer_actions_data,
       campaignContactId: contact.id,
       contact,
       campaign,
@@ -62,6 +63,28 @@ const questionResponseActionHandler = async ({
       campaign,
       organization,
       previousValue
+    });
+  }
+};
+
+const cannedResponseActionHandler = async ({
+  organization,
+  cannedResponse,
+  campaign,
+  contact
+}) => {
+  for (var i in cannedResponse.actions) {
+    const action = cannedResponse.actions[i];
+
+    const handler = await ActionHandlers.rawActionHandler(action.action);
+
+    handler.processAction({
+      action: action.action,
+      action_data: action.actionData,
+      campaignContactId: contact.id,
+      contact,
+      campaign,
+      organization
     });
   }
 };
@@ -105,6 +128,7 @@ const taskMap = Object.freeze({
   [Tasks.SEND_MESSAGE]: sendMessage,
   [Tasks.ACTION_HANDLER_QUESTION_RESPONSE]: questionResponseActionHandler,
   [Tasks.ACTION_HANDLER_TAG_UPDATE]: tagUpdateActionHandler,
+  [Tasks.ACTION_HANDLER_CANNED_RESPONSE]: cannedResponseActionHandler,
   [Tasks.CAMPAIGN_START_CACHE]: startCampaignCache
 });
 

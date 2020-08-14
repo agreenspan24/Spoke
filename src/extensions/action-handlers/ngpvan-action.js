@@ -88,17 +88,15 @@ export const postCanvassResponse = async (
 // What happens when a texter saves the answer that triggers the action
 // This is presumably the meat of the action
 export async function processAction({
-  interactionStep,
+  action_data,
   contact,
   campaign,
   organization
 }) {
   try {
-    const answerActionsData = JSON.parse(
-      (interactionStep || {}).answer_actions_data || "{}"
-    );
+    const actionData = JSON.parse(action_data || "{}");
 
-    const body = JSON.parse(answerActionsData.value);
+    const body = JSON.parse(actionData.value);
 
     return postCanvassResponse(contact, organization, body, campaign);
   } catch (caughtError) {
