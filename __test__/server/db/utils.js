@@ -12,6 +12,7 @@ export const tables = [
   "interaction_step",
   "assignment",
   "organization",
+  "canned_response_action",
   "canned_response",
   "opt_out",
   "question_response",
