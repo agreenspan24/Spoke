@@ -47,6 +47,7 @@ const cannedResponseCache = {
       const response = cannedResponses.find(
         r => r.id == action.canned_response_id
       );
+
       if (!response.actions) {
         response.actions = [];
       }

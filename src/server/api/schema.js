@@ -828,9 +828,9 @@ const rootMutations = {
         {}
       );
 
-      const originalCannedResponses = await r
-        .knex("canned_response")
-        .where({ campaign_id: oldCampaignId });
+      const originalCannedResponses = await cacheableData.cannedResponse.query({
+        campaignId: campaign.id
+      });
 
       await cacheableData.cannedResponse.save(
         originalCannedResponses,
