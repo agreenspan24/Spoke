@@ -5,6 +5,7 @@ import { compose, map, reduce, getOr, find, filter, has } from "lodash/fp";
 
 import { r, cacheableData } from "../../models";
 import { getConfig } from "./config";
+import { getAvailableActionHandlersFull } from "../../../extensions/action-handlers";
 
 const textRegex = RegExp(".*[A-Za-z0-9]+.*");
 
@@ -217,10 +218,10 @@ const makeInteractionHierarchy = (
       if (interactionParagraph.isParagraphItalic) {
         // Italic = action handler.
         const handlerLabel = interactionParagraph.text.trim().toLowerCase();
-        const handler = actionHandlers[handlerLabel];
-        if (!handler) continue;
-        interactionsHierarchyNode.action = handler.name;
-        interactionsHierarchyNode.action_data = handler.data;
+        const handlers = actionHandlers[handlerLabel];
+        if (!handlers || !handlers.length) continue;
+        interactionsHierarchyNode.action = handlers[0].action;
+        interactionsHierarchyNode.action_data = handlers[0].actionData;
       } else {
         // Regular text, add to script.
         interactionsHierarchyNode.script.push(interactionParagraph.text);
@@ -337,7 +338,13 @@ const makeCannedResponsesList = cannedResponsesParagraphs => {
       !cannedResponsesParagraphs[0].isParagraphBold
     ) {
       const textParagraph = cannedResponsesParagraphs.shift();
-      cannedResponse.text.push(textParagraph.text);
+      cannedResponse.text = textParagraph.text;
+
+      const actions = actionHandlers[cannedResponse.title.toLowerCase()];
+
+      if (actions) {
+        cannedResponse.actions = actions;
+      }
     }
 
     if (!cannedResponse.text[0]) {
@@ -352,41 +359,9 @@ const makeCannedResponsesList = cannedResponsesParagraphs => {
   return cannedResponses;
 };
 
-const replaceCannedResponsesInDatabase = async (
-  campaignId,
-  cannedResponses
-) => {
-  await r.knex.transaction(async trx => {
-    try {
-      await r
-        .knex("canned_response")
-        .transacting(trx)
-        .where({
-          campaign_id: campaignId
-        })
-        .whereNull("user_id")
-        .delete();
-
-      for (const cannedResponse of cannedResponses) {
-        await r.knex
-          .insert({
-            campaign_id: campaignId,
-            user_id: null,
-            title: cannedResponse.title,
-            text: cannedResponse.text.join("\n")
-          })
-          .into("canned_response")
-          .transacting(trx);
-      }
-    } catch (exception) {
-      console.log(exception);
-      throw exception;
-    }
-  });
-};
-
-const makeActionHandlersList = actionHandlerParagraphs => {
+const makeActionHandlersList = (actionHandlerParagraphs, availableActions) => {
   const actionHandlers = {};
+
   while (actionHandlerParagraphs[0]) {
     const handler = {};
 
@@ -402,17 +377,50 @@ const makeActionHandlersList = actionHandlerParagraphs => {
       actionHandlerParagraphs[0] &&
       !actionHandlerParagraphs[0].isParagraphItalic
     ) {
-      handler.name = actionHandlerParagraphs.shift().text;
-      handler.data = actionHandlerParagraphs.shift().text;
+      const handlerName = actionHandlerParagraphs.shift().text.toLowerCase();
+      const action = availableActions.find(
+        x =>
+          x.name.toLowerCase() == handlerName ||
+          x.displayName.toLowerCase() == handlerName
+      );
+
+      if (action) {
+        handler.action = action.name;
+
+        if (action.clientChoiceData && action.clientChoiceData.length) {
+          const actionDataOrLabel = actionHandlerParagraphs
+            .shift()
+            .text.toLowerCase();
+
+          const actionData = action.clientChoiceData.find(
+            x =>
+              x.name.toLowerCase() == actionDataOrLabel ||
+              x.details == actionDataOrLabel
+          );
+
+          if (actionData) {
+            handler.actionData = JSON.stringify({
+              label: actionData.name,
+              value: actionData.details
+            });
+          }
+        }
+      }
     }
 
-    if (!handler.name || !handler.data) {
+    if (!handler.action || !handler.actionData) {
       throw new Error(
         `Action handler format error -- handler missing name or data. Look for [${handler.label}]`
       );
     }
 
-    actionHandlers[handler.label.trim().toLowerCase()] = handler;
+    const label = handler.label.trim().toLowerCase();
+
+    if (!actionHandlers[label]) {
+      actionHandlers[label] = [];
+    }
+
+    actionHandlers[label].push(handler);
   }
 
   return actionHandlers;
@@ -437,8 +445,22 @@ const importScriptFromDocument = async (campaignId, scriptUrl) => {
   namedStyles = result.data.namedStyles.styles;
   const sections = getSections(document);
 
+  const campaign = await cacheableData.campaign.load(campaignId);
+  const organization = await cacheableData.organization.load(
+    campaign.organization_id
+  );
+
+  const availableActions = await getAvailableActionHandlersFull(
+    organization,
+    {},
+    campaign
+  );
+
   const actionHandlerParagraphs = getActionHandlers(sections) || [];
-  actionHandlers = makeActionHandlersList(_.clone(actionHandlerParagraphs));
+  actionHandlers = makeActionHandlersList(
+    _.clone(actionHandlerParagraphs),
+    availableActions
+  );
 
   const interactionParagraphs = getInteractions(sections);
   const interactionsHierarchy = makeInteractionHierarchy(
@@ -452,9 +474,9 @@ const importScriptFromDocument = async (campaignId, scriptUrl) => {
   const cannedResponsesList = makeCannedResponsesList(
     _.clone(cannedResponsesParagraphs)
   );
-  await replaceCannedResponsesInDatabase(campaignId, cannedResponsesList);
+
+  await cacheableData.cannedResponse.save(cannedResponsesList, campaignId);
   await cacheableData.campaign.reload(campaignId);
-  await cacheableData.cannedResponse.clearQuery({ campaignId });
 };
 
 export default importScriptFromDocument;

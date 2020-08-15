@@ -160,12 +160,38 @@ export async function getAvailableActionHandlers(organization, user, campaign) {
   return actionHandlers.filter(x => x);
 }
 
+export async function getAvailableActionHandlersFull(
+  organization,
+  user,
+  campaign
+) {
+  const availableHandlers = await getAvailableActionHandlers(
+    organization,
+    user,
+    campaign
+  );
+
+  const promises = availableHandlers.map(handler => {
+    return getActionChoiceData(handler, organization, campaign, user).then(
+      clientChoiceData => {
+        return {
+          name: handler.name,
+          displayName: handler.displayName(),
+          instructions: handler.instructions(),
+          clientChoiceData
+        };
+      }
+    );
+  });
+
+  return Promise.all(promises);
+}
+
 export async function getActionChoiceData(
   actionHandler,
   organization,
   campaign,
-  user,
-  loaders
+  user
 ) {
   const cacheKeyFunc =
     actionHandler.clientChoiceDataCacheKey || (org => `${org.id}`);

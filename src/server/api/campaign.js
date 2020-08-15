@@ -12,7 +12,8 @@ import twilio from "./lib/twilio";
 import { getConfig } from "./lib/config";
 import {
   getAvailableActionHandlers,
-  getActionChoiceData
+  getActionChoiceData,
+  getAvailableActionHandlersFull
 } from "../../extensions/action-handlers";
 
 import ownedPhoneNumber from "./lib/owned-phone-number";
@@ -397,30 +398,7 @@ export const resolvers = {
         campaign.organization_id
       );
 
-      const availableHandlers = await getAvailableActionHandlers(
-        organization,
-        user,
-        campaign
-      );
-
-      const promises = availableHandlers.map(handler => {
-        return getActionChoiceData(
-          handler,
-          organization,
-          campaign,
-          user,
-          loaders
-        ).then(clientChoiceData => {
-          return {
-            name: handler.name,
-            displayName: handler.displayName(),
-            instructions: handler.instructions(),
-            clientChoiceData
-          };
-        });
-      });
-
-      return Promise.all(promises);
+      return await getAvailableActionHandlersFull(organization, user, campaign);
     },
     completionStats: async campaign => {
       // must be cache-loaded or bust:

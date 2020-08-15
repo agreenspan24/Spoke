@@ -125,7 +125,6 @@ export default class CampaignCannedResponsesForm extends React.Component {
         primaryText={response.title}
         secondaryText={
           <div>
-            <div>{response.text}</div>
             {response.actions && response.actions.length ? (
               <div>
                 {`Actions: ${response.actions
@@ -138,6 +137,7 @@ export default class CampaignCannedResponsesForm extends React.Component {
             ) : (
               ""
             )}
+            <div>{response.text}</div>
           </div>
         }
         rightIconButton={
