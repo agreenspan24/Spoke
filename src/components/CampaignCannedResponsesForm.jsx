@@ -117,6 +117,8 @@ export default class CampaignCannedResponsesForm extends React.Component {
   }
 
   listItems(cannedResponses) {
+    const availableActions = this.props.availableActions;
+
     const listItems = cannedResponses.map(response => (
       <ListItem
         {...dataTest("cannedResponse")}
@@ -130,7 +132,12 @@ export default class CampaignCannedResponsesForm extends React.Component {
                 {`Actions: ${response.actions
                   .map(a => {
                     const parsed = JSON.parse(a.actionData).label;
-                    return `${a.action}${parsed ? ` (${parsed})` : ""}`;
+                    const action = availableActions.find(
+                      x => x.name == a.action
+                    );
+                    return `${(action || {}).displayName}${
+                      parsed ? ` (${parsed})` : ""
+                    }`;
                   })
                   .join(", ")}`}
               </div>
