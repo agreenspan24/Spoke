@@ -104,6 +104,8 @@ const cannedResponseCache = {
       .filter({ user_id: "" })
       .delete();
 
+    if (!convertedResponses.length) return;
+
     // Add responses to database
     const savedResponses = await r
       .knex("canned_response")
