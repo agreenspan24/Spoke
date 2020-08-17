@@ -338,13 +338,13 @@ const makeCannedResponsesList = cannedResponsesParagraphs => {
       !cannedResponsesParagraphs[0].isParagraphBold
     ) {
       const textParagraph = cannedResponsesParagraphs.shift();
-      cannedResponse.text = textParagraph.text;
+      cannedResponse.text.push(textParagraph.text);
+    }
 
-      const actions = actionHandlers[cannedResponse.title.toLowerCase()];
+    const actions = actionHandlers[cannedResponse.title.toLowerCase()];
 
-      if (actions) {
-        cannedResponse.actions = actions;
-      }
+    if (actions) {
+      cannedResponse.actions = actions;
     }
 
     if (!cannedResponse.text[0]) {
@@ -353,7 +353,10 @@ const makeCannedResponsesList = cannedResponsesParagraphs => {
       );
     }
 
-    cannedResponses.push(cannedResponse);
+    cannedResponses.push({
+      ...cannedResponse,
+      text: cannedResponse.text.join("\n")
+    });
   }
 
   return cannedResponses;
