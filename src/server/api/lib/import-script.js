@@ -474,6 +474,8 @@ const importScriptFromDocument = async (campaignId, scriptUrl) => {
     availableActions
   );
 
+  console.log({ actionHandlers });
+
   const interactionParagraphs = getInteractions(sections);
   const interactionsHierarchy = makeInteractionHierarchy(
     _.clone(interactionParagraphs),
@@ -487,6 +489,7 @@ const importScriptFromDocument = async (campaignId, scriptUrl) => {
     _.clone(cannedResponsesParagraphs)
   );
 
+  console.log({ cannedResponsesList });
   await cacheableData.cannedResponse.save(cannedResponsesList, campaignId);
   await cacheableData.campaign.reload(campaignId);
 };
