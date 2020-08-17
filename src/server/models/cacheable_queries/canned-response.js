@@ -104,10 +104,7 @@ const cannedResponseCache = {
       .filter({ user_id: "" })
       .delete();
 
-    console.log({ convertedResponses });
     if (!convertedResponses.length) return;
-
-    console.log("convertedResponses length");
 
     // Add responses to database
     const savedResponses = await r
@@ -115,15 +112,13 @@ const cannedResponseCache = {
       .returning(["id", "title"])
       .insert(convertedResponses);
 
-    console.log({ savedResponses });
-
     // Add response actions to database
-    const responseActions = [];
+    let responseActions = [];
 
     savedResponses.forEach(r => {
       const actions = title_to_actions[r.title];
 
-      responseActions.concat(
+      responseActions = responseActions.concat(
         actions.map(a => ({
           id: undefined,
           canned_response_id: r.id,
