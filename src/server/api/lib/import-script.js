@@ -366,64 +366,73 @@ const makeActionHandlersList = (actionHandlerParagraphs, availableActions) => {
   const actionHandlers = {};
 
   while (actionHandlerParagraphs[0]) {
-    const handler = {};
-
     const paragraph = actionHandlerParagraphs.shift();
     if (!paragraph.isParagraphItalic) {
       throw new Error(
         `Action handler format error -- can't find a italic paragraph. Look for [${paragraph.text}]`
       );
     }
-    handler.label = paragraph.text;
+
+    const handlerLabel = paragraph.text;
+    const label = handlerLabel.trim().toLowerCase();
 
     while (
       actionHandlerParagraphs[0] &&
       !actionHandlerParagraphs[0].isParagraphItalic
     ) {
+      let action;
+      let actionData;
+
       const handlerName = actionHandlerParagraphs.shift().text.toLowerCase();
-      const action = availableActions.find(
+      const foundAction = availableActions.find(
         x =>
           x.name.toLowerCase() == handlerName ||
           x.displayName.toLowerCase() == handlerName
       );
 
-      if (action) {
-        handler.action = action.name;
+      if (foundAction) {
+        action = foundAction.name;
 
-        if (action.clientChoiceData && action.clientChoiceData.length) {
+        if (
+          actionHandlerParagraphs[0] &&
+          !actionHandlerParagraphs[0].isParagraphItalic &&
+          foundAction.clientChoiceData &&
+          foundAction.clientChoiceData.length
+        ) {
           const actionDataOrLabel = actionHandlerParagraphs
             .shift()
             .text.toLowerCase();
 
-          const actionData = action.clientChoiceData.find(
+          const foundActionData = foundAction.clientChoiceData.find(
             x =>
               x.name.toLowerCase() == actionDataOrLabel ||
               x.details == actionDataOrLabel
           );
 
-          if (actionData) {
-            handler.actionData = JSON.stringify({
-              label: actionData.name,
-              value: actionData.details
+          if (foundActionData) {
+            actionData = JSON.stringify({
+              label: foundActionData.name,
+              value: foundActionData.details
             });
           }
         }
       }
+
+      if (!action || !actionData) {
+        throw new Error(
+          `Action handler format error -- handler missing name or data. Look for [${label}]`
+        );
+      }
+
+      if (!actionHandlers[label]) {
+        actionHandlers[label] = [];
+      }
+
+      actionHandlers[label].push({
+        action,
+        actionData
+      });
     }
-
-    if (!handler.action || !handler.actionData) {
-      throw new Error(
-        `Action handler format error -- handler missing name or data. Look for [${handler.label}]`
-      );
-    }
-
-    const label = handler.label.trim().toLowerCase();
-
-    if (!actionHandlers[label]) {
-      actionHandlers[label] = [];
-    }
-
-    actionHandlers[label].push(handler);
   }
 
   return actionHandlers;
