@@ -118,17 +118,20 @@ const cannedResponseCache = {
     console.log({ savedResponses });
 
     // Add response actions to database
-    const responseActions = savedResponses
-      .map(r => {
-        const actions = title_to_actions[r.title];
-        return actions.map(a => ({
+    const responseActions = [];
+
+    savedResponses.forEach(r => {
+      const actions = title_to_actions[r.title];
+
+      responseActions.concat(
+        actions.map(a => ({
           id: undefined,
           canned_response_id: r.id,
           action: a.action,
           action_data: a.actionData
-        }));
-      })
-      .flat(1);
+        }))
+      );
+    });
 
     CannedResponseAction.save(responseActions);
   }
