@@ -88,6 +88,7 @@ const rootSchema = gql`
     textingHoursEnd: Int
     texterUIConfig: TexterUIConfigInput
     timezone: String
+    vanDatabaseMode: Int
     inventoryPhoneNumberCounts: [CampaignPhoneNumberInput!]
   }
 

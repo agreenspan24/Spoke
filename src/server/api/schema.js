@@ -181,7 +181,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     textingHoursEnforced,
     textingHoursStart,
     textingHoursEnd,
-    timezone
+    timezone,
+    vanDatabaseMode
   } = campaign;
   // some changes require ADMIN and we recheck below
   const organizationId =
@@ -207,9 +208,10 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     texting_hours_end: textingHoursEnd,
     use_own_messaging_service: useOwnMessagingService,
     messageservice_sid: messageserviceSid,
+    timezone,
+    van_database_mode: vanDatabaseMode,
     batch_size: batchSize,
-    response_window: responseWindow,
-    timezone
+    response_window: responseWindow
   };
 
   Object.keys(campaignUpdates).forEach(key => {
