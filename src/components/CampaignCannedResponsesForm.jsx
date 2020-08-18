@@ -14,6 +14,8 @@ import yup from "yup";
 import theme from "../styles/theme";
 import { StyleSheet, css } from "aphrodite";
 import { dataTest } from "../lib/attributes";
+import { parseCannedResponseCsv } from "../lib";
+import RaisedButton from "material-ui/RaisedButton";
 
 const styles = StyleSheet.create({
   formContainer: {
@@ -29,6 +31,16 @@ const styles = StyleSheet.create({
   form: {
     backgroundColor: theme.colors.white,
     padding: 10
+  },
+  exampleImageInput: {
+    cursor: "pointer",
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    right: 0,
+    left: 0,
+    width: "100%",
+    opacity: 0
   }
 });
 
@@ -36,7 +48,9 @@ export default class CampaignCannedResponsesForm extends React.Component {
   state = {
     showForm: false,
     formButtonText: "",
-    responseId: null
+    responseId: null,
+    uploading: false,
+    uploadError: null
   };
 
   formSchema = yup.object({
@@ -53,6 +67,47 @@ export default class CampaignCannedResponsesForm extends React.Component {
       })
     )
   });
+
+  getCannedResponseId = () => {
+    return Math.random()
+      .toString(36)
+      .replace(/[^a-zA-Z1-9]+/g, "");
+  };
+
+  handleUpload = event => {
+    event.preventDefault();
+
+    const file = event.target.files[0];
+    const availableActions = this.props.availableActions;
+
+    this.setState({ uploading: true, uploadError: null }, () => {
+      parseCannedResponseCsv(
+        file,
+        availableActions,
+        ({ error, cannedResponses }) => {
+          if (error) {
+            this.setState({
+              uploading: false,
+              uploadError: error
+            });
+          } else {
+            this.props.onChange({
+              cannedResponses: this.props.formValues.cannedResponses.concat(
+                cannedResponses.map(r => ({
+                  ...r,
+                  id: this.getCannedResponseId()
+                }))
+              )
+            });
+
+            this.setState({
+              uploading: false
+            });
+          }
+        }
+      );
+    });
+  };
 
   showAddForm() {
     const handleCloseAddForm = () => {
@@ -77,9 +132,7 @@ export default class CampaignCannedResponsesForm extends React.Component {
                   ...ele
                 };
                 if (!this.state.responseId) {
-                  newEle.id = Math.random()
-                    .toString(36)
-                    .replace(/[^a-zA-Z1-9]+/g, "");
+                  newEle.id = this.getCannedResponseId();
                   newVals.push(newEle);
                 } else {
                   const resToEditIndex = newVals.findIndex(
@@ -208,6 +261,32 @@ export default class CampaignCannedResponsesForm extends React.Component {
           title="Canned responses for texters"
           subtitle="Save some scripts for your texters to use to answer additional FAQs that may come up outside of the survey questions and scripts you already set up."
         />
+        <div>
+          <RaisedButton
+            label={
+              this.state.uploading ? "Uploading..." : "Upload Canned Responses"
+            }
+            labelPosition="before"
+            disabled={this.state.uploading}
+            onClick={() => this.uploadButton.click()}
+          />
+          <input
+            id="canned-response-upload"
+            ref={input => input && (this.uploadButton = input)}
+            type="file"
+            className={css(styles.exampleImageInput)}
+            onChange={this.handleUpload}
+            accept=".csv"
+            style={{ display: "none" }}
+          />
+          <div style={{ marginTop: 12, color: theme.colors.red }}>
+            {this.state.uploadError}
+          </div>
+          <div style={{ margin: "12px 0px" }}>
+            Upload a CSV with column headers including Title and Script. An
+            Actions column is optional, with comma-delimited actions.
+          </div>
+        </div>
         {list}
         {this.showAddForm()}
         <Form.Button
