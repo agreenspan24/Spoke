@@ -209,7 +209,6 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     use_own_messaging_service: useOwnMessagingService,
     messageservice_sid: messageserviceSid,
     timezone,
-    van_database_mode: vanDatabaseMode,
     batch_size: batchSize,
     response_window: responseWindow
   };
@@ -227,9 +226,16 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   }
   const features = getFeatures(origCampaignRecord);
   if (campaign.texterUIConfig && campaign.texterUIConfig.options) {
-    Object.assign(features, {
-      TEXTER_UI_SETTINGS: campaign.texterUIConfig.options
-    });
+    Object.assign(
+      features,
+      {
+        TEXTER_UI_SETTINGS: campaign.texterUIConfig.options
+      },
+      {
+        van_database_mode: campaign.vanDatabaseMode
+      }
+    );
+
     campaignUpdates.features = JSON.stringify(features);
   }
 

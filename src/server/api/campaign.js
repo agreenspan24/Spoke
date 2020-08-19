@@ -295,8 +295,7 @@ export const resolvers = {
         "textingHoursEnforced",
         "textingHoursStart",
         "textingHoursEnd",
-        "timezone",
-        "vanDatabaseMode"
+        "timezone"
       ],
       Campaign
     ),
@@ -654,6 +653,7 @@ export const resolvers = {
         campaign.use_own_messaging_service &&
         !campaign.messageservice_sid
       );
-    }
+    },
+    vanDatabaseMode: campaign => (campaign.features || {}).van_database_mode
   }
 };
