@@ -654,6 +654,7 @@ export const resolvers = {
         !campaign.messageservice_sid
       );
     },
-    vanDatabaseMode: campaign => (campaign.features || {}).van_database_mode
+    vanDatabaseMode: campaign =>
+      (campaign.features || {}).van_database_mode || null
   }
 };

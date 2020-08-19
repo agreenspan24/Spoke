@@ -224,20 +224,22 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   if (origCampaignRecord && !origCampaignRecord.join_token) {
     campaignUpdates.join_token = uuidv4();
   }
-  const features = getFeatures(origCampaignRecord);
-  if (campaign.texterUIConfig && campaign.texterUIConfig.options) {
-    Object.assign(
-      features,
-      {
-        TEXTER_UI_SETTINGS: campaign.texterUIConfig.options
-      },
-      {
-        van_database_mode: campaign.vanDatabaseMode
-      }
-    );
 
-    campaignUpdates.features = JSON.stringify(features);
+  const features = getFeatures(origCampaignRecord);
+
+  if (features.van_database_mode != vanDatabaseMode) {
+    Object.assign(features, {
+      van_database_mode: vanDatabaseMode
+    });
   }
+
+  if (campaign.texterUIConfig && campaign.texterUIConfig.options) {
+    Object.assign(features, {
+      TEXTER_UI_SETTINGS: campaign.texterUIConfig.options
+    });
+  }
+
+  campaignUpdates.features = JSON.stringify(features);
 
   let changed = Boolean(Object.keys(campaignUpdates).length);
   if (changed) {
