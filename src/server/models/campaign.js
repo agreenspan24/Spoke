@@ -57,8 +57,7 @@ const Campaign = thinky.createModel(
       timezone: type
         .string()
         .required()
-        .default("US/Eastern"),
-      van_database_mode: type.integer().allowNull(true)
+        .default("US/Eastern")
     })
     .allowExtra(false),
   { noAutoCreation: true }
