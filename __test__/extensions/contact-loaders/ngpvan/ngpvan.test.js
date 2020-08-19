@@ -252,8 +252,7 @@ describe("ngpvan", () => {
       };
 
       campaign = {
-        id: 78,
-        van_database_mode: 0
+        id: 78
       };
     });
 

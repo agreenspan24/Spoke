@@ -16,8 +16,7 @@ describe("ngpvan/util", () => {
     };
 
     campaign = {
-      id: 78,
-      van_database_mode: 0
+      id: 78
     };
   });
 
@@ -126,7 +125,10 @@ describe("ngpvan/util", () => {
       }
 
       try {
-        auth = Van.getAuth(organization, campaign.van_database_mode);
+        auth = Van.getAuth(
+          organization,
+          (campaign.features || {}).van_database_mode
+        );
       } catch (caughtException) {
         error = caughtException;
       } finally {
