@@ -74,11 +74,19 @@ export default class CampaignCannedResponsesForm extends React.Component {
       .replace(/[^a-zA-Z1-9]+/g, "");
   };
 
+  clearCannedResponses = () => {
+    this.props.onChange({
+      cannedResponses: []
+    });
+  };
+
   handleUpload = event => {
     event.preventDefault();
 
     const file = event.target.files[0];
     const availableActions = this.props.availableActions;
+
+    if (!file) return;
 
     this.setState({ uploading: true, uploadError: null }, () => {
       parseCannedResponseCsv(
@@ -240,7 +248,7 @@ export default class CampaignCannedResponsesForm extends React.Component {
   }
 
   render() {
-    const { formValues } = this.props;
+    const { formValues, availableActions } = this.props;
     const cannedResponses = formValues.cannedResponses;
     const list =
       cannedResponses.length === 0 ? null : (
@@ -264,11 +272,19 @@ export default class CampaignCannedResponsesForm extends React.Component {
         <div>
           <RaisedButton
             label={
-              this.state.uploading ? "Uploading..." : "Upload Canned Responses"
+              this.state.uploading
+                ? "Uploading..."
+                : cannedResponses.length
+                ? "Clear Canned Responses"
+                : "Upload Canned Responses"
             }
             labelPosition="before"
             disabled={this.state.uploading}
-            onClick={() => this.uploadButton.click()}
+            onClick={() =>
+              cannedResponses.length
+                ? this.clearCannedResponses()
+                : this.uploadButton.click()
+            }
           />
           <input
             id="canned-response-upload"
@@ -283,8 +299,13 @@ export default class CampaignCannedResponsesForm extends React.Component {
             {this.state.uploadError}
           </div>
           <div style={{ margin: "12px 0px" }}>
-            Upload a CSV with column headers including Title and Script. An
-            Actions column is optional, with comma-delimited actions.
+            Upload a CSV with column headers including Title and Script.
+            {availableActions
+              ? " An Actions column is optional, with comma-delimited actions."
+              : ""}
+            {availableActions && availableActions.length > 1
+              ? ' Since there are multiple possible action types, please specify the action type and data in the format of "action - actionChoice, action - actionChoice"'
+              : ""}
           </div>
         </div>
         {list}

@@ -167,6 +167,8 @@ export const parseCannedResponseCsv = (
         onCompleteCallback({
           error: "Missing fields: " + missingFields.join(", ")
         });
+
+        return;
       }
 
       let cannedResponseRows = parserData;
@@ -183,8 +185,8 @@ export const parseCannedResponseCsv = (
 
         // Get basic details of canned response
         const newCannedResponse = {
-          title: response[titleLabel],
-          text: response[scriptLabel]
+          title: response[titleLabel].trim(),
+          text: response[scriptLabel].trim()
         };
 
         // If there are actions and an action provided, add them
@@ -193,7 +195,18 @@ export const parseCannedResponseCsv = (
           const responseActions = [];
 
           // Split the actions by comma
-          const actionsArray = actionsString.split(",").map(a => a.trim());
+          const actionsArray = actionsString
+            .split(",")
+            .map(a => a.trim())
+            .filter(a => !!a);
+
+          if (actionsArray.length > 3) {
+            onCompleteCallback({
+              error: `Too many actions for canned response '${newCannedResponse.title}.`
+            });
+
+            return;
+          }
 
           // Loop through actions in CSV row
           for (var j in actionsArray) {
@@ -236,6 +249,13 @@ export const parseCannedResponseCsv = (
                       value: actionData.details
                     });
                   }
+                } else {
+                  console.log({ action, actionDataLabel }, actionsArray[j]);
+                  onCompleteCallback({
+                    error: `Actions for canned response "${newCannedResponse.title}" are incomplete. Action: ${action.name}.`
+                  });
+
+                  return;
                 }
               } else {
                 // If action does not require client choice data
@@ -245,11 +265,6 @@ export const parseCannedResponseCsv = (
               if (newAction.action) {
                 responseActions.push(newAction);
               }
-            }
-
-            // Only allowed three actions at this time
-            if (j >= 2) {
-              break;
             }
           }
 
