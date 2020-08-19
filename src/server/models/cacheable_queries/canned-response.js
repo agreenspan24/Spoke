@@ -116,6 +116,9 @@ const cannedResponseCache = {
     const responseActions = savedResponses
       .map(r => {
         const actions = title_to_actions[r.title];
+
+        if (!actions) return [];
+
         return actions.map(a => ({
           id: undefined,
           canned_response_id: r.id,

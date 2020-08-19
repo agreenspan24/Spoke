@@ -1,7 +1,6 @@
 import thinky from "./thinky";
 const type = thinky.type;
 import { requiredString, optionalString } from "./custom-types";
-import CannedResponse from "./canned-response";
 
 const CannedResponseAction = thinky.createModel(
   "canned_response_action",

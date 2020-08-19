@@ -31,9 +31,7 @@ describe("CampaignCannedResponsesForm component", () => {
   test("Renders canned responses with correct text", () => {
     expect(wrapper.find("ListItem").prop("primaryText")).toBe("Response1");
 
-    expect(wrapper.find("ListItem").prop("secondaryText")).toBe(
-      "Response1 desc"
-    );
+    expect(wrapper.find("ListItem").text()).toContain("Response1 desc");
   });
 
   test("Renders CampaignCannedResponseForm component for editing when edit icon clicked", () => {
