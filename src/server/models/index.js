@@ -15,6 +15,7 @@ import JobRequest from "./job-request";
 import Invite from "./invite";
 import CannedResponseAction from "./canned-response-action";
 import CannedResponse from "./canned-response";
+import CannedResponseSubmission from "./canned-response-submission";
 import UserOrganization from "./user-organization";
 import UserCell from "./user-cell";
 import Message from "./message";
@@ -53,6 +54,7 @@ const tableList = [
   "campaign_contact", // ?good candidate (or by cell)
   "canned_response_action",
   "canned_response", // good candidate
+  "canned_response_submission",
   "interaction_step",
   "invite",
   "job_request",
@@ -144,6 +146,7 @@ export {
   Organization,
   PendingMessagePart,
   CannedResponseAction,
+  CannedResponseSubmission,
   CannedResponse,
   QuestionResponse,
   UserCell,

@@ -3,7 +3,7 @@
 // See src/extensions/job-runners/README.md for more details
 import serviceMap from "../server/api/lib/services";
 import * as ActionHandlers from "../extensions/action-handlers";
-import { cacheableData } from "../server/models";
+import { cacheableData, CannedResponseSubmission } from "../server/models";
 
 export const Tasks = Object.freeze({
   SEND_MESSAGE: "send_message",
@@ -73,6 +73,15 @@ const cannedResponseActionHandler = async ({
   campaign,
   contact
 }) => {
+  CannedResponseSubmission.save({
+    campaign_contact_id: contact.id,
+    campaign_id: campaign.id,
+    organization_id: organization.id,
+    title: cannedResponse.title,
+    text: cannedResponse.text,
+    actions: JSON.stringify(cannedResponse.actions)
+  });
+
   for (var i in cannedResponse.actions) {
     const action = cannedResponse.actions[i];
 

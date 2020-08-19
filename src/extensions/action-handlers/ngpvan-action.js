@@ -76,7 +76,10 @@ export const postCanvassResponse = async (
     retries: 0,
     timeout: 32000,
     headers: {
-      Authorization: Van.getAuth(organization, campaign.van_database_mode),
+      Authorization: Van.getAuth(
+        organization,
+        (campaign.features || {}).van_database_mode
+      ),
       "Content-Type": "application/json"
     },
     body: JSON.stringify(body),
@@ -113,7 +116,10 @@ async function getContactTypeIdAndInputTypeId(organization, campaign) {
       method: "GET",
       timeout: 32000,
       headers: {
-        Authorization: Van.getAuth(organization, campaign.van_database_mode)
+        Authorization: Van.getAuth(
+          organization,
+          (campaign.features || {}).van_database_mode
+        )
       }
     }
   )
@@ -131,7 +137,10 @@ async function getContactTypeIdAndInputTypeId(organization, campaign) {
       method: "GET",
       timeout: 32000,
       headers: {
-        Authorization: Van.getAuth(organization, campaign.van_database_mode)
+        Authorization: Van.getAuth(
+          organization,
+          (campaign.features || {}).van_database_mode
+        )
       }
     }
   )
@@ -215,7 +224,10 @@ export async function getClientChoiceData(organization, campaign) {
       method: "GET",
       timeout: 32000,
       headers: {
-        Authorization: Van.getAuth(organization, campaign.van_database_mode)
+        Authorization: Van.getAuth(
+          organization,
+          (campaign.features || {}).van_database_mode
+        )
       }
     }
   )
@@ -233,7 +245,10 @@ export async function getClientChoiceData(organization, campaign) {
       method: "GET",
       timeout: 32000,
       headers: {
-        Authorization: Van.getAuth(organization, campaign.van_database_mode)
+        Authorization: Van.getAuth(
+          organization,
+          (campaign.features || {}).van_database_mode
+        )
       }
     }
   )
@@ -251,7 +266,10 @@ export async function getClientChoiceData(organization, campaign) {
       method: "GET",
       timeout: 32000,
       headers: {
-        Authorization: Van.getAuth(organization, campaign.van_database_mode)
+        Authorization: Van.getAuth(
+          organization,
+          (campaign.features || {}).van_database_mode
+        )
       }
     }
   )

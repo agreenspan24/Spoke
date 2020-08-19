@@ -11,11 +11,6 @@ export const submitCannedResponse = async (
   { cannedResponse, campaignContactId },
   { user }
 ) => {
-  console.log(
-    "submitCannedResponseDispatch",
-    cannedResponse,
-    campaignContactId
-  );
   const contact = await cacheableData.campaignContact.load(campaignContactId);
   const campaign = await cacheableData.campaign.load(contact.campaign_id);
   const organization = await cacheableData.organization.load(
@@ -28,8 +23,6 @@ export const submitCannedResponse = async (
     contact.assignment_id,
     contact
   );
-
-  // TODO: consider saving responses
 
   try {
     const actionHandlersConfigured =
