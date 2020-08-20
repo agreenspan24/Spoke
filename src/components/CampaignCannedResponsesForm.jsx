@@ -31,16 +31,6 @@ const styles = StyleSheet.create({
   form: {
     backgroundColor: theme.colors.white,
     padding: 10
-  },
-  exampleImageInput: {
-    cursor: "pointer",
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    right: 0,
-    left: 0,
-    width: "100%",
-    opacity: 0
   }
 });
 
@@ -290,8 +280,8 @@ export default class CampaignCannedResponsesForm extends React.Component {
             id="canned-response-upload"
             ref={input => input && (this.uploadButton = input)}
             type="file"
-            className={css(styles.exampleImageInput)}
             onChange={this.handleUpload}
+            onClick={e => (e.target.value = null)}
             accept=".csv"
             style={{ display: "none" }}
           />
