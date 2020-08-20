@@ -96,7 +96,7 @@ export function addServerEndpoints(expressApp) {
 
 export function clientChoiceDataCacheKey(organization, campaign, user) {
   // / returns a string to cache getClientChoiceData -- include items that relate to cacheability
-  return `${organization.id}-${campaign.van_database_mode}`;
+  return `${organization.id}-${(campaign.features || {}).van_database_mode}`;
 }
 
 export async function getClientChoiceData(organization, campaign, user) {
@@ -116,7 +116,10 @@ export async function getClientChoiceData(organization, campaign, user) {
     const response = await HttpRequest(url, {
       method: "GET",
       headers: {
-        Authorization: Van.getAuth(organization, campaign.van_database_mode)
+        Authorization: Van.getAuth(
+          organization,
+          (campaign.features || {}).van_database_mode
+        )
       },
       retries: 0,
       timeout: 5000
@@ -275,7 +278,10 @@ export async function processContactLoad(
       retries: 0,
       timeout: 5000,
       headers: {
-        Authorization: Van.getAuth(organization, campaign.van_database_mode),
+        Authorization: Van.getAuth(
+          organization,
+          (campaign.features || {}).van_database_mode
+        ),
         "Content-Type": "application/json"
       },
       body: JSON.stringify({

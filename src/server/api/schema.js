@@ -210,7 +210,6 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     use_own_messaging_service: useOwnMessagingService,
     messageservice_sid: messageserviceSid,
     timezone,
-    van_database_mode: vanDatabaseMode,
     batch_size: batchSize,
     response_window: responseWindow
   };
@@ -226,13 +225,22 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   if (origCampaignRecord && !origCampaignRecord.join_token) {
     campaignUpdates.join_token = uuidv4();
   }
+
   const features = getFeatures(origCampaignRecord);
+
+  if (features.van_database_mode != vanDatabaseMode) {
+    Object.assign(features, {
+      van_database_mode: vanDatabaseMode
+    });
+  }
+
   if (campaign.texterUIConfig && campaign.texterUIConfig.options) {
     Object.assign(features, {
       TEXTER_UI_SETTINGS: campaign.texterUIConfig.options
     });
-    campaignUpdates.features = JSON.stringify(features);
   }
+
+  campaignUpdates.features = JSON.stringify(features);
 
   let changed = Boolean(Object.keys(campaignUpdates).length);
   if (changed) {
