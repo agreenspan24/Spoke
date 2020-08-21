@@ -1,6 +1,6 @@
 import { getConfig } from "../../../server/api/lib/config";
 const Van = require("../../../extensions/action-handlers/ngpvan-action");
-
+import { log } from "../../../lib";
 import { getActionChoiceData } from "../../../extensions/action-handlers";
 
 export const DEFAULT_NGP_VAN_INITIAL_TEXT_CANVASS_RESULT = "Texted";
@@ -47,10 +47,7 @@ export const postMessageSave = async ({ contact, organization }) => {
     .then(() => {})
     .catch(caughtError => {
       // eslint-disable-next-line no-console
-      console.error(
-        "Encountered exception in ngpvan.postMessageSave",
-        caughtError
-      );
+      log.error("Encountered exception in ngpvan.postMessageSave", caughtError);
       return {};
     });
 };

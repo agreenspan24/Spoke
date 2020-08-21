@@ -4,6 +4,7 @@ import { parseCSVAsync } from "../../../workers/parse_csv";
 import { failedContactLoad } from "../../../workers/jobs";
 import HttpRequest from "../../../server/lib/http-request.js";
 import Van from "./util";
+import { log } from "../../../lib";
 
 export const name = "ngpvan";
 
@@ -41,7 +42,7 @@ export const handleFailedContactLoad = async (
   message
 ) => {
   // eslint-disable-next-line no-console
-  console.error(message);
+  log.error(message, "error two");
   await failedContactLoad(job, null, JSON.stringify(ingestDataReference), {
     errors: [message],
     ...ingestDataReference

@@ -4,6 +4,7 @@
 import serviceMap from "../server/api/lib/services";
 import * as ActionHandlers from "../extensions/action-handlers";
 import { cacheableData } from "../server/models";
+import { log } from "../lib";
 
 export const Tasks = Object.freeze({
   SEND_MESSAGE: "send_message",
@@ -92,7 +93,7 @@ const startCampaignCache = async ({ campaign, organization }) => {
     })
     .catch(err => {
       // eslint-disable-next-line no-console
-      console.error("ERROR contact loadMany", campaign.id, err, campaign);
+      log.error("ERROR contact loadMany", campaign.id, err, campaign);
     });
   const loadOptOuts = cacheableData.optOut.loadMany(organization.id);
 

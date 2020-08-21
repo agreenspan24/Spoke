@@ -3,6 +3,7 @@ import { cacheableData } from "../../models";
 import { jobRunner } from "../../../extensions/job-runners";
 import { Tasks } from "../../../workers/tasks";
 const ActionHandlers = require("../../../extensions/action-handlers");
+import { log } from "../../../lib";
 
 export const updateContactTags = async (
   _,
@@ -43,11 +44,11 @@ export const updateContactTags = async (
         });
       })
     ).catch(e =>
-      console.error("Dispatching to one or more tag handlers failed", e)
+      log.error("Dispatching to one or more tag handlers failed", e)
     );
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error(
+    log.error(
       `Error saving tagCampaignContact for campaignContactID ${campaignContactId} tags ${tags}  error ${err}`
     );
     throw err;

@@ -2,6 +2,7 @@ import { r, Message } from "../../models";
 import campaignCache from "./campaign";
 import campaignContactCache from "./campaign-contact";
 import { getMessageHandlers } from "../../../extensions/message-handlers";
+import { log } from "../../../lib";
 // QUEUE
 // messages-<contactId>
 // Expiration: 24 hours after last message added
@@ -160,11 +161,7 @@ const incomingMessageMatching = async (messageInstance, activeCellFound) => {
       m => m.service_id && m.service_id === messageInstance.service_id
     );
     if (redundant.length) {
-      console.error(
-        "DUPLICATE MESSAGE CACHE",
-        messageInstance,
-        activeCellFound
-      );
+      log.error("DUPLICATE MESSAGE CACHE", messageInstance, activeCellFound);
       return "DUPLICATE MESSAGE CACHE";
     }
   }

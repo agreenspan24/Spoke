@@ -364,7 +364,7 @@ export function postMessageSend(
         });
       })
       .catch(err => {
-        console.error(
+        log.error(
           "Failed message and contact update on twilio postMessageSend",
           err
         );
