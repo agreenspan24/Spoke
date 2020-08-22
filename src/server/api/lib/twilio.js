@@ -13,6 +13,7 @@ import { saveNewIncomingMessage } from "./message-sending";
 import { getConfig } from "./config";
 import urlJoin from "url-join";
 import _ from "lodash";
+import ownedPhoneNumber from "./owned-phone-number";
 
 // TWILIO error_codes:
 // > 1 (i.e. positive) error_codes are reserved for Twilio error codes
@@ -153,6 +154,35 @@ async function getMessagingServiceSid(
   );
 }
 
+async function getContactUserNumber(organization, contactNumber) {
+  const contactUserNumber = await cacheableData.contactUserNumber.query({
+    organizationId: organization.id,
+    contactNumber
+  });
+
+  if (contactUserNumber && contactUserNumber.user_number) {
+    return contactUserNumber.user_number;
+  }
+
+  if (
+    (getConfig("EXPERIMENTAL_PHONE_INVENTORY", organization, {
+      truthy: true
+    }) ||
+      getConfig("PHONE_INVENTORY", organization, { truthy: true })) &&
+    getConfig("SKIP_TWILIO_MESSAGING_SERVICE", organization, { truthy: true })
+  ) {
+    const phoneNumber = await ownedPhoneNumber.getOwnedPhoneNumberForStickySender(
+      organization.id,
+      contactNumber
+    );
+
+    console.log({ phoneNumber });
+    return phoneNumber && phoneNumber.phone_number;
+  }
+
+  return null;
+}
+
 async function sendMessage(message, contact, trx, organization, campaign) {
   const twilio = await getTwilio(organization);
   const APITEST = /twilioapitest/.test(message.text);
@@ -181,6 +211,17 @@ async function sendMessage(message, contact, trx, organization, campaign) {
     message,
     campaign
   );
+
+  let userNumber;
+  if (
+    organization &&
+    (getConfig("EXPERIMENTAL_STICKY_SENDER"), organization, { truthy: true })
+  ) {
+    userNumber = await getContactUserNumber(
+      organization,
+      message.contact_number
+    );
+  }
 
   return new Promise((resolve, reject) => {
     if (message.service !== "twilio") {
@@ -219,17 +260,24 @@ async function sendMessage(message, contact, trx, organization, campaign) {
     }
     const changes = {};
 
-    changes.messageservice_sid = messagingServiceSid;
+    if (userNumber) {
+      changes.user_number = userNumber;
+    } else {
+      changes.messageservice_sid = messagingServiceSid;
+    }
 
     const messageParams = Object.assign(
       {
         to: message.contact_number,
         body: message.text,
-        messagingServiceSid: messagingServiceSid,
-        statusCallback: process.env.TWILIO_STATUS_CALLBACK_URL
+        statusCallback: process.env.TWILIO_STATUS_CALLBACK_URL,
+        smartEncoded: true
       },
       twilioValidityPeriod ? { validityPeriod: twilioValidityPeriod } : {},
-      parseMessageText(message)
+      parseMessageText(message),
+      userNumber
+        ? { from: userNumber }
+        : { messagingServiceSid: messagingServiceSid }
     );
 
     console.log("twilioMessage", messageParams);
@@ -352,10 +400,11 @@ export function postMessageSend(
     };
     Promise.all([
       updateQuery.update(changesToSave),
-      cacheableData.campaignContact.updateStatus({
-        ...contact,
-        messageservice_sid: changesToSave.messageservice_sid
-      })
+      cacheableData.campaignContact.updateStatus(
+        contact,
+        undefined,
+        changesToSave.messageservice_sid || changesToSave.user_number
+      )
     ])
       .then((newMessage, cacheResult) => {
         resolve({
@@ -535,15 +584,21 @@ async function addNumberToMessagingService(
  * Buy a phone number and add it to the owned_phone_number table
  */
 async function buyNumber(organization, twilioInstance, phoneNumber, opts = {}) {
+  const twilioBaseUrl =
+    getConfig("TWILIO_BASE_CALLBACK_URL", organization) || "";
   const response = await twilioInstance.incomingPhoneNumbers.create({
     phoneNumber,
     friendlyName: `Managed by Spoke [${process.env.BASE_URL}]: ${phoneNumber}`,
-    voiceUrl: getConfig("TWILIO_VOICE_URL", organization) // will use default twilio recording if undefined
+    voiceUrl: getConfig("TWILIO_VOICE_URL", organization), // will use default twilio recording if undefined
+    smsUrl: urlJoin(twilioBaseUrl, "twilio", organization.id.toString())
   });
+
   if (response.error) {
     throw new Error(`Error buying twilio number: ${response.error}`);
   }
+
   log.debug(`Bought number ${phoneNumber} [${response.sid}]`);
+
   let allocationFields = {};
   const messagingServiceSid = opts && opts.messagingServiceSid;
   if (messagingServiceSid) {

@@ -119,7 +119,21 @@ export default function renderIndex(html, css, assetMap) {
       ) || 200};
       window.HIDE_BRANCHED_SCRIPTS=${getConfig("HIDE_BRANCHED_SCRIPTS", null, {
         truthy: 1
-      }) || false}      
+      }) || false};     
+      window.SKIP_TWILIO_MESSAGING_SERVICE=${getConfig(
+        "SKIP_TWILIO_MESSAGING_SERVICE",
+        null,
+        {
+          truthy: 1
+        }
+      ) || false};
+      window.EXPERIMENTAL_STICKY_SENDER=${getConfig(
+        "EXPERIMENTAL_STICKY_SENDER",
+        null,
+        {
+          truthy: 1
+        }
+      ) || false};
     </script>
     <script src="${assetMap["bundle.js"]}"></script>
   </body>
