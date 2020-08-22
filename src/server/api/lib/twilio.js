@@ -232,7 +232,8 @@ async function sendMessage(message, contact, trx, organization, campaign) {
       parseMessageText(message)
     );
 
-    console.log("twilioMessage", messageParams);
+    log.info("twilioMessage", messageParams);
+
     if (APITEST) {
       let fakeErr = null;
       let fakeResponse = null;
@@ -296,7 +297,11 @@ export function postMessageSend(
   let hasError = false;
   if (err) {
     hasError = true;
-    log.error("Error sending message", err);
+    log.error("ERROR SENDING MESSAGE", {
+      err,
+      message,
+      response
+    });
     console.log("Error sending message", err);
   }
   if (response) {
@@ -422,7 +427,7 @@ async function handleIncomingMessage(message) {
     !message.hasOwnProperty("Body") ||
     !message.hasOwnProperty("MessageSid")
   ) {
-    log.error(`This is not an incoming message: ${JSON.stringify(message)}`);
+    log.error("This is not an incoming message", message);
   }
 
   const { From, To, MessageSid } = message;

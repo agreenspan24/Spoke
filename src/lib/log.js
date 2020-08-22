@@ -58,7 +58,7 @@ if (isClient()) {
       const [err] = msg;
 
       if (rollbar) {
-        rollbar.error(msg);
+        rollbar.error(...msg);
       }
 
       miniLogInstance.error(err && err.stack ? err.stack : err);
