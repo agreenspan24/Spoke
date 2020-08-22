@@ -7,11 +7,16 @@ const config = require("../../../../src/server/api/lib/config");
 
 describe("ngpvan/util", () => {
   let organization;
+  let campaign;
 
   beforeEach(async () => {
     organization = {
       id: 77,
       name: "What good shall I do today?"
+    };
+
+    campaign = {
+      id: 78
     };
   });
 
@@ -120,7 +125,10 @@ describe("ngpvan/util", () => {
       }
 
       try {
-        auth = Van.getAuth(organization);
+        auth = Van.getAuth(
+          organization,
+          (campaign.features || {}).van_database_mode
+        );
       } catch (caughtException) {
         error = caughtException;
       } finally {

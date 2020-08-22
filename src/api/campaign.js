@@ -64,6 +64,18 @@ export const schema = gql`
     resultMessage: String
   }
 
+  type ActionChoice {
+    name: String!
+    details: String!
+  }
+
+  type Action {
+    name: String
+    displayName: String
+    instructions: String
+    clientChoiceData: [ActionChoice]
+  }
+
   type CampaignPhoneNumberCount {
     areaCode: String!
     count: Int!
@@ -103,6 +115,7 @@ export const schema = gql`
     pendingJobs: [JobRequest]
     ingestMethodsAvailable: [IngestMethod]
     ingestMethod: IngestMethod
+    availableActions: [Action]
     useDynamicAssignment: Boolean
     introHtml: String
     primaryColor: String
@@ -117,6 +130,7 @@ export const schema = gql`
     messageserviceSid: String
     useOwnMessagingService: Boolean
     phoneNumbers: [String]
+    vanDatabaseMode: Int
     inventoryPhoneNumberCounts: [CampaignPhoneNumberCount]
   }
 

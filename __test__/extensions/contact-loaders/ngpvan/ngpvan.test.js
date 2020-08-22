@@ -79,6 +79,8 @@ describe("ngpvan", () => {
     let oldNgpVanCacheTtl;
     let oldNgpVanApiBaseUrl;
     let listItems;
+    let organization;
+    let campaign;
 
     beforeEach(async () => {
       oldMaximumListSize = process.env.NGP_VAN_MAXIMUM_LIST_SIZE;
@@ -131,6 +133,14 @@ describe("ngpvan", () => {
           doorCount: 263
         }
       ];
+
+      organization = {
+        id: 77
+      };
+
+      campaign = {
+        id: 78
+      };
     });
 
     afterEach(async () => {
@@ -157,7 +167,10 @@ describe("ngpvan", () => {
           nextPageLink: null,
           count: 5
         });
-      const savedListsResponse = await getClientChoiceData();
+      const savedListsResponse = await getClientChoiceData(
+        organization,
+        campaign
+      );
 
       expect(JSON.parse(savedListsResponse.data).items).toEqual(listItems);
       expect(savedListsResponse.expiresSeconds).toEqual(30);
@@ -177,7 +190,10 @@ describe("ngpvan", () => {
           )
           .reply(404);
 
-        const savedListsResponse = await getClientChoiceData();
+        const savedListsResponse = await getClientChoiceData(
+          organization,
+          campaign
+        );
 
         expect(JSON.parse(savedListsResponse.data)).toEqual({
           error: expect.stringMatching(
@@ -203,6 +219,7 @@ describe("ngpvan", () => {
     let webhookUrl;
     let oldNgpVanApiBaseUrl;
     let organization;
+    let campaign;
 
     beforeEach(async () => {
       oldNgpVanWebhookUrl = process.env.NGP_VAN_WEBHOOK_BASE_URL;
@@ -232,6 +249,10 @@ describe("ngpvan", () => {
       organization = {
         id: 77,
         name: "What good shall I do today?"
+      };
+
+      campaign = {
+        id: 78
       };
     });
 
@@ -342,7 +363,7 @@ describe("ngpvan", () => {
       const exportJobsNock = makeSuccessfulExportJobPostNock("Completed");
       const getCsvNock = makeSuccessfulGetCsvNock();
 
-      await processContactLoad(job, maxContacts, organization);
+      await processContactLoad(job, maxContacts, organization, campaign);
       expect(ngpvan.makeRowTransformer.mock.calls).toEqual([[false]]);
 
       expect(csvParser.parseCSVAsync).toHaveBeenCalledTimes(1);
@@ -445,7 +466,7 @@ describe("ngpvan", () => {
         const exportJobsNock = makeSuccessfulExportJobPostNock("Completed");
         const getCsvNock = makeSuccessfulGetCsvNock();
 
-        await processContactLoad(job, maxContacts, organization);
+        await processContactLoad(job, maxContacts, organization, campaign);
         expect(ngpvan.makeRowTransformer.mock.calls).toEqual([[true]]);
 
         exportJobsNock.done();
@@ -462,7 +483,7 @@ describe("ngpvan", () => {
         const exportJobsNock = makeSuccessfulExportJobPostNock("Completed");
         const getCsvNock = makeSuccessfulGetCsvNock();
 
-        await processContactLoad(job, maxContacts, organization);
+        await processContactLoad(job, maxContacts, organization, campaign);
         expect(ngpvan.makeRowTransformer.mock.calls).toEqual([[false]]);
 
         exportJobsNock.done();
@@ -481,7 +502,7 @@ describe("ngpvan", () => {
       it("calls handleFailedContactLoad", async () => {
         const exportJobsNock = makeSuccessfulExportJobPostNock("Requested");
 
-        await processContactLoad(job, maxContacts, organization);
+        await processContactLoad(job, maxContacts, organization, campaign);
         expect(ngpvan.handleFailedContactLoad.mock.calls).toEqual([
           [
             job,
@@ -507,7 +528,7 @@ describe("ngpvan", () => {
       it("calls handleFailedContactLoad", async () => {
         const exportJobsNock = makeSuccessfulExportJobPostNock("Error", 777);
 
-        await processContactLoad(job, maxContacts, organization);
+        await processContactLoad(job, maxContacts, organization, campaign);
         expect(ngpvan.handleFailedContactLoad.mock.calls).toEqual([
           [
             job,
@@ -538,7 +559,7 @@ describe("ngpvan", () => {
         const exportJobsNock = makeSuccessfulExportJobPostNock("Completed");
         const getCsvNock = makeSuccessfulGetCsvNock();
 
-        await processContactLoad(job, maxContacts, organization);
+        await processContactLoad(job, maxContacts, organization, campaign);
         expect(ngpvan.handleFailedContactLoad.mock.calls).toEqual([
           [job, payload, "No contacts ingested. Check the selected list."]
         ]);
@@ -561,7 +582,7 @@ describe("ngpvan", () => {
           )
           .reply(500);
 
-        await processContactLoad(job, maxContacts, organization);
+        await processContactLoad(job, maxContacts, organization, campaign);
 
         expect(helpers.finalizeContactLoad).not.toHaveBeenCalled();
         expect(csvParser.parseCSVAsync).not.toHaveBeenCalled();
@@ -590,7 +611,7 @@ describe("ngpvan", () => {
           .get("/pii.csv")
           .reply(500);
 
-        await processContactLoad(job, maxContacts, organization);
+        await processContactLoad(job, maxContacts, organization, campaign);
 
         expect(helpers.finalizeContactLoad).not.toHaveBeenCalled();
         expect(csvParser.parseCSVAsync).not.toHaveBeenCalled();
@@ -622,7 +643,7 @@ describe("ngpvan", () => {
         const exportJobsNock = makeSuccessfulExportJobPostNock("Completed");
         const getCsvNock = makeSuccessfulGetCsvNock();
 
-        await processContactLoad(job, maxContacts, organization);
+        await processContactLoad(job, maxContacts, organization, campaign);
 
         expect(helpers.finalizeContactLoad).not.toHaveBeenCalled();
         expect(csvParser.parseCSVAsync).toHaveBeenCalledTimes(1);
@@ -654,7 +675,7 @@ describe("ngpvan", () => {
         const exportJobsNock = makeSuccessfulExportJobPostNock("Completed");
         const getCsvNock = makeSuccessfulGetCsvNock();
 
-        await processContactLoad(job, maxContacts, organization);
+        await processContactLoad(job, maxContacts, organization, campaign);
 
         expect(helpers.finalizeContactLoad).toHaveBeenCalledTimes(1);
         expect(csvParser.parseCSVAsync).toHaveBeenCalledTimes(1);

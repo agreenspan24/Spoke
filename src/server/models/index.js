@@ -13,7 +13,9 @@ import QuestionResponse from "./question-response";
 import OptOut from "./opt-out";
 import JobRequest from "./job-request";
 import Invite from "./invite";
+import CannedResponseAction from "./canned-response-action";
 import CannedResponse from "./canned-response";
+import CannedResponseSubmission from "./canned-response-submission";
 import UserOrganization from "./user-organization";
 import UserCell from "./user-cell";
 import Message from "./message";
@@ -21,6 +23,7 @@ import ZipCode from "./zip-code";
 import Log from "./log";
 import Tag from "./tag";
 import TagCampaignContact from "./tag-campaign-contact";
+import ContactUserNumber from "./contact-user-number";
 
 import thinky from "./thinky";
 import datawarehouse from "./datawarehouse";
@@ -50,7 +53,10 @@ const tableList = [
   "assignment",
   // the rest are alphabetical
   "campaign_contact", // ?good candidate (or by cell)
+  "canned_response_action",
   "canned_response", // good candidate
+  "canned_response_submission",
+  "contact_user_number",
   "interaction_step",
   "invite",
   "job_request",
@@ -134,6 +140,7 @@ export {
   Campaign,
   CampaignAdmin,
   CampaignContact,
+  ContactUserNumber,
   InteractionStep,
   Invite,
   JobRequest,
@@ -141,6 +148,8 @@ export {
   OptOut,
   Organization,
   PendingMessagePart,
+  CannedResponseAction,
+  CannedResponseSubmission,
   CannedResponse,
   QuestionResponse,
   UserCell,

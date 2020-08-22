@@ -145,3 +145,139 @@ export const parseCSV = (file, onCompleteCallback, options) => {
     }
   });
 };
+
+export const parseCannedResponseCsv = (
+  file,
+  availableActions,
+  onCompleteCallback,
+  options
+) => {
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    // eslint-disable-next-line no-shadow, no-unused-vars
+    complete: ({ data: parserData, meta, errors }, file) => {
+      const requiredFields = ["Title", "Script"];
+
+      const missingFields = requiredFields.filter(
+        f => meta.fields.indexOf(f) == -1
+      );
+
+      if (missingFields.length) {
+        onCompleteCallback({
+          error: "Missing fields: " + missingFields.join(", ")
+        });
+
+        return;
+      }
+
+      let cannedResponseRows = parserData;
+
+      const titleLabel = meta.fields.find(f => f.toLowerCase() == "title");
+      const scriptLabel = meta.fields.find(f => f.toLowerCase() == "script");
+      const actionsLabel = meta.fields.find(f => f.toLowerCase() == "actions");
+
+      const cannedResponses = [];
+
+      // Loop through canned responses in CSV
+      for (var i in cannedResponseRows) {
+        const response = cannedResponseRows[i];
+
+        // Get basic details of canned response
+        const newCannedResponse = {
+          title: response[titleLabel].trim(),
+          text: response[scriptLabel].trim()
+        };
+
+        // If there are actions and an action provided, add them
+        if (availableActions.length && actionsLabel) {
+          const actionsString = response[actionsLabel];
+          const responseActions = [];
+
+          // Split the actions by comma
+          const actionsArray = actionsString
+            .split(",")
+            .map(a => a.trim())
+            .filter(a => !!a);
+
+          if (actionsArray.length > 3) {
+            onCompleteCallback({
+              error: `Too many actions for canned response '${newCannedResponse.title}.`
+            });
+
+            return;
+          }
+
+          // Loop through actions in CSV row
+          for (var j in actionsArray) {
+            let action = availableActions[0];
+            let actionDataLabel =
+              actionsArray[j] && actionsArray[j].trim().toLowerCase();
+
+            // If multiple actions, find the one they were referring to.
+            // (You don't need to provide an action if there's only one)
+            if (availableActions.length > 1) {
+              const actionDetails = actionsArray[j]
+                .split("-")
+                .map(t => t.trim().toLowerCase());
+
+              action = availableActions.find(
+                a =>
+                  a.displayName.toLowerCase() == actionDetails[0] ||
+                  a.name.toLowerCase() == actionDetails[0]
+              );
+
+              // Set the actionDataLabel to the correct value if it was specified
+              actionDataLabel = actionDetails[1];
+            }
+
+            if (action) {
+              const newAction = {};
+
+              if (action.clientChoiceData && action.clientChoiceData.length) {
+                // If action requires client choice data, check that a choice was provided
+                if (actionDataLabel) {
+                  newAction.action = action.name;
+
+                  const actionData = action.clientChoiceData.find(
+                    c => c.name.toLowerCase() == actionDataLabel
+                  );
+
+                  if (actionData) {
+                    newAction.actionData = JSON.stringify({
+                      label: actionData.name,
+                      value: actionData.details
+                    });
+                  }
+                } else {
+                  console.log({ action, actionDataLabel }, actionsArray[j]);
+                  onCompleteCallback({
+                    error: `Actions for canned response "${newCannedResponse.title}" are incomplete. Action: ${action.name}.`
+                  });
+
+                  return;
+                }
+              } else {
+                // If action does not require client choice data
+                newAction.action = action.name;
+              }
+
+              if (newAction.action) {
+                responseActions.push(newAction);
+              }
+            }
+          }
+
+          newCannedResponse.actions = responseActions;
+        }
+
+        cannedResponses.push(newCannedResponse);
+      }
+
+      onCompleteCallback({
+        error: null,
+        cannedResponses
+      });
+    }
+  });
+};

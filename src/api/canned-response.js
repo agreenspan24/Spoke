@@ -1,10 +1,29 @@
 export const schema = `
+  input CannedResponseActionInput {
+    action: String
+    actionData: String
+  }
+
+  type CannedResponseAction {
+    action: String
+    actionData: String
+  }
+
   input CannedResponseInput {
     id: String
     title: String
     text: String
     campaignId: String
     userId: String
+    actions: [CannedResponseActionInput]
+  }
+
+  input CannedResponseSubmission {
+    id: ID
+    title: String
+    text: String
+    isUserCreated: Boolean
+    actions: [CannedResponseActionInput]
   }
 
   type CannedResponse {
@@ -12,5 +31,6 @@ export const schema = `
     title: String
     text: String
     isUserCreated: Boolean
+    actions: [CannedResponseAction]
   }
 `;

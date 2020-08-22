@@ -97,7 +97,12 @@ export async function getClientChoiceData(organization, campaign, user) {
   };
 }
 
-export async function processContactLoad(job, maxContacts, organization) {
+export async function processContactLoad(
+  job,
+  maxContacts,
+  organization,
+  campaign
+) {
   /// trigger processing -- this will likely be the most important part
   /// you should load contacts into the contact table with the job.campaign_id
   /// Since this might just *begin* the processing and other work might
