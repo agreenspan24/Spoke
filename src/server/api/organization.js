@@ -311,6 +311,9 @@ export const resolvers = {
       if (
         !getConfig("EXPERIMENTAL_PHONE_INVENTORY", organization, {
           truthy: true
+        }) &&
+        !getConfig("PHONE_INVENTORY", organization, {
+          truthy: true
         })
       ) {
         return [];
