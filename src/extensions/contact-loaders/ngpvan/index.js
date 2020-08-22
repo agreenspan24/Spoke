@@ -42,7 +42,7 @@ export const handleFailedContactLoad = async (
   message
 ) => {
   // eslint-disable-next-line no-console
-  log.error(message, "error two");
+  log.error(message);
   await failedContactLoad(job, null, JSON.stringify(ingestDataReference), {
     errors: [message],
     ...ingestDataReference

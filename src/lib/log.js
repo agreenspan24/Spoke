@@ -18,7 +18,7 @@ if (isClient()) {
   let rollbar = null;
 
   if (
-    // process.env.NODE_ENV === "production" &&
+    process.env.NODE_ENV === "production" &&
     process.env.ROLLBAR_ACCESS_TOKEN
   ) {
     rollbar = new Rollbar({
@@ -55,13 +55,11 @@ if (isClient()) {
       miniLogInstance.warn(...msg);
     },
     error: (...msg) => {
-      const [err] = msg;
-
       if (rollbar) {
         rollbar.error(...msg);
       }
 
-      miniLogInstance.error(err && err.stack ? err.stack : err);
+      miniLogInstance.error(...msg);
     }
   };
 }
