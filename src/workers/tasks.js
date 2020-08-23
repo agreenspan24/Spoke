@@ -121,7 +121,7 @@ const startCampaignCache = async ({ campaign, organization }) => {
     .loadMany(campaign, organization, {})
     .then(() => {
       // eslint-disable-next-line no-console
-      console.log("FINISHED contact loadMany", campaign.id);
+      log.info("FINISHED contact loadMany", campaign.id);
     })
     .catch(err => {
       // eslint-disable-next-line no-console
@@ -144,7 +144,13 @@ const taskMap = Object.freeze({
 
 export const invokeTaskFunction = async (taskName, payload) => {
   if (taskName in taskMap) {
-    await taskMap[taskName](payload);
+    try {
+      await taskMap[taskName](payload);
+    } catch (err) {
+      log.error("Error Processing Task", err);
+
+      throw err;
+    }
   } else {
     throw new Error(`Task of type ${taskName} not found`);
   }

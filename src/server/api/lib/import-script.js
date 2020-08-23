@@ -24,7 +24,7 @@ const getDocument = async documentId => {
       documentId
     });
   } catch (err) {
-    console.log(err);
+    log.error(err);
     throw new Error(err.message);
   }
   return result;
@@ -312,7 +312,7 @@ const replaceInteractionsInDatabase = async (
         null
       );
     } catch (exception) {
-      console.log(exception);
+      log.error(exception);
       throw exception;
     }
   });
@@ -380,7 +380,7 @@ const replaceCannedResponsesInDatabase = async (
           .transacting(trx);
       }
     } catch (exception) {
-      console.log(exception);
+      log.error(exception);
       throw exception;
     }
   });

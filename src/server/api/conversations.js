@@ -279,7 +279,7 @@ export async function getConversations(
   } catch (err) {
     // default fake value that means 'a lot'
     conversationCount = 9999;
-    console.log("getConversations timeout", err);
+    log.error("getConversations timeout", err);
   }
 
   const pageInfo = {

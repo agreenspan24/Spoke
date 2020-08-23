@@ -1,6 +1,6 @@
 import Papa from "papaparse";
 import _ from "lodash";
-import { getFormattedPhoneNumber, getFormattedZip } from "../lib";
+import { getFormattedPhoneNumber, getFormattedZip, log } from "../lib";
 
 export const requiredUploadFields = ["firstName", "lastName", "cell"];
 const topLevelUploadFields = [
@@ -250,7 +250,7 @@ export const parseCannedResponseCsv = (
                     });
                   }
                 } else {
-                  console.log({ action, actionDataLabel }, actionsArray[j]);
+                  log.error({ action, actionDataLabel }, actionsArray[j]);
                   onCompleteCallback({
                     error: `Actions for canned response "${newCannedResponse.title}" are incomplete. Action: ${action.name}.`
                   });

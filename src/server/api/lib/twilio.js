@@ -350,7 +350,6 @@ export function postMessageSend(
       message,
       response
     });
-    console.log("Error sending message", err);
   }
   if (response) {
     changesToSave.service_id = response.sid;
@@ -496,7 +495,9 @@ async function handleIncomingMessage(message) {
     const finalMessage = await convertMessagePartsToMessage([
       pendingMessagePart
     ]);
-    console.log("Contact reply", finalMessage, pendingMessagePart);
+
+    log.info("Contact Reply", finalMessage, pendingMessagePart);
+
     if (finalMessage) {
       if (message.spokeCreatedAt) {
         finalMessage.created_at = message.spokeCreatedAt;

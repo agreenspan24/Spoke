@@ -234,7 +234,7 @@ const campaignCache = {
           .expire(infoKey, 432000) // counts stay 5 days for easier review
           .execAsync();
       } catch (err) {
-        console.log("campaign.updateAssignedCount Error", id, err);
+        log.error("campaign.updateAssignedCount Error", id, err);
       }
     }
   },
@@ -254,7 +254,7 @@ const campaignCache = {
           .expire(infoKey, 432000) // counts stay 5 days for easier review
           .execAsync();
       } catch (err) {
-        console.log("campaign.incrMessaged Error", id, err);
+        log.error("campaign.incrMessaged Error", id, err);
       }
     }
   }

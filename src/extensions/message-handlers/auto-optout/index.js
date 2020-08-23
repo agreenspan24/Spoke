@@ -1,6 +1,7 @@
 import { getConfig } from "../../../server/api/lib/config";
 import { cacheableData, Message } from "../../../server/models";
 import serviceMap from "../../../server/api/lib/services";
+import { log } from "../../../lib";
 
 const DEFAULT_AUTO_OPTOUT_REGEX_LIST_BASE64 =
   "W3sicmVnZXgiOiAiXlxccypzdG9wXFxifFxcYnJlbW92ZSBtZVxccyokfHJlbW92ZSBteSBuYW1lfFxcYnRha2UgbWUgb2ZmIHRoXFx3KyBsaXN0fFxcYmxvc2UgbXkgbnVtYmVyfGRlbGV0ZSBteSBudW1iZXJ8Xlxccyp1bnN1YnNjcmliZVxccyokfF5cXHMqY2FuY2VsXFxzKiR8XlxccyplbmRcXHMqJHxeXFxzKnF1aXRcXHMqJCIsICJyZWFzb24iOiAic3RvcCJ9XQ==";
@@ -35,7 +36,7 @@ export const available = organization => {
     JSON.parse(Buffer.from(conf, "base64").toString());
     return true;
   } catch (e) {
-    console.log(
+    log.error(
       "message-handler/auto-optout JSON parse of AUTO_OPTOUT_REGEX_LIST_BASE64 failed",
       e
     );
