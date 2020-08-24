@@ -1,6 +1,7 @@
 import { invokeJobFunction } from "../../../workers/job-processes";
 import { invokeTaskFunction } from "../../../workers/tasks";
 import { r } from "../../../server/models";
+import { log } from "../../../lib";
 
 const requireKeys = (event, keys) => {
   for (const key of keys) {
@@ -19,7 +20,7 @@ const handleJob = async event => {
       .where("id", event.jobId)
       .first();
     if (!job) {
-      console.error(`Job ${event.jobId} not found`);
+      log.error(`Job ${event.jobId} not found`);
       return;
     }
     console.log("Running job", job);
@@ -28,7 +29,7 @@ const handleJob = async event => {
     // For now suppress Lambda retries by not raising the exception.
     // In the future, we may want to mark jobs as retryable and let Lambda do
     // its thing with exceptions.
-    console.error("Caught exception while processing job", e);
+    log.error("Caught exception while processing job", e);
   }
 };
 
@@ -42,7 +43,7 @@ const handleTask = async event => {
     // For now suppress Lambda retries by not raising the exception.
     // In the future, we may want to mark jobs as retryable and let Lambda do
     // its thing with exceptions.
-    console.error("Caught exception while processing task", e);
+    log.error("Caught exception while processing task", e);
   }
 };
 

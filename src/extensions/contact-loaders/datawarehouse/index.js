@@ -11,6 +11,7 @@ import {
 } from "../../../server/models";
 import { getConfig, hasConfig } from "../../../server/api/lib/config";
 import { getFormattedPhoneNumber } from "../../../lib/phone-format.js";
+import { log } from "../../../lib";
 
 let warehouseConnection = null;
 
@@ -85,7 +86,7 @@ export async function getClientChoiceData(organization, campaign, user) {
       messages.push("no connection");
     }
   } catch (err) {
-    console.error("warehouse connection error", err);
+    log.error("warehouse connection error", err);
     isConnected = false;
     messages.push(err);
   }
@@ -127,12 +128,7 @@ export async function processContactLoad(job, maxContacts, organization) {
       console.log("datawarehouse: finished running", job.id, job.campaign_id);
     })
     .catch(err => {
-      console.error(
-        "datawarehouse: failed running",
-        job.id,
-        job.campaign_id,
-        err
-      );
+      log.error("datawarehouse: failed running", job.id, job.campaign_id, err);
     });
 }
 
@@ -179,7 +175,7 @@ export async function loadContactsFromDataWarehouseFragment(job, jobEvent) {
     knexResult = await warehouseConnection.raw(sqlQuery);
   } catch (err) {
     // query failed
-    console.error("Data warehouse query failed: ", err);
+    log.error("Data warehouse query failed: ", err);
     jobMessages.push(`Data warehouse count query failed with ${err}`);
     // TODO: send feedback about job
   }
@@ -199,7 +195,7 @@ export async function loadContactsFromDataWarehouseFragment(job, jobEvent) {
     }
   });
   if (!("first_name" in fields && "last_name" in fields && "cell" in fields)) {
-    console.error(
+    log.error(
       "SQL statement does not return first_name, last_name, and cell: ",
       sqlQuery,
       fields
@@ -315,14 +311,14 @@ export async function loadContactsFromDataWarehouse(job) {
   const sqlQuery = JSON.parse(job.payload).contactSql;
 
   if (!sqlQuery.startsWith("SELECT") || sqlQuery.indexOf(";") >= 0) {
-    console.error(
+    log.error(
       "Malformed SQL statement.  Must begin with SELECT and not have any semicolons: ",
       sqlQuery
     );
     return;
   }
   if (!datawarehouse) {
-    console.error("No data warehouse connection, so cannot load contacts", job);
+    log.error("No data warehouse connection, so cannot load contacts", job);
     return;
   }
 
@@ -334,7 +330,7 @@ export async function loadContactsFromDataWarehouse(job) {
       `SELECT COUNT(*) FROM ( ${sqlQuery} ) AS QUERYCOUNT`
     );
   } catch (err) {
-    console.error("Data warehouse count query failed: ", err);
+    log.error("Data warehouse count query failed: ", err);
     jobMessages.push(`Data warehouse count query failed with ${err}`);
   }
 

@@ -39,20 +39,28 @@ if (isClient()) {
     .pipe(minilog.backends.console.formatWithStack)
     .pipe(minilog.backends.console);
 
-  logInstance = minilog("backend");
-  const existingErrorLogger = logInstance.error;
-  logInstance.error = err => {
-    if (rollbar) {
-      if (typeof err === "object") {
-        rollbar.error(err);
-      } else if (typeof err === "string") {
-        rollbar.log(err);
-      } else {
-        rollbar.log("Got backend error with no error message");
-      }
-    }
+  const miniLogInstance = minilog("backend");
 
-    existingErrorLogger(err && err.stack ? err.stack : err);
+  logInstance = {
+    debug: (...msg) => {
+      miniLogInstance.debug(...msg);
+    },
+    info: (...msg) => {
+      miniLogInstance.info(...msg);
+    },
+    log: (...msg) => {
+      miniLogInstance.log(...msg);
+    },
+    warn: (...msg) => {
+      miniLogInstance.warn(...msg);
+    },
+    error: (...msg) => {
+      if (rollbar) {
+        rollbar.error(...msg);
+      }
+
+      miniLogInstance.error(...msg);
+    }
   };
 }
 

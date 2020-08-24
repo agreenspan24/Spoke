@@ -3,6 +3,7 @@ import { modelWithExtraProps } from "./lib";
 import { assembleAnswerOptions } from "../../../lib/interaction-step-helpers";
 import { getFeatures } from "../../api/lib/config";
 import organizationCache from "./organization";
+import { log } from "../../../lib";
 
 // This should be cached data for a campaign that will not change
 // based on assignments or texter actions
@@ -71,7 +72,7 @@ const loadDeep = async id => {
   if (r.redis) {
     const campaign = await Campaign.get(id);
     if (Array.isArray(campaign) && campaign.length === 0) {
-      console.error("NO CAMPAIGN FOUND");
+      log.error("NO CAMPAIGN FOUND");
       return {};
     }
     if (campaign.is_archived) {

@@ -4,6 +4,7 @@ import optOutCache from "./opt-out";
 import organizationCache from "./organization";
 import { modelWithExtraProps } from "./lib";
 import { Writable } from "stream";
+import { log } from "../../../lib";
 
 // <campaignContactId>
 //   - assignmentId
@@ -322,7 +323,7 @@ const campaignContactCache = {
             next();
           },
           err => {
-            console.error("FAILED CONTACT CACHE SAVE", err);
+            log.error("FAILED CONTACT CACHE SAVE", err);
             stream.end();
             next();
           }

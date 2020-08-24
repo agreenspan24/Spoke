@@ -2,6 +2,7 @@ import { r, Message } from "../../models";
 import campaignCache from "./campaign";
 import campaignContactCache from "./campaign-contact";
 import { getMessageHandlers } from "../../../extensions/message-handlers";
+import { log } from "../../../lib";
 // QUEUE
 // messages-<contactId>
 // Expiration: 24 hours after last message added
@@ -131,13 +132,11 @@ const incomingMessageMatching = async (messageInstance, activeCellFound) => {
     // No active thread to attach message to. This should be very RARE
     // This could happen way after a campaign is closed and a contact responds 'very late'
     // or e.g. gives the 'number for moveon' to another person altogether that tries to text it.
-    console.log(
-      "messageCache ORPHAN MESSAGE",
-      messageInstance,
-      activeCellFound
-    );
+    log.error("messageCache ORPHAN MESSAGE", messageInstance, activeCellFound);
+
     return "ORPHAN MESSAGE";
   }
+
   // Check to see if the message is a duplicate of the last one
   // if-case==db result from lastMessage, else-case==cache-result
   if (activeCellFound.service_id) {
@@ -149,6 +148,7 @@ const incomingMessageMatching = async (messageInstance, activeCellFound) => {
         messageInstance,
         activeCellFound
       );
+
       return "DUPLICATE MESSAGE DB";
     }
   } else {
@@ -156,15 +156,13 @@ const incomingMessageMatching = async (messageInstance, activeCellFound) => {
     const messageThread = await query({
       campaignContactId: activeCellFound.campaign_contact_id
     });
+
     const redundant = messageThread.filter(
       m => m.service_id && m.service_id === messageInstance.service_id
     );
+
     if (redundant.length) {
-      console.error(
-        "DUPLICATE MESSAGE CACHE",
-        messageInstance,
-        activeCellFound
-      );
+      log.error("DUPLICATE MESSAGE CACHE", messageInstance, activeCellFound);
       return "DUPLICATE MESSAGE CACHE";
     }
   }
@@ -172,6 +170,7 @@ const incomingMessageMatching = async (messageInstance, activeCellFound) => {
 
 const deliveryReport = async ({
   contactNumber,
+  userNumber,
   messageSid,
   service,
   messageServiceSid,
@@ -183,6 +182,15 @@ const deliveryReport = async ({
     send_status: newStatus
   };
   if (newStatus === "ERROR") {
+    log.error("FAILED MESSAGE DELIVERY", {
+      contactNumber,
+      userNumber,
+      messageSid,
+      service,
+      messageServiceSid,
+      errorCode
+    });
+
     changes.error_code = errorCode;
 
     const lookup = await campaignContactCache.lookupByCell(
@@ -190,17 +198,21 @@ const deliveryReport = async ({
       service || "",
       messageServiceSid
     );
+
     if (lookup && lookup.campaign_contact_id) {
       await r
         .knex("campaign_contact")
         .where("id", lookup.campaign_contact_id)
         .update("error_code", errorCode);
     }
+
     console.log("messageCache deliveryReport", lookup);
+
     if (lookup.campaign_id) {
       campaignCache.incrCount(lookup.campaign_id, "errorCount");
     }
   }
+
   await r
     .knex("message")
     .where("service_id", messageSid)
