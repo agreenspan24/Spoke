@@ -218,6 +218,8 @@ app.get(
   })
 );
 
+app.use("/.well-known/pki-validation", express.static("static"));
+
 // This middleware should be last. Return the React app only if no other route is hit.
 app.use(appRenderer);
 
