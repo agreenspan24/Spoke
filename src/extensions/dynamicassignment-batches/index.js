@@ -1,4 +1,5 @@
 import { getConfig } from "../../server/api/lib/config";
+import { log } from "../../lib";
 
 export const getDynamicAssignmentBatchPolicy = ({ organization, campaign }) => {
   const handlerKey = "DYNAMICASSIGNMENT_BATCHES";
@@ -10,9 +11,7 @@ export const getDynamicAssignmentBatchPolicy = ({ organization, campaign }) => {
   try {
     handler = require(`./${name}/index.js`);
   } catch (err) {
-    console.error(
-      `${handlerKey} failed to load message handler ${name} -- ${err}`
-    );
+    log.error(`${handlerKey} failed to load message handler ${name} -- ${err}`);
   }
   return handler;
 };

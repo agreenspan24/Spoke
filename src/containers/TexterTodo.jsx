@@ -85,6 +85,10 @@ export const campaignQuery = gql`
           title
           text
           isUserCreated
+          actions {
+            action
+            actionData
+          }
         }
         interactionSteps {
           id

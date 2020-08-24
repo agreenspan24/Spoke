@@ -4,6 +4,7 @@ import { parseCSVAsync } from "../../../workers/parse_csv";
 import { failedContactLoad } from "../../../workers/jobs";
 import HttpRequest from "../../../server/lib/http-request.js";
 import Van from "./util";
+import { log } from "../../../lib";
 
 export const name = "ngpvan";
 
@@ -41,7 +42,7 @@ export const handleFailedContactLoad = async (
   message
 ) => {
   // eslint-disable-next-line no-console
-  console.error(message);
+  log.error(message);
   await failedContactLoad(job, null, JSON.stringify(ingestDataReference), {
     errors: [message],
     ...ingestDataReference
@@ -96,7 +97,7 @@ export function addServerEndpoints(expressApp) {
 
 export function clientChoiceDataCacheKey(organization, campaign, user) {
   // / returns a string to cache getClientChoiceData -- include items that relate to cacheability
-  return `${organization.id}`;
+  return `${organization.id}-${(campaign.features || {}).van_database_mode}`;
 }
 
 export async function getClientChoiceData(organization, campaign, user) {
@@ -116,7 +117,10 @@ export async function getClientChoiceData(organization, campaign, user) {
     const response = await HttpRequest(url, {
       method: "GET",
       headers: {
-        Authorization: Van.getAuth(organization)
+        Authorization: Van.getAuth(
+          organization,
+          (campaign.features || {}).van_database_mode
+        )
       },
       retries: 0,
       timeout: 5000
@@ -126,7 +130,7 @@ export async function getClientChoiceData(organization, campaign, user) {
   } catch (error) {
     const message = `Error retrieving saved list metadata from VAN ${error}`;
     // eslint-disable-next-line no-console
-    console.log(message);
+    log.error(message);
     return { data: `${JSON.stringify({ error: message })}` };
   }
 
@@ -250,7 +254,12 @@ export const headerTransformer = header => {
   }
 };
 
-export async function processContactLoad(job, maxContacts, organization) {
+export async function processContactLoad(
+  job,
+  maxContacts,
+  organization,
+  campaign
+) {
   let responseJson;
   const ingestDataReference = JSON.parse(job.payload);
   let vanResponse;
@@ -270,7 +279,10 @@ export async function processContactLoad(job, maxContacts, organization) {
       retries: 0,
       timeout: 5000,
       headers: {
-        Authorization: Van.getAuth(organization),
+        Authorization: Van.getAuth(
+          organization,
+          (campaign.features || {}).van_database_mode
+        ),
         "Content-Type": "application/json"
       },
       body: JSON.stringify({

@@ -5,10 +5,6 @@ import { getTags } from "./tag";
 import { accessRequired } from "./errors";
 import { getCampaigns } from "./campaign";
 import { buildUsersQuery } from "./user";
-import {
-  getAvailableActionHandlers,
-  getActionChoiceData
-} from "../../extensions/action-handlers";
 
 export const ownerConfigurable = {
   // ACTION_HANDLERS: 1,
@@ -119,28 +115,6 @@ export const resolvers = {
       typeof getFeatures(organization).profile_fields === "string"
         ? JSON.parse(getFeatures(organization).profile_fields)
         : getFeatures(organization).profile_fields || [],
-    availableActions: async (organization, _, { user, loaders }) => {
-      await accessRequired(user, organization.id, "SUPERVOLUNTEER");
-      const availableHandlers = await getAvailableActionHandlers(
-        organization,
-        user
-      );
-
-      const promises = availableHandlers.map(handler => {
-        return getActionChoiceData(handler, organization, user, loaders).then(
-          clientChoiceData => {
-            return {
-              name: handler.name,
-              displayName: handler.displayName(),
-              instructions: handler.instructions(),
-              clientChoiceData
-            };
-          }
-        );
-      });
-
-      return Promise.all(promises);
-    },
     allowSendAll: organization =>
       Boolean(
         // the first ALLOW_SEND_ALL is NOT per-org
@@ -253,7 +227,10 @@ export const resolvers = {
         let messagingServiceConfigured;
         if (
           manualMessagingServicesEnabled(organization) ||
-          campaignNumbersEnabled(organization)
+          campaignNumbersEnabled(organization) ||
+          getConfig("SKIP_TWILIO_MESSAGING_SERVICE", organization, {
+            truthy: true
+          })
         ) {
           messagingServiceConfigured = true;
         } else {
@@ -337,6 +314,9 @@ export const resolvers = {
       if (
         !getConfig("EXPERIMENTAL_PHONE_INVENTORY", organization, {
           truthy: true
+        }) &&
+        !getConfig("PHONE_INVENTORY", organization, {
+          truthy: true
         })
       ) {
         return [];
@@ -351,7 +331,9 @@ export const resolvers = {
           r.knex.raw("COUNT(allocated_to) as allocated_count"),
           r.knex.raw(
             "SUM(CASE WHEN allocated_to IS NULL THEN 1 END) as available_count"
-          )
+          ),
+          r.knex.raw("MIN(stuck_contacts) as min_stuck_contacts"),
+          r.knex.raw("MAX(stuck_contacts) as max_stuck_contacts")
         )
         .where({
           service,
@@ -362,7 +344,9 @@ export const resolvers = {
         areaCode: row.area_code,
         state: usAreaCodes.get(Number(row.area_code)),
         allocatedCount: Number(row.allocated_count),
-        availableCount: Number(row.available_count)
+        availableCount: Number(row.available_count),
+        minStuckContacts: Number(row.min_stuck_contacts),
+        maxStuckContacts: Number(row.max_stuck_contacts)
       }));
     }
   }

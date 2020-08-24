@@ -14,6 +14,7 @@ const log = require("../../../src/lib").log;
 describe("action-handlers/index", () => {
   let organization;
   let user;
+  let campaign;
   let savedEnvironment;
 
   beforeAll(async () => {
@@ -21,13 +22,13 @@ describe("action-handlers/index", () => {
 
     await setupTest();
 
-    const startedCampaign = await createStartedCampaign();
     ({
       testOrganization: {
         data: { createOrganization: organization }
       },
-      testAdminUser: user
-    } = startedCampaign);
+      testAdminUser: user,
+      testCampaign: campaign
+    } = await createStartedCampaign());
   });
 
   afterAll(async () => {
@@ -58,10 +59,11 @@ describe("action-handlers/index", () => {
       const cacheKey = ActionHandlers.availabilityCacheKey(
         "grateful-dead",
         organization,
-        2
+        2,
+        campaign
       );
       expect(cacheKey).toEqual(
-        `${process.env.CACHE_PREFIX || ""}action-avail-grateful-dead-1-2`
+        `${process.env.CACHE_PREFIX || ""}action-avail-grateful-dead-1-2-1`
       );
     });
 
@@ -74,10 +76,11 @@ describe("action-handlers/index", () => {
         const cacheKey = ActionHandlers.availabilityCacheKey(
           "grateful-dead",
           organization,
-          2
+          2,
+          campaign
         );
         expect(cacheKey).toEqual(
-          `${process.env.CACHE_PREFIX}action-avail-grateful-dead-1-2`
+          `${process.env.CACHE_PREFIX}action-avail-grateful-dead-1-2-1`
         );
       });
     });
@@ -376,11 +379,14 @@ describe("action-handlers/index", () => {
           "test-action",
           TestAction,
           organization,
-          user
+          user,
+          campaign
         );
 
         expect(returned).toEqual("fake_result");
-        expect(TestAction.available.mock.calls).toEqual([[organization, user]]);
+        expect(TestAction.available.mock.calls).toEqual([
+          [organization, user, campaign]
+        ]);
       });
     });
 
@@ -396,11 +402,14 @@ describe("action-handlers/index", () => {
           "test-action",
           TestAction,
           organization,
-          user
+          user,
+          campaign
         );
 
         expect(returned).toEqual(false);
-        expect(TestAction.available.mock.calls).toEqual([[organization, user]]);
+        expect(TestAction.available.mock.calls).toEqual([
+          [organization, user, campaign]
+        ]);
       });
     });
 
@@ -420,7 +429,8 @@ describe("action-handlers/index", () => {
           "test-action",
           TestAction,
           organization,
-          user
+          user,
+          campaign
         );
         expect(returned).toEqual(false);
         expect(log.error.mock.calls).toEqual([
@@ -462,7 +472,8 @@ describe("action-handlers/index", () => {
       const returned = await ActionHandlers.getActionHandler(
         "test-action",
         organization,
-        user
+        user,
+        campaign
       );
 
       expect(returned).toEqual(TestAction);
@@ -473,7 +484,8 @@ describe("action-handlers/index", () => {
         const returned = await ActionHandlers.getActionHandler(
           "not-a-handler",
           organization,
-          user
+          user,
+          campaign
         );
 
         expect(returned).toBe(false);
@@ -490,7 +502,8 @@ describe("action-handlers/index", () => {
           const returned = await ActionHandlers.getActionHandler(
             "complex-test-action",
             organization,
-            user
+            user,
+            campaign
           );
 
           expect(returned).toBe(false);
@@ -503,7 +516,8 @@ describe("action-handlers/index", () => {
     it("returns all the handlers", async () => {
       const returned = await ActionHandlers.getAvailableActionHandlers(
         organization,
-        user
+        user,
+        campaign
       );
 
       expect(returned).toHaveLength(2);
@@ -522,7 +536,8 @@ describe("action-handlers/index", () => {
       it("returns the action handler that is available", async () => {
         const returned = await ActionHandlers.getAvailableActionHandlers(
           organization,
-          user
+          user,
+          campaign
         );
 
         expect(returned).toHaveLength(1);
@@ -554,36 +569,38 @@ describe("action-handlers/index", () => {
       const returned = await ActionHandlers.getActionChoiceData(
         ComplexTestAction,
         organization,
-        user
+        user,
+        campaign
       );
 
       expect(returned).toEqual(expectedReturn);
 
       expect(ComplexTestAction.clientChoiceDataCacheKey.mock.calls).toEqual([
-        [organization, user]
+        [organization, user, campaign]
       ]);
 
       expect(ComplexTestAction.getClientChoiceData.mock.calls).toEqual([
-        [organization, user]
+        [organization, user, campaign]
       ]);
 
       // handles the second call from the cache
       const secondCallReturned = await ActionHandlers.getActionChoiceData(
         ComplexTestAction,
         organization,
-        user
+        user,
+        campaign
       );
 
       expect(secondCallReturned).toEqual(expectedReturn);
 
       expect(ComplexTestAction.clientChoiceDataCacheKey.mock.calls).toEqual([
-        [organization, user],
-        [organization, user]
+        [organization, user, campaign],
+        [organization, user, campaign]
       ]);
 
       expect(ComplexTestAction.getClientChoiceData.mock.calls).toEqual([
-        [organization, user],
-        ...(!r.redis && [[organization, user]])
+        [organization, user, campaign],
+        ...(!r.redis && [[organization, user, campaign]])
       ]);
     });
 
@@ -592,7 +609,8 @@ describe("action-handlers/index", () => {
         const returned = await ActionHandlers.getActionChoiceData(
           TestAction,
           organization,
-          user
+          user,
+          campaign
         );
         expect(returned).toEqual([]);
       });
@@ -615,7 +633,8 @@ describe("action-handlers/index", () => {
           const returned = await ActionHandlers.getActionChoiceData(
             fakeAction,
             { id: 99 },
-            user
+            user,
+            campaign
           );
           expect(returned).toEqual(expectedReturn);
           expect(ActionHandlers.getSetCacheableResult.mock.calls).toEqual([
@@ -635,7 +654,8 @@ describe("action-handlers/index", () => {
           const returned = await ActionHandlers.getActionChoiceData(
             fakeAction,
             organization,
-            user
+            user,
+            campaign
           );
           expect(returned).toEqual([]);
         });
@@ -651,7 +671,8 @@ describe("action-handlers/index", () => {
           const returned = await ActionHandlers.getActionChoiceData(
             fakeAction,
             organization,
-            user
+            user,
+            campaign
           );
           expect(returned).toEqual([]);
         });
@@ -668,7 +689,8 @@ describe("action-handlers/index", () => {
           const returned = await ActionHandlers.getActionChoiceData(
             fakeAction,
             organization,
-            user
+            user,
+            campaign
           );
           expect(returned).toEqual([]);
         });
@@ -685,7 +707,8 @@ describe("action-handlers/index", () => {
           const returned = await ActionHandlers.getActionChoiceData(
             fakeAction,
             organization,
-            user
+            user,
+            campaign
           );
           expect(returned).toEqual([]);
         });
@@ -703,7 +726,8 @@ describe("action-handlers/index", () => {
           const returned = await ActionHandlers.getActionChoiceData(
             fakeAction,
             organization,
-            user
+            user,
+            campaign
           );
           expect(returned).toEqual([]);
           expect(log.error.mock.calls).toEqual([
@@ -728,7 +752,8 @@ describe("action-handlers/index", () => {
           const returned = await ActionHandlers.getActionChoiceData(
             fakeAction,
             organization,
-            user
+            user,
+            campaign
           );
           expect(returned).toEqual(expectedReturn);
           expect(log.error.mock.calls).toEqual([
@@ -756,7 +781,8 @@ describe("action-handlers/index", () => {
           const returned = await ActionHandlers.getActionChoiceData(
             fakeAction,
             organization,
-            user
+            user,
+            campaign
           );
           expect(returned).toEqual([]);
           expect(log.error.mock.calls).toEqual([

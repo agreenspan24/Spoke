@@ -47,6 +47,7 @@ const campaignInfoFragment = `
   useOwnMessagingService
   messageserviceSid
   overrideOrganizationTextingHours
+  vanDatabaseMode
   textingHoursEnforced
   textingHoursStart
   textingHoursEnd
@@ -79,6 +80,10 @@ const campaignInfoFragment = `
     id
     title
     text
+    actions {
+      action
+      actionData
+    }
   }
   ingestMethodsAvailable {
     name
@@ -94,6 +99,15 @@ const campaignInfoFragment = `
     deletedOptouts
     deletedDupes
     updatedAt
+  }
+  availableActions {
+    name
+    displayName
+    instructions
+    clientChoiceData {
+      name
+      details
+    }
   }
   editors
   pendingJobs {
@@ -120,7 +134,7 @@ export class AdminCampaignEdit extends React.Component {
     super(props);
     const isNew = props.location.query.new;
     const section = props.location.query.section;
-    console.log("SECTION", section);
+
     const expandedSection = section
       ? this.sections().findIndex(s => s.title === section)
       : isNew
@@ -375,7 +389,8 @@ export class AdminCampaignEdit extends React.Component {
           "dueBy",
           "logoImageUrl",
           "primaryColor",
-          "introHtml"
+          "introHtml",
+          "vanDatabaseMode"
         ],
         blocksStarting: true,
         expandAfterCampaignStarts: true,
@@ -383,7 +398,18 @@ export class AdminCampaignEdit extends React.Component {
         checkCompleted: () =>
           this.state.campaignFormValues.title !== "" &&
           this.state.campaignFormValues.description !== "" &&
-          this.state.campaignFormValues.dueBy !== null
+          this.state.campaignFormValues.dueBy !== null,
+        extraProps: {
+          vanIntegrationEnabled:
+            (this.props.campaignData.campaign.ingestMethodsAvailable &&
+              this.props.campaignData.campaign.ingestMethodsAvailable.some(
+                x => x.name == "ngpvan"
+              )) ||
+            (this.props.campaignData.campaign.availableActions &&
+              this.props.campaignData.campaign.availableActions.some(
+                x => x.name == "ngpvan-action"
+              ))
+        }
       },
       {
         title: "Contacts",
@@ -433,7 +459,9 @@ export class AdminCampaignEdit extends React.Component {
         }
       },
       {
-        title: "Interactions",
+        title: window.HIDE_BRANCHED_SCRIPTS
+          ? "Initial Outbound"
+          : "Interactions",
         content: CampaignInteractionStepsForm,
         keys: ["interactionSteps"],
         checkCompleted: () =>
@@ -446,8 +474,7 @@ export class AdminCampaignEdit extends React.Component {
         expandableBySuperVolunteers: true,
         extraProps: {
           customFields: this.props.campaignData.campaign.customFields,
-          availableActions: this.props.organizationData.organization
-            .availableActions
+          availableActions: this.props.campaignData.campaign.availableActions
         }
       },
       {
@@ -459,7 +486,8 @@ export class AdminCampaignEdit extends React.Component {
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: true,
         extraProps: {
-          customFields: this.props.campaignData.campaign.customFields
+          customFields: this.props.campaignData.campaign.customFields,
+          availableActions: this.props.campaignData.campaign.availableActions
         }
       },
       {
@@ -917,15 +945,6 @@ const queries = {
             firstName
             lastName
             displayName
-          }
-          availableActions {
-            name
-            displayName
-            instructions
-            clientChoiceData {
-              name
-              details
-            }
           }
           phoneNumberCounts {
             areaCode

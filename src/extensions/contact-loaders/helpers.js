@@ -1,6 +1,7 @@
 import { completeContactLoad, getTimezoneByZip } from "../../workers/jobs";
 import { r, CampaignContact } from "../../server/models";
 import { updateJob } from "../../workers/lib";
+import { log } from "../../lib";
 
 export const finalizeContactLoad = async (
   job,
@@ -36,7 +37,7 @@ export const finalizeContactLoad = async (
   }
   for (let index = 0; index < numChunks; index++) {
     await updateJob(job, Math.round((100 / numChunks) * index)).catch(err => {
-      console.error("Error updating job:", campaignId, job.id, err);
+      log.error("Error updating job:", campaignId, job.id, err);
     });
 
     const savePortion = contacts.slice(

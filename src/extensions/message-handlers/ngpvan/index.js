@@ -1,6 +1,6 @@
 import { getConfig } from "../../../server/api/lib/config";
 const Van = require("../../../extensions/action-handlers/ngpvan-action");
-
+import { log } from "../../../lib";
 import { getActionChoiceData } from "../../../extensions/action-handlers";
 
 export const DEFAULT_NGP_VAN_INITIAL_TEXT_CANVASS_RESULT = "Texted";
@@ -26,7 +26,7 @@ export const available = organization =>
 
 // export const preMessageSave = async () => {};
 
-export const postMessageSave = async ({ contact, organization }) => {
+export const postMessageSave = async ({ contact, organization, campaign }) => {
   if (!available(organization)) {
     return {};
   }
@@ -35,7 +35,11 @@ export const postMessageSave = async ({ contact, organization }) => {
     return {};
   }
 
-  const clientChoiceData = await getActionChoiceData(Van, organization);
+  const clientChoiceData = await getActionChoiceData(
+    Van,
+    organization,
+    campaign
+  );
   const initialTextResult =
     getConfig("NGP_VAN_INITIAL_TEXT_CANVASS_RESULT", organization) ||
     DEFAULT_NGP_VAN_INITIAL_TEXT_CANVASS_RESULT;
@@ -43,14 +47,11 @@ export const postMessageSave = async ({ contact, organization }) => {
   const texted = clientChoiceData.find(ccd => ccd.name === initialTextResult);
   const body = JSON.parse(texted.details);
 
-  return Van.postCanvassResponse(contact, organization, body)
+  return Van.postCanvassResponse(contact, organization, body, campaign)
     .then(() => {})
     .catch(caughtError => {
       // eslint-disable-next-line no-console
-      console.error(
-        "Encountered exception in ngpvan.postMessageSave",
-        caughtError
-      );
+      log.error("Encountered exception in ngpvan.postMessageSave", caughtError);
       return {};
     });
 };

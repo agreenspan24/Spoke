@@ -2,6 +2,7 @@ import {
   validateActionHandler,
   validateActionHandlerWithClientChoices
 } from "../../../src/extensions/action-handlers";
+import { log } from "../../../src/lib";
 import nock from "nock";
 
 const NgpVanAction = require("../../../src/extensions/action-handlers/ngpvan-action");
@@ -13,6 +14,7 @@ afterEach(async () => {
 
 describe("ngpvn-action", () => {
   let veryFakeOrganization;
+  let veryFakeCampaign;
 
   beforeEach(async () => {
     process.env.NGP_VAN_APP_NAME = "fake_app_name";
@@ -24,6 +26,10 @@ describe("ngpvn-action", () => {
 
     veryFakeOrganization = {
       id: 3
+    };
+
+    veryFakeCampaign = {
+      id: 78
     };
   });
 
@@ -338,7 +344,10 @@ describe("ngpvn-action", () => {
     it("returns what we expect", async () => {
       makeAllNocks({ getSurveyResultsStatusCode: 200 });
 
-      const clientChoiceData = await NgpVanAction.getClientChoiceData();
+      const clientChoiceData = await NgpVanAction.getClientChoiceData(
+        veryFakeOrganization,
+        veryFakeCampaign
+      );
       const receivedItems = JSON.parse(clientChoiceData.data).items;
 
       const expectedItems = [
@@ -561,7 +570,10 @@ describe("ngpvn-action", () => {
       it("returns what we expect", async () => {
         makeAllNocks({ getSurveyResultsStatusCode: 200 });
 
-        const clientChoiceData = await NgpVanAction.getClientChoiceData();
+        const clientChoiceData = await NgpVanAction.getClientChoiceData(
+          veryFakeOrganization,
+          veryFakeCampaign
+        );
         const receivedItems = JSON.parse(clientChoiceData.data).items;
 
         const expectedItems = [
@@ -789,7 +801,10 @@ describe("ngpvn-action", () => {
           getSurveyResultsStatusCode: 200,
           getSurveyResponsesExtraParameters: "&cycle=2020"
         });
-        await NgpVanAction.getClientChoiceData();
+        await NgpVanAction.getClientChoiceData(
+          veryFakeOrganization,
+          veryFakeCampaign
+        );
         allNocksDone();
       });
     });
@@ -798,7 +813,10 @@ describe("ngpvn-action", () => {
       it("returns what we expect", async () => {
         makeAllNocks({ getSurveyResultsStatusCode: 404 });
 
-        const clientChoiceData = await NgpVanAction.getClientChoiceData();
+        const clientChoiceData = await NgpVanAction.getClientChoiceData(
+          veryFakeOrganization,
+          veryFakeCampaign
+        );
         const receivedError = JSON.parse(clientChoiceData.data).error;
 
         expect(receivedError).toEqual(
@@ -813,7 +831,10 @@ describe("ngpvn-action", () => {
       it("throws an exception", async () => {
         makeAllNocks({ getCanvasResponsesContactTypesStatusCode: 404 });
 
-        const clientChoiceData = await NgpVanAction.getClientChoiceData();
+        const clientChoiceData = await NgpVanAction.getClientChoiceData(
+          veryFakeOrganization,
+          veryFakeCampaign
+        );
         const receivedError = JSON.parse(clientChoiceData.data).error;
 
         expect(receivedError).toEqual(
@@ -828,7 +849,10 @@ describe("ngpvn-action", () => {
       it("throws an exception", async () => {
         makeAllNocks({ getCanvassResponsesContactTypesResult: [] });
 
-        const clientChoiceData = await NgpVanAction.getClientChoiceData();
+        const clientChoiceData = await NgpVanAction.getClientChoiceData(
+          veryFakeOrganization,
+          veryFakeCampaign
+        );
         const receivedError = JSON.parse(clientChoiceData.data).error;
 
         expect(receivedError).toEqual(
@@ -847,7 +871,10 @@ describe("ngpvn-action", () => {
       it("throws an exception", async () => {
         makeAllNocks({ getCanvassResponsesInputTypesResult: [] });
 
-        const clientChoiceData = await NgpVanAction.getClientChoiceData();
+        const clientChoiceData = await NgpVanAction.getClientChoiceData(
+          veryFakeOrganization,
+          veryFakeCampaign
+        );
         const receivedError = JSON.parse(clientChoiceData.data).error;
 
         expect(receivedError).toEqual(
@@ -862,7 +889,8 @@ describe("ngpvn-action", () => {
   describe("#clientChoiceDataCacheKey", () => {
     it("returns the organizationId as a string", async () => {
       const cacheKey = NgpVanAction.clientChoiceDataCacheKey(
-        veryFakeOrganization
+        veryFakeOrganization,
+        veryFakeCampaign
       );
       expect(cacheKey).toEqual("3");
     });
@@ -871,13 +899,17 @@ describe("ngpvn-action", () => {
   describe("#available", () => {
     it("delegates to its dependencies and returns something indicating it's available", async () => {
       jest.spyOn(NgpVanAction, "getClientChoiceData").mockResolvedValueOnce({});
-      const result = await NgpVanAction.available(veryFakeOrganization);
+      const result = await NgpVanAction.available(
+        veryFakeOrganization,
+        {},
+        veryFakeCampaign
+      );
       expect(result).toEqual({
         result: true,
         expiresSeconds: 86400
       });
       expect(NgpVanAction.getClientChoiceData.mock.calls).toEqual([
-        [veryFakeOrganization]
+        [veryFakeOrganization, veryFakeCampaign]
       ]);
     });
 
@@ -887,7 +919,11 @@ describe("ngpvn-action", () => {
       });
       it("returns something indicating it's unavailble", async () => {
         jest.spyOn(NgpVanAction, "getClientChoiceData");
-        const result = await NgpVanAction.available(veryFakeOrganization);
+        const result = await NgpVanAction.available(
+          veryFakeOrganization,
+          {},
+          veryFakeCampaign
+        );
         expect(result).toEqual({
           result: false,
           expiresSeconds: 86400
@@ -905,13 +941,17 @@ describe("ngpvn-action", () => {
         });
       });
       it("returns something indicating it's unavailble", async () => {
-        const result = await NgpVanAction.available(veryFakeOrganization);
+        const result = await NgpVanAction.available(
+          veryFakeOrganization,
+          {},
+          veryFakeCampaign
+        );
         expect(result).toEqual({
           result: false,
           expiresSeconds: 86400
         });
         expect(NgpVanAction.getClientChoiceData.mock.calls).toEqual([
-          [veryFakeOrganization]
+          [veryFakeOrganization, veryFakeCampaign]
         ]);
       });
     });
@@ -923,13 +963,17 @@ describe("ngpvn-action", () => {
           .mockRejectedValueOnce(new Error("Mercury is retrograde"));
       });
       it("returns something indicating it's unavailble", async () => {
-        const result = await NgpVanAction.available(veryFakeOrganization);
+        const result = await NgpVanAction.available(
+          veryFakeOrganization,
+          {},
+          veryFakeCampaign
+        );
         expect(result).toEqual({
           result: false,
           expiresSeconds: 86400
         });
         expect(NgpVanAction.getClientChoiceData.mock.calls).toEqual([
-          [veryFakeOrganization]
+          [veryFakeOrganization, veryFakeCampaign]
         ]);
       });
     });
@@ -943,7 +987,7 @@ describe("ngpvn-action", () => {
 
     let questionResponse;
     let unusedCampaignContactId;
-    let unusedCampaign;
+    let campaign;
 
     let makePostPeopleCanvassResponsesNock;
     let postPeopleCanvassResponsesNock;
@@ -970,6 +1014,10 @@ describe("ngpvn-action", () => {
       organization = {
         id: 3
       };
+
+      campaign = {
+        id: 78
+      };
     });
 
     beforeEach(async () => {
@@ -988,9 +1036,9 @@ describe("ngpvn-action", () => {
       postPeopleCanvassResponsesNock = makePostPeopleCanvassResponsesNock();
 
       await NgpVanAction.processAction({
-        questionResponse,
-        interactionStep,
+        action_data: interactionStep.answer_actions_data,
         contact,
+        campaign,
         organization,
         previousValue: null
       });
@@ -1007,9 +1055,9 @@ describe("ngpvn-action", () => {
         let error;
         try {
           await NgpVanAction.processAction({
-            questionResponse,
-            interactionStep,
+            action_data: interactionStep.answer_actions_data,
             contact,
+            campaign,
             organization,
             previousValue: null
           });
@@ -1055,11 +1103,10 @@ describe("ngpvn-action", () => {
         let error;
         try {
           await NgpVanAction.processAction({
-            questionResponse,
-            interactionStep,
+            action_data: interactionStep.answer_actions_data,
             unusedCampaignContactId,
             contact,
-            unusedCampaign,
+            campaign,
             organization,
             previousValue: null
           });
@@ -1081,6 +1128,7 @@ describe("ngpvn-action", () => {
     let contact;
     let organization;
     let body;
+    let campaign;
 
     describe("happy path", () => {
       beforeEach(async () => {
@@ -1097,6 +1145,10 @@ describe("ngpvn-action", () => {
         body = {
           willVote: true
         };
+
+        campaign = {
+          id: 78
+        };
       });
 
       it("calls the people endpoint", async () => {
@@ -1109,7 +1161,12 @@ describe("ngpvn-action", () => {
           .post(`/v4/people/8675309/canvassResponses`, JSON.stringify(body))
           .reply(204);
 
-        await NgpVanAction.postCanvassResponse(contact, organization, body);
+        await NgpVanAction.postCanvassResponse(
+          contact,
+          organization,
+          body,
+          campaign
+        );
 
         postPeopleCanvassResponsesNock.done();
       });
@@ -1117,7 +1174,7 @@ describe("ngpvn-action", () => {
 
     describe("when custom_fields fails to parse", () => {
       beforeEach(async () => {
-        jest.spyOn(console, "error");
+        jest.spyOn(log, "error");
         contact = {
           id: 3,
           custom_fields: "won't parse"
@@ -1128,11 +1185,12 @@ describe("ngpvn-action", () => {
         const result = await NgpVanAction.postCanvassResponse(
           contact,
           organization,
-          body
+          body,
+          campaign
         );
 
         // eslint-disable-next-line no-console
-        expect(console.error.mock.calls).toEqual([
+        expect(log.error.mock.calls).toEqual([
           [expect.stringMatching(/Error parsing custom_fields for contact 3.*/)]
         ]);
         expect(result).toEqual({});
@@ -1141,7 +1199,7 @@ describe("ngpvn-action", () => {
 
     describe("when custom_fields doesn't have VanID", () => {
       beforeEach(async () => {
-        jest.spyOn(console, "error");
+        jest.spyOn(log, "error");
         contact = {
           id: 3,
           custom_fields: "{}"
@@ -1152,11 +1210,12 @@ describe("ngpvn-action", () => {
         const result = await NgpVanAction.postCanvassResponse(
           contact,
           organization,
-          body
+          body,
+          campaign
         );
 
         // eslint-disable-next-line no-console
-        expect(console.error.mock.calls).toEqual([
+        expect(log.error.mock.calls).toEqual([
           [
             "Cannot sync results to van for campaign_contact 3. No VanID in custom fields"
           ]

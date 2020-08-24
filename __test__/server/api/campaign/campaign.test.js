@@ -39,6 +39,7 @@ import {
   sleep
 } from "../../../test_helpers";
 
+const ActionHandlerFramework = require("../../../../src/extensions/action-handlers");
 jest.mock("../../../../src/server/api/lib/twilio");
 
 let testAdminUser;
@@ -1340,6 +1341,83 @@ describe("per-campaign phone numbers", async () => {
     );
     expect(data.campaign.inventoryPhoneNumberCounts).toEqual([
       { areaCode: "917", count: 1 }
+    ]);
+  });
+});
+
+describe("availableActions", () => {
+  let savedActionHandlers;
+  let campaignQuery;
+  let variables;
+
+  beforeAll(async () => {
+    savedActionHandlers = process.env.ACTION_HANDLERS;
+    await setupTest();
+  }, global.DATABASE_SETUP_TEARDOWN_TIMEOUT);
+
+  afterAll(async () => {
+    await cleanupTest();
+  }, global.DATABASE_SETUP_TEARDOWN_TIMEOUT);
+
+  afterEach(async () => {
+    process.env.ACTION_HANDLERS = savedActionHandlers;
+    jest.restoreAllMocks();
+  });
+
+  beforeEach(async () => {
+    campaignQuery = `
+      query q($campaignId: String!) {
+        campaign(id: $campaignId) {
+          id 
+          availableActions {
+            name
+            displayName
+            instructions
+            clientChoiceData {
+              name
+              details
+            }
+          }
+        }
+      }
+    `;
+
+    variables = {
+      campaignId: testCampaign.id
+    };
+
+    jest
+      .spyOn(ActionHandlerFramework, "getAvailableActionHandlers")
+      .mockResolvedValue([
+        {
+          name: "thing 1",
+          displayName: () => "THING ONE",
+          instructions: () => "Thing 1 instructions"
+        },
+        {
+          name: "thing 2",
+          displayName: () => "THING TWO",
+          instructions: () => "Thing 2 instructions"
+        }
+      ]);
+  });
+
+  it("calls availableHandlers and handles the result correctly", async () => {
+    const result = await runGql(campaignQuery, variables, testAdminUser);
+
+    expect(result.data.campaign.availableActions).toEqual([
+      {
+        name: "thing 1",
+        displayName: "THING ONE",
+        instructions: "Thing 1 instructions",
+        clientChoiceData: []
+      },
+      {
+        name: "thing 2",
+        displayName: "THING TWO",
+        instructions: "Thing 2 instructions",
+        clientChoiceData: []
+      }
     ]);
   });
 });

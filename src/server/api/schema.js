@@ -3,7 +3,7 @@ import GraphQLJSON from "graphql-type-json";
 import { GraphQLError } from "graphql/error";
 import isUrl from "is-url";
 
-import { gzip, makeTree, getHighestRole } from "../../lib";
+import { gzip, makeTree, getHighestRole, log } from "../../lib";
 import { capitalizeWord } from "./lib/utils";
 import twilio from "./lib/twilio";
 import ownedPhoneNumber from "./lib/owned-phone-number";
@@ -63,7 +63,8 @@ import {
   startCampaign,
   updateContactTags,
   updateQuestionResponses,
-  releaseCampaignNumbers
+  releaseCampaignNumbers,
+  submitCannedResponse
 } from "./mutations";
 
 const ActionHandlers = require("../../extensions/action-handlers");
@@ -181,7 +182,8 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     textingHoursEnforced,
     textingHoursStart,
     textingHoursEnd,
-    timezone
+    timezone,
+    vanDatabaseMode
   } = campaign;
   // some changes require ADMIN and we recheck below
   const organizationId =
@@ -207,9 +209,9 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     texting_hours_end: textingHoursEnd,
     use_own_messaging_service: useOwnMessagingService,
     messageservice_sid: messageserviceSid,
+    timezone,
     batch_size: batchSize,
-    response_window: responseWindow,
-    timezone
+    response_window: responseWindow
   };
 
   Object.keys(campaignUpdates).forEach(key => {
@@ -223,13 +225,25 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
   if (origCampaignRecord && !origCampaignRecord.join_token) {
     campaignUpdates.join_token = uuidv4();
   }
+
   const features = getFeatures(origCampaignRecord);
+
+  if (
+    typeof vanDatabaseMode !== "undefined" &&
+    features.van_database_mode != vanDatabaseMode
+  ) {
+    Object.assign(features, {
+      van_database_mode: vanDatabaseMode
+    });
+  }
+
   if (campaign.texterUIConfig && campaign.texterUIConfig.options) {
     Object.assign(features, {
       TEXTER_UI_SETTINGS: campaign.texterUIConfig.options
     });
-    campaignUpdates.features = JSON.stringify(features);
   }
+
+  campaignUpdates.features = JSON.stringify(features);
 
   let changed = Boolean(Object.keys(campaignUpdates).length);
   if (changed) {
@@ -264,7 +278,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
           ingest_success: null
         });
     } else {
-      console.error("ingestMethod unavailable", campaign.ingestMethod);
+      log.error("ingestMethod unavailable", campaign.ingestMethod);
     }
   }
 
@@ -300,27 +314,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
 
   if (campaign.hasOwnProperty("cannedResponses")) {
     changed = true;
-    const cannedResponses = campaign.cannedResponses;
-    const convertedResponses = [];
-    for (let index = 0; index < cannedResponses.length; index++) {
-      const response = cannedResponses[index];
-      convertedResponses.push({
-        ...response,
-        campaign_id: id,
-        id: undefined
-      });
-    }
-
-    await r
-      .table("canned_response")
-      .getAll(id, { index: "campaign_id" })
-      .filter({ user_id: "" })
-      .delete();
-    await CannedResponse.save(convertedResponses);
-    await cacheableData.cannedResponse.clearQuery({
-      userId: "",
-      campaignId: id
-    });
+    await cacheableData.cannedResponse.save(campaign.cannedResponses, id);
   }
 
   if (campaign.hasOwnProperty("inventoryPhoneNumberCounts")) {
@@ -760,7 +754,8 @@ const rootMutations = {
         response_window: getConfig("DEFAULT_RESPONSEWINDOW", organization, {
           default: 48
         }),
-        use_own_messaging_service: false
+        use_own_messaging_service: false,
+        timezone: getConfig("DST_TIMEZONE_REFERENCE", organization)
       });
       const newCampaign = await campaignInstance.save();
       await r.knex("campaign_admin").insert({
@@ -841,19 +836,14 @@ const rootMutations = {
         {}
       );
 
-      const originalCannedResponses = await r
-        .knex("canned_response")
-        .where({ campaign_id: oldCampaignId });
-      const copiedCannedResponsePromises = originalCannedResponses.map(
-        response => {
-          return new CannedResponse({
-            campaign_id: newCampaignId,
-            title: response.title,
-            text: response.text
-          }).save();
-        }
+      const originalCannedResponses = await cacheableData.cannedResponse.query({
+        campaignId: campaign.id
+      });
+
+      await cacheableData.cannedResponse.save(
+        originalCannedResponses,
+        newCampaignId
       );
-      await Promise.all(copiedCannedResponsePromises);
 
       return newCampaign;
     },
@@ -968,6 +958,7 @@ const rootMutations = {
       });
       return cannedResponseInstance;
     },
+    submitCannedResponse,
     createOrganization: async (_, { name, userId, inviteId }, { user }) => {
       authRequired(user);
       const invite = await Invite.get(inviteId);

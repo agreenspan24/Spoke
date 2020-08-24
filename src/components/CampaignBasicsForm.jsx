@@ -19,7 +19,11 @@ const FormSchema = {
     .transform(value => (!value ? null : value))
     .nullable(),
   primaryColor: yup.string().nullable(),
-  introHtml: yup.string().nullable()
+  introHtml: yup.string().nullable(),
+  vanDatabaseMode: yup
+    .number()
+    .transform(value => (!value ? null : value))
+    .nullable()
 };
 
 const EnsureCompletedFormSchema = {
@@ -37,6 +41,10 @@ const EnsureCompletedFormSchema = {
     .nullable(),
   introHtml: yup
     .string()
+    .transform(value => (!value ? null : value))
+    .nullable(),
+  vanDatabaseMode: yup
+    .number()
     .transform(value => (!value ? null : value))
     .nullable()
 };
@@ -92,6 +100,20 @@ export default class CampaignBasicsForm extends React.Component {
             fullWidth
             utcOffset={0}
           />
+          {this.props.vanIntegrationEnabled && (
+            <Form.Field
+              name="vanDatabaseMode"
+              floatingLabelText="VAN Database Mode (if applicable)"
+              default={this.props.formValues.vanDatabaseMode}
+              type="select"
+              fullWidth
+              choices={[
+                { value: null, label: "" },
+                { value: 0, label: "My Voters" },
+                { value: 1, label: "My Campaign" }
+              ]}
+            />
+          )}
           <Form.Field name="introHtml" label="Intro HTML" multiLine fullWidth />
           <Form.Field
             name="logoImageUrl"
@@ -124,11 +146,13 @@ CampaignBasicsForm.propTypes = {
     dueBy: PropTypes.any,
     logoImageUrl: PropTypes.string,
     primaryColor: PropTypes.string,
-    introHtml: PropTypes.string
+    introHtml: PropTypes.string,
+    vanDatabaseMode: PropTypes.number
   }),
   onChange: PropTypes.func,
   onSubmit: PropTypes.func,
   saveLabel: PropTypes.string,
   saveDisabled: PropTypes.bool,
-  ensureComplete: PropTypes.bool
+  ensureComplete: PropTypes.bool,
+  vanIntegrationEnabled: PropTypes.bool
 };

@@ -88,6 +88,7 @@ const rootSchema = gql`
     textingHoursEnd: Int
     texterUIConfig: TexterUIConfigInput
     timezone: String
+    vanDatabaseMode: Int
     inventoryPhoneNumberCounts: [CampaignPhoneNumberInput!]
   }
 
@@ -305,6 +306,10 @@ const rootSchema = gql`
     updateContactTags(tags: [TagInput], campaignContactId: String!): String
     updateQuestionResponses(
       questionResponses: [QuestionResponseInput]
+      campaignContactId: String!
+    ): String
+    submitCannedResponse(
+      cannedResponse: CannedResponseSubmission
       campaignContactId: String!
     ): String
     startCampaign(id: String!): Campaign
