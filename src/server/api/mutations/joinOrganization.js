@@ -1,7 +1,7 @@
 import { GraphQLError } from "graphql/error";
 
 import { r, cacheableData } from "../../models";
-import { hasRole } from "../../../lib";
+import { hasRole, log } from "../../../lib";
 import { getConfig } from "../lib/config";
 
 export const joinOrganization = async (
@@ -76,7 +76,7 @@ export const joinOrganization = async (
       });
     } catch (error) {
       // Unexpected errors
-      console.log("error on userOrganization save", error);
+      log.error("error on userOrganization save", error);
       throw new GraphQLError("Error on saving user-organization connection");
     }
     await cacheableData.user.clearUser(user.id);

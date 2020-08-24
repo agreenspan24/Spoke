@@ -41,7 +41,7 @@ const defensivelyDeleteOldJobsForCampaignJobType = async job => {
         retries += 1;
         await doDelete();
       } else
-        console.error(`Could not delete campaign/jobType. Err: ${err.message}`);
+        log.error(`Could not delete campaign/jobType. Err: ${err.message}`);
     }
   };
 
@@ -61,7 +61,7 @@ const defensivelyDeleteJob = async job => {
         if (retries < 5) {
           retries += 1;
           await deleteJob();
-        } else console.error(`Could not delete job. Err: ${err.message}`);
+        } else log.error(`Could not delete job. Err: ${err.message}`);
       }
     };
 
@@ -215,7 +215,7 @@ export async function dispatchContactIngestLoad(job, organization) {
   const ingestMethod = rawIngestMethod(job.job_type.replace("ingest.", ""));
 
   if (!ingestMethod) {
-    console.error(
+    log.error(
       "dispatchContactIngestLoad not found. invalid job type",
       job.job_type
     );
@@ -316,7 +316,7 @@ export async function completeContactLoad(
       console.log("Deduplication result", campaignId, result);
     })
     .catch(err => {
-      console.error("Failed deduplication", campaignId, err);
+      log.error("Failed deduplication", campaignId, err);
     });
 
   const finalContactCount = await r.getCount(
@@ -916,18 +916,18 @@ export async function sendMessages(queryFunc, defaultStatus) {
           pastMessages.push(message.id);
           pastMessages = pastMessages.slice(-100); // keep the last 100
         } catch (err) {
-          console.error("Failed sendMessage", err);
+          log.error("Failed sendMessage", err);
         }
         trySendCount += 1;
       }
       await trx.commit();
     } catch (err) {
-      console.error("Error sending messages:", err);
+      log.error("Error sending messages:", err);
       await trx.rollback();
     }
   } catch (err) {
     console.log("sendMessages transaction errored:");
-    console.error(err);
+    log.error(err);
   }
   return trySendCount;
 }
@@ -1076,7 +1076,7 @@ export async function loadMessages(csvFile) {
             resolve(doneDid);
           })
           .catch(err => {
-            console.error("Error processing for CSV", err);
+            log.error("Error processing for CSV", err);
             reject(err);
           });
       }
@@ -1191,7 +1191,7 @@ async function prepareTwilioCampaign(campaign, organization, trx) {
       msgSrvSid
     );
   } catch (e) {
-    console.error("Failed to add numbers to messaging service", e);
+    log.error("Failed to add numbers to messaging service", e);
     await twilio.deleteMessagingService(organization, msgSrvSid);
     throw new Error("Failed to add numbers to messaging service");
   }
@@ -1261,7 +1261,7 @@ export async function startCampaignWithPhoneNumbers(job) {
       campaign: reloadedCampaign
     });
   } catch (e) {
-    console.error(`Job ${job.id} failed: ${e.message}`, e);
+    log.error(`Job ${job.id} failed: ${e.message}`, e);
   } finally {
     await defensivelyDeleteJob(job);
   }

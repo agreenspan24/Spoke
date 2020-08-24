@@ -1,6 +1,7 @@
 import { r, OptOut } from "../../models";
 import campaignCache from "./campaign";
 import contactUserNumberCache from "./contact-user-number";
+import { log } from "../../../lib";
 
 // STRUCTURE
 // SET by organization, so optout-<organization_id> has a <cell> key
@@ -93,11 +94,7 @@ const optOutCache = {
           }
         })
         .catch(err => {
-          console.log(
-            "optOutCache Error for organization",
-            organizationId,
-            err
-          );
+          log.error("optOutCache Error for organization", organizationId, err);
         });
     }
     const dbResult = await r

@@ -280,7 +280,8 @@ async function sendMessage(message, contact, trx, organization, campaign) {
         : { messagingServiceSid: messagingServiceSid }
     );
 
-    console.log("twilioMessage", messageParams);
+    log.info("twilioMessage", messageParams);
+
     if (APITEST) {
       let fakeErr = null;
       let fakeResponse = null;
@@ -344,8 +345,11 @@ export function postMessageSend(
   let hasError = false;
   if (err) {
     hasError = true;
-    log.error("Error sending message", err);
-    console.log("Error sending message", err);
+    log.error("ERROR SENDING MESSAGE", {
+      err,
+      message,
+      response
+    });
   }
   if (response) {
     changesToSave.service_id = response.sid;
@@ -413,7 +417,7 @@ export function postMessageSend(
         });
       })
       .catch(err => {
-        console.error(
+        log.error(
           "Failed message and contact update on twilio postMessageSend",
           err
         );
@@ -471,7 +475,7 @@ async function handleIncomingMessage(message) {
     !message.hasOwnProperty("Body") ||
     !message.hasOwnProperty("MessageSid")
   ) {
-    log.error(`This is not an incoming message: ${JSON.stringify(message)}`);
+    log.error("This is not an incoming message", message);
   }
 
   const { From, To, MessageSid } = message;
@@ -491,7 +495,9 @@ async function handleIncomingMessage(message) {
     const finalMessage = await convertMessagePartsToMessage([
       pendingMessagePart
     ]);
-    console.log("Contact reply", finalMessage, pendingMessagePart);
+
+    log.info("Contact Reply", finalMessage, pendingMessagePart);
+
     if (finalMessage) {
       if (message.spokeCreatedAt) {
         finalMessage.created_at = message.spokeCreatedAt;

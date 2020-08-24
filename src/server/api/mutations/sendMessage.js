@@ -1,7 +1,7 @@
 import { GraphQLError } from "graphql/error";
 
 import { Message, cacheableData } from "../../models";
-
+import { log } from "../../../lib";
 import { getSendBeforeTimeUtc } from "../../../lib/timezones";
 import { jobRunner } from "../../../extensions/job-runners";
 import { Tasks } from "../../../workers/tasks";
@@ -22,7 +22,7 @@ export const sendMessage = async (
     contact.assignment_id !== parseInt(message.assignmentId) ||
     campaign.is_archived
   ) {
-    console.error("Error: assignment changed");
+    log.error("Error: assignment changed");
     throw new GraphQLError({
       status: 400,
       message: "Your assignment has changed"

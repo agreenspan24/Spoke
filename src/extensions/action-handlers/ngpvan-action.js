@@ -1,6 +1,6 @@
 import { getConfig } from "../../server/api/lib/config";
 import Van from "../contact-loaders/ngpvan/util";
-
+import { log } from "../../lib";
 import httpRequest from "../../server/lib/http-request.js";
 
 export const name = "ngpvan-action";
@@ -49,7 +49,7 @@ export const postCanvassResponse = async (
     vanId = customFields.VanID || customFields.vanid;
   } catch (caughtException) {
     // eslint-disable-next-line no-console
-    console.error(
+    log.error(
       `Error parsing custom_fields for contact ${contact.id} ${caughtException}`
     );
     return {};
@@ -57,7 +57,7 @@ export const postCanvassResponse = async (
 
   if (!vanId) {
     // eslint-disable-next-line no-console
-    console.error(
+    log.error(
       `Cannot sync results to van for campaign_contact ${contact.id}. No VanID in custom fields`
     );
     return {};
@@ -104,7 +104,7 @@ export async function processAction({
     return postCanvassResponse(contact, organization, body, campaign);
   } catch (caughtError) {
     // eslint-disable-next-line no-console
-    console.error("Encountered exception in ngpvan.processAction", caughtError);
+    log.error("Encountered exception in ngpvan.processAction", caughtError);
     throw caughtError;
   }
 }
@@ -127,7 +127,7 @@ async function getContactTypeIdAndInputTypeId(organization, campaign) {
     .catch(error => {
       const message = `Error retrieving contact types from VAN ${error}`;
       // eslint-disable-next-line no-console
-      console.error(message);
+      log.error(message);
       throw new Error(message);
     });
 
@@ -148,7 +148,7 @@ async function getContactTypeIdAndInputTypeId(organization, campaign) {
     .catch(error => {
       const message = `Error retrieving input types from VAN ${error}`;
       // eslint-disable-next-line no-console
-      console.error(message);
+      log.error(message);
       throw new Error(message);
     });
 
@@ -169,7 +169,7 @@ async function getContactTypeIdAndInputTypeId(organization, campaign) {
     ));
     if (!contactTypeId) {
       // eslint-disable-next-line no-console
-      console.error(`Contact type ${contactType} not returned by VAN`);
+      log.error(`Contact type ${contactType} not returned by VAN`);
     }
 
     const inputTypeName = getConfig("NGP_VAN_INPUT_TYPE", organization);
@@ -179,7 +179,7 @@ async function getContactTypeIdAndInputTypeId(organization, campaign) {
       inputTypeId = inputType.inputTypeId || -1;
       if (inputTypeId === -1) {
         // eslint-disable-next-line no-console
-        console.error(`Input type ${inputType} not returned by VAN`);
+        log.error(`Input type ${inputType} not returned by VAN`);
       }
     }
 
@@ -190,7 +190,7 @@ async function getContactTypeIdAndInputTypeId(organization, campaign) {
     }
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error(
+    log.error(
       `Error loading canvass/contactTypes or canvass/inputTypes from VAN  ${error}`
     );
   }
@@ -235,7 +235,7 @@ export async function getClientChoiceData(organization, campaign) {
     .catch(error => {
       const message = `Error retrieving survey questions from VAN ${error}`;
       // eslint-disable-next-line no-console
-      console.error(message);
+      log.error(message);
       throw new Error(message);
     });
 
@@ -256,7 +256,7 @@ export async function getClientChoiceData(organization, campaign) {
     .catch(error => {
       const message = `Error retrieving activist codes from VAN ${error}`;
       // eslint-disable-next-line no-console
-      console.error(message);
+      log.error(message);
       throw new Error(message);
     });
 
@@ -277,7 +277,7 @@ export async function getClientChoiceData(organization, campaign) {
     .catch(error => {
       const message = `Error retrieving canvass result codes from VAN ${error}`;
       // eslint-disable-next-line no-console
-      console.error(message);
+      log.error(message);
       throw new Error(message);
     });
 
@@ -297,7 +297,7 @@ export async function getClientChoiceData(organization, campaign) {
     ]);
   } catch (caughtError) {
     // eslint-disable-next-line no-console
-    console.error(
+    log.error(
       `Error loading surveyQuestions, activistCodes or canvass/resultCodes from VAN  ${caughtError}`
     );
     return {
