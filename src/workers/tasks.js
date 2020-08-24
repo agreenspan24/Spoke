@@ -3,6 +3,7 @@
 // See src/extensions/job-runners/README.md for more details
 import serviceMap from "../server/api/lib/services";
 import * as ActionHandlers from "../extensions/action-handlers";
+import { log } from "../lib";
 import { cacheableData, CannedResponseSubmission } from "../server/models";
 
 export const Tasks = Object.freeze({
@@ -120,11 +121,11 @@ const startCampaignCache = async ({ campaign, organization }) => {
     .loadMany(campaign, organization, {})
     .then(() => {
       // eslint-disable-next-line no-console
-      console.log("FINISHED contact loadMany", campaign.id);
+      log.info("FINISHED contact loadMany", campaign.id);
     })
     .catch(err => {
       // eslint-disable-next-line no-console
-      console.error("ERROR contact loadMany", campaign.id, err, campaign);
+      log.error("ERROR contact loadMany", campaign.id, err, campaign);
     });
   const loadOptOuts = cacheableData.optOut.loadMany(organization.id);
 
@@ -143,7 +144,13 @@ const taskMap = Object.freeze({
 
 export const invokeTaskFunction = async (taskName, payload) => {
   if (taskName in taskMap) {
-    await taskMap[taskName](payload);
+    try {
+      await taskMap[taskName](payload);
+    } catch (err) {
+      log.error("Error Processing Task", err);
+
+      throw err;
+    }
   } else {
     throw new Error(`Task of type ${taskName} not found`);
   }

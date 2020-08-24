@@ -3,7 +3,7 @@ import GraphQLJSON from "graphql-type-json";
 import { GraphQLError } from "graphql/error";
 import isUrl from "is-url";
 
-import { gzip, makeTree, getHighestRole } from "../../lib";
+import { gzip, makeTree, getHighestRole, log } from "../../lib";
 import { capitalizeWord } from "./lib/utils";
 import twilio from "./lib/twilio";
 import ownedPhoneNumber from "./lib/owned-phone-number";
@@ -278,7 +278,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
           ingest_success: null
         });
     } else {
-      console.error("ingestMethod unavailable", campaign.ingestMethod);
+      log.error("ingestMethod unavailable", campaign.ingestMethod);
     }
   }
 

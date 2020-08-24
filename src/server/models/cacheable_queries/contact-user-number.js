@@ -1,4 +1,6 @@
 import { r } from "../../models";
+import { log } from "../../../lib";
+import { getConfig } from "../../api/lib/config";
 
 // Datastructure:
 // * regular GET/SET with JSON ordered list of the objects {id,title,text}
@@ -51,10 +53,22 @@ const contactUserNumberCache = {
 
     await r.knex("contact_user_number").insert(contactUserNumber);
 
-    await r
+    const [ownedPhoneNumber] = await r
       .knex("owned_phone_number")
       .where({ phone_number: userNumber })
+      .returning("*")
       .increment("stuck_contacts", 1);
+
+    if (
+      ownedPhoneNumber &&
+      ownedPhoneNumber.stuck_contacts ==
+        parseInt(getConfig("CONTACTS_PER_PHONE_NUMBER"))
+    ) {
+      log.error(
+        "Owned Phone Number crossed stuck_contacts limit",
+        ownedPhoneNumber
+      );
+    }
 
     if (r.redis) {
       const cacheKey = getCacheKey(organizationId, contactNumber);

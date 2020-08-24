@@ -294,7 +294,7 @@ export async function dispatchProcesses(event, dispatcher, eventCallback) {
       toDispatch[p]()
         .then()
         .catch(err => {
-          console.error("Process Error", p, err);
+          log.error("Process Error", p, err);
         });
     }
   }

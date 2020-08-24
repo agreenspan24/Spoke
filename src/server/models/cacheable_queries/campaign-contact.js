@@ -4,6 +4,7 @@ import optOutCache from "./opt-out";
 import organizationCache from "./organization";
 import { modelWithExtraProps } from "./lib";
 import { Writable } from "stream";
+import { log } from "../../../lib";
 
 // <campaignContactId>
 //   - assignmentId
@@ -323,7 +324,7 @@ const campaignContactCache = {
             next();
           },
           err => {
-            console.error("FAILED CONTACT CACHE SAVE", err);
+            log.error("FAILED CONTACT CACHE SAVE", err);
             stream.end();
             next();
           }
@@ -500,7 +501,7 @@ const campaignContactCache = {
         //await updateAssignmentContact(contact, newStatus);
       }
     } catch (err) {
-      console.log("contact updateStatus Error", newStatus, contact, err);
+      log.error("contact updateStatus Error", newStatus, contact, err);
     }
   }
 };
