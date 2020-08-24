@@ -314,11 +314,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
 
   if (campaign.hasOwnProperty("cannedResponses")) {
     changed = true;
-    await cacheableData.cannedResponse.save(
-      campaign.cannedResponses,
-      id,
-      user.id
-    );
+    await cacheableData.cannedResponse.save(campaign.cannedResponses, id);
   }
 
   if (campaign.hasOwnProperty("inventoryPhoneNumberCounts")) {
@@ -846,8 +842,7 @@ const rootMutations = {
 
       await cacheableData.cannedResponse.save(
         originalCannedResponses,
-        newCampaignId,
-        user.id
+        newCampaignId
       );
 
       return newCampaign;
