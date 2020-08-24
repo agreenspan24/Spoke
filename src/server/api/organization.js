@@ -227,7 +227,10 @@ export const resolvers = {
         let messagingServiceConfigured;
         if (
           manualMessagingServicesEnabled(organization) ||
-          campaignNumbersEnabled(organization)
+          campaignNumbersEnabled(organization) ||
+          getConfig("SKIP_TWILIO_MESSAGING_SERVICE", organization, {
+            truthy: true
+          })
         ) {
           messagingServiceConfigured = true;
         } else {
