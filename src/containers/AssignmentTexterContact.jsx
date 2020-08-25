@@ -181,7 +181,7 @@ export class AssignmentTexterContact extends React.Component {
       } else {
         await this.props.mutations.sendMessage(message, contact.id);
         await this.handleSubmitSurveys();
-        await this.handleSubmitCannedResponse();
+        await this.handleSubmitCannedResponse(message);
       }
       this.props.onFinishContact(contact.id);
     } catch (e) {
@@ -258,14 +258,17 @@ export class AssignmentTexterContact extends React.Component {
     }
   };
 
-  handleSubmitCannedResponse = async () => {
+  handleSubmitCannedResponse = async message => {
     if (!this.state.cannedResponseScript) {
       return; // no canned response submission
     }
 
     const { contact } = this.props;
     await this.props.mutations.submitCannedResponse(
-      this.state.cannedResponseScript,
+      {
+        ...this.state.cannedResponseScript,
+        text: message
+      },
       contact.id
     );
   };
@@ -410,6 +413,7 @@ export class AssignmentTexterContact extends React.Component {
           messageStatusFilter={this.props.messageStatusFilter}
           disabled={this.state.disabled}
           enabledSideboxes={this.props.enabledSideboxes}
+          cannedResponseScript={this.state.cannedResponseScript}
           onMessageFormSubmit={this.handleMessageFormSubmit}
           onOptOut={this.handleOptOut}
           onUpdateTags={this.handleUpdateTags}
