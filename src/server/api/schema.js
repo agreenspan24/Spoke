@@ -227,7 +227,10 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
 
   const features = getFeatures(origCampaignRecord);
 
-  if (features.van_database_mode != vanDatabaseMode) {
+  if (
+    typeof vanDatabaseMode !== "undefined" &&
+    features.van_database_mode != vanDatabaseMode
+  ) {
     Object.assign(features, {
       van_database_mode: vanDatabaseMode
     });
