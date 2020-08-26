@@ -228,7 +228,10 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
 
   const features = getFeatures(origCampaignRecord);
 
-  if (features.van_database_mode != vanDatabaseMode) {
+  if (
+    typeof vanDatabaseMode !== "undefined" &&
+    features.van_database_mode != vanDatabaseMode
+  ) {
     Object.assign(features, {
       van_database_mode: vanDatabaseMode
     });
@@ -311,11 +314,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
 
   if (campaign.hasOwnProperty("cannedResponses")) {
     changed = true;
-    await cacheableData.cannedResponse.save(
-      campaign.cannedResponses,
-      id,
-      user.id
-    );
+    await cacheableData.cannedResponse.save(campaign.cannedResponses, id);
   }
 
   if (campaign.hasOwnProperty("inventoryPhoneNumberCounts")) {
@@ -842,8 +841,7 @@ const rootMutations = {
 
       await cacheableData.cannedResponse.save(
         originalCannedResponses,
-        newCampaignId,
-        user.id
+        newCampaignId
       );
 
       return newCampaign;
