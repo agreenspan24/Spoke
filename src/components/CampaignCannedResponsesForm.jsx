@@ -43,7 +43,13 @@ export default class CampaignCannedResponsesForm extends React.Component {
     cannedResponses: yup.array().of(
       yup.object({
         title: yup.string(),
-        text: yup.string()
+        text: yup.string(),
+        actions: yup.array().of(
+          yup.object({
+            label: yup.string(),
+            value: yup.string()
+          })
+        )
       })
     )
   });
@@ -87,6 +93,7 @@ export default class CampaignCannedResponsesForm extends React.Component {
                 this.setState({ showForm: false });
               }}
               customFields={this.props.customFields}
+              availableActions={this.props.availableActions}
             />
           </div>
         </div>
@@ -110,13 +117,36 @@ export default class CampaignCannedResponsesForm extends React.Component {
   }
 
   listItems(cannedResponses) {
+    const availableActions = this.props.availableActions;
+
     const listItems = cannedResponses.map(response => (
       <ListItem
         {...dataTest("cannedResponse")}
         value={response.text}
         key={response.id}
         primaryText={response.title}
-        secondaryText={response.text}
+        secondaryText={
+          <div>
+            {response.actions && response.actions.length ? (
+              <div>
+                {`Actions: ${response.actions
+                  .map(a => {
+                    const parsed = JSON.parse(a.actionData).label;
+                    const action = availableActions.find(
+                      x => x.name == a.action
+                    );
+                    return `${(action || {}).displayName}${
+                      parsed ? ` (${parsed})` : ""
+                    }`;
+                  })
+                  .join(", ")}`}
+              </div>
+            ) : (
+              ""
+            )}
+            <div>{response.text}</div>
+          </div>
+        }
         rightIconButton={
           <span>
             <IconButton
@@ -196,5 +226,6 @@ CampaignCannedResponsesForm.propTypes = {
   onSubmit: type.func,
   onChange: type.func,
   formValues: type.object,
-  customFields: type.array
+  customFields: type.array,
+  availableActions: type.array
 };

@@ -1,9 +1,7 @@
 import thinky from "./thinky";
 const type = thinky.type;
 import { requiredString, timestamp, optionalString } from "./custom-types";
-
-import Campaign from "./campaign";
-import User from "./user";
+import CannedResponseAction from "./canned-response-action";
 
 const CannedResponse = thinky.createModel(
   "canned_response",

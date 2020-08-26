@@ -313,27 +313,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
 
   if (campaign.hasOwnProperty("cannedResponses")) {
     changed = true;
-    const cannedResponses = campaign.cannedResponses;
-    const convertedResponses = [];
-    for (let index = 0; index < cannedResponses.length; index++) {
-      const response = cannedResponses[index];
-      convertedResponses.push({
-        ...response,
-        campaign_id: id,
-        id: undefined
-      });
-    }
-
-    await r
-      .table("canned_response")
-      .getAll(id, { index: "campaign_id" })
-      .filter({ user_id: "" })
-      .delete();
-    await CannedResponse.save(convertedResponses);
-    await cacheableData.cannedResponse.clearQuery({
-      userId: "",
-      campaignId: id
-    });
+    await cacheableData.cannedResponse.save(campaign.cannedResponses, id);
   }
 
   if (campaign.hasOwnProperty("inventoryPhoneNumberCounts")) {
@@ -854,19 +834,14 @@ const rootMutations = {
         {}
       );
 
-      const originalCannedResponses = await r
-        .knex("canned_response")
-        .where({ campaign_id: oldCampaignId });
-      const copiedCannedResponsePromises = originalCannedResponses.map(
-        response => {
-          return new CannedResponse({
-            campaign_id: newCampaignId,
-            title: response.title,
-            text: response.text
-          }).save();
-        }
+      const originalCannedResponses = await cacheableData.cannedResponse.query({
+        campaignId: campaign.id
+      });
+
+      await cacheableData.cannedResponse.save(
+        originalCannedResponses,
+        newCampaignId
       );
-      await Promise.all(copiedCannedResponsePromises);
 
       return newCampaign;
     },

@@ -80,6 +80,10 @@ const campaignInfoFragment = `
     id
     title
     text
+    actions {
+      action
+      actionData
+    }
   }
   ingestMethodsAvailable {
     name
@@ -480,7 +484,8 @@ export class AdminCampaignEdit extends React.Component {
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: true,
         extraProps: {
-          customFields: this.props.campaignData.campaign.customFields
+          customFields: this.props.campaignData.campaign.customFields,
+          availableActions: this.props.campaignData.campaign.availableActions
         }
       },
       {

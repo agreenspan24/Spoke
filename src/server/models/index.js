@@ -13,6 +13,7 @@ import QuestionResponse from "./question-response";
 import OptOut from "./opt-out";
 import JobRequest from "./job-request";
 import Invite from "./invite";
+import CannedResponseAction from "./canned-response-action";
 import CannedResponse from "./canned-response";
 import UserOrganization from "./user-organization";
 import UserCell from "./user-cell";
@@ -141,6 +142,7 @@ export {
   OptOut,
   Organization,
   PendingMessagePart,
+  CannedResponseAction,
   CannedResponse,
   QuestionResponse,
   UserCell,
