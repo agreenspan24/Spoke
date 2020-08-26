@@ -52,7 +52,6 @@ export const postMessageSave = async ({ contact, organization, campaign }) => {
 
     // First message not from the contact will be initial text, the second is the initial reply since the user can only send one initial text.
     if (messages.filter(m => !m.is_from_contact).length === 2) {
-      console.log({ initialReplyCanvassResult });
       canvassResult = initialReplyCanvassResult;
     }
   }
