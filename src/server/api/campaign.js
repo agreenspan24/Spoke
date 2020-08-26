@@ -705,7 +705,9 @@ export const resolvers = {
         !campaign.messageservice_sid
       );
     },
-    vanDatabaseMode: campaign =>
-      (campaign.features || {}).van_database_mode || null
+    vanDatabaseMode: campaign => {
+      const vanDatabaseMode = (campaign.features || {}).van_database_mode;
+      return vanDatabaseMode == undefined ? null : vanDatabaseMode;
+    }
   }
 };
