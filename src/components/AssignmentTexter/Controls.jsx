@@ -56,7 +56,6 @@ export class AssignmentTexterContactControls extends React.Component {
       sideboxCloses: {},
       sideboxOpens: {},
       messageText: this.getStartingMessageText(),
-      cannedResponseScript: null,
       optOutDialogOpen: false,
       currentShortcutSpace: 0,
       messageFocus: false,
@@ -230,20 +229,23 @@ export class AssignmentTexterContactControls extends React.Component {
 
   handleCannedResponseChange = cannedResponseScript => {
     const currentCannedResponseId =
-      this.state.cannedResponseScript && this.state.cannedResponseScript.id;
+      this.props.cannedResponseScript && this.props.cannedResponseScript.id;
 
     if (cannedResponseScript.id === currentCannedResponseId) {
       // identical means we're cancelling it -- so it can be toggled
       this.setState({
-        messageText: "",
-        cannedResponseScript: null
+        messageText: ""
       });
+
+      this.props.onCannedResponseChange({ cannedResponseScript: null });
     } else {
       this.handleChangeScript(cannedResponseScript.text);
+
       this.setState({
-        cannedResponseScript,
         answerPopoverOpen: false
       });
+
+      this.props.onCannedResponseChange({ cannedResponseScript });
     }
   };
 
@@ -297,6 +299,7 @@ export class AssignmentTexterContactControls extends React.Component {
         // this is because responses are sent to the server on many other actions
         // so any of those can trigger a question response update
         this.props.onQuestionResponseChange({ questionResponses });
+        this.props.onCannedResponseChange({ cannedResponseScript: null });
       }
     );
   };
@@ -305,8 +308,7 @@ export class AssignmentTexterContactControls extends React.Component {
     const messageText = this.props.getMessageTextFromScript(newScript) || "";
 
     this.setState({
-      messageText,
-      cannedResponseScript: null
+      messageText
     });
   };
 
@@ -391,12 +393,8 @@ export class AssignmentTexterContactControls extends React.Component {
   };
 
   renderSurveySection() {
-    const { assignment, campaign, contact } = this.props;
-    const {
-      answerPopoverOpen,
-      questionResponses,
-      cannedResponseScript
-    } = this.state;
+    const { assignment, campaign, contact, cannedResponseScript } = this.props;
+    const { answerPopoverOpen, questionResponses } = this.state;
     const { messages } = contact;
 
     const availableInteractionSteps = getAvailableInteractionSteps(
@@ -637,12 +635,11 @@ export class AssignmentTexterContactControls extends React.Component {
   }
 
   renderMessagingRowReplyShortcuts() {
-    const { assignment, campaign } = this.props;
+    const { assignment, campaign, cannedResponseScript } = this.props;
     const {
       availableSteps,
       questionResponses,
-      currentInteractionStep,
-      cannedResponseScript
+      currentInteractionStep
     } = this.state;
 
     let joinedLength = 0;
@@ -999,6 +996,7 @@ AssignmentTexterContactControls.propTypes = {
   navigationToolbarChildren: PropTypes.object,
   messageStatusFilter: PropTypes.string,
   enabledSideboxes: PropTypes.arrayOf(PropTypes.object),
+  cannedResponseScript: PropTypes.object,
 
   // parent config/callbacks
   startingMessage: PropTypes.string,
@@ -1006,6 +1004,7 @@ AssignmentTexterContactControls.propTypes = {
   onOptOut: PropTypes.func,
   onUpdateTags: PropTypes.func,
   onQuestionResponseChange: PropTypes.func,
+  onCannedResponseChange: PropTypes.func,
   onCreateCannedResponse: PropTypes.func,
   onExitTexter: PropTypes.func,
   onEditStatus: PropTypes.func,

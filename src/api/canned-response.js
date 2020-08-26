@@ -18,6 +18,14 @@ export const schema = `
     actions: [CannedResponseActionInput]
   }
 
+  input CannedResponseSubmission {
+    id: ID
+    title: String
+    text: String
+    isUserCreated: Boolean
+    actions: [CannedResponseActionInput]
+  }
+
   type CannedResponse {
     id: ID
     title: String

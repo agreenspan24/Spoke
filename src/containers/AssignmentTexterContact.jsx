@@ -181,6 +181,7 @@ export class AssignmentTexterContact extends React.Component {
       } else {
         await this.props.mutations.sendMessage(message, contact.id);
         await this.handleSubmitSurveys();
+        await this.handleSubmitCannedResponse(message);
       }
       this.props.onFinishContact(contact.id);
     } catch (e) {
@@ -193,6 +194,10 @@ export class AssignmentTexterContact extends React.Component {
 
   handleQuestionResponseChange = ({ questionResponses }) => {
     this.setState({ questionResponses });
+  };
+
+  handleCannedResponseChange = ({ cannedResponseScript }) => {
+    this.setState({ cannedResponseScript });
   };
 
   handleCreateCannedResponse = async ({ cannedResponse }) => {
@@ -251,6 +256,21 @@ export class AssignmentTexterContact extends React.Component {
         contact.id
       );
     }
+  };
+
+  handleSubmitCannedResponse = async message => {
+    if (!this.state.cannedResponseScript) {
+      return; // no canned response submission
+    }
+
+    const { contact } = this.props;
+    await this.props.mutations.submitCannedResponse(
+      {
+        ...this.state.cannedResponseScript,
+        text: message
+      },
+      contact.id
+    );
   };
 
   handleUpdateTags = async tags => {
@@ -393,10 +413,12 @@ export class AssignmentTexterContact extends React.Component {
           messageStatusFilter={this.props.messageStatusFilter}
           disabled={this.state.disabled}
           enabledSideboxes={this.props.enabledSideboxes}
+          cannedResponseScript={this.state.cannedResponseScript}
           onMessageFormSubmit={this.handleMessageFormSubmit}
           onOptOut={this.handleOptOut}
           onUpdateTags={this.handleUpdateTags}
           onQuestionResponseChange={this.handleQuestionResponseChange}
+          onCannedResponseChange={this.handleCannedResponseChange}
           onCreateCannedResponse={this.handleCreateCannedResponse}
           onExitTexter={this.props.onExitTexter}
           onEditStatus={this.handleEditStatus}
@@ -481,6 +503,20 @@ const mutations = {
       }
     `,
     variables: { cannedResponse }
+  }),
+  submitCannedResponse: ownProps => (cannedResponse, campaignContactId) => ({
+    mutation: gql`
+      mutation submitCannedResponse(
+        $cannedResponse: CannedResponseSubmission!
+        $campaignContactId: String!
+      ) {
+        submitCannedResponse(
+          cannedResponse: $cannedResponse
+          campaignContactId: $campaignContactId
+        )
+      }
+    `,
+    variables: { cannedResponse, campaignContactId }
   }),
   editCampaignContactMessageStatus: ownProps => (
     messageStatus,

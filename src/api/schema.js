@@ -308,6 +308,10 @@ const rootSchema = gql`
       questionResponses: [QuestionResponseInput]
       campaignContactId: String!
     ): String
+    submitCannedResponse(
+      cannedResponse: CannedResponseSubmission
+      campaignContactId: String!
+    ): String
     startCampaign(id: String!): Campaign
     archiveCampaign(id: String!): Campaign
     archiveCampaigns(ids: [String!]): [Campaign]
