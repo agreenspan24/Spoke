@@ -259,16 +259,37 @@ export class AssignmentTexterContact extends React.Component {
   };
 
   handleSubmitCannedResponse = async message => {
-    if (!this.state.cannedResponseScript) {
+    if (
+      !this.state.cannedResponseScript &&
+      !this.props.campaign.firstReplyAction
+    ) {
       return; // no canned response submission
     }
 
-    const { contact } = this.props;
-    await this.props.mutations.submitCannedResponse(
-      {
+    let cannedResponseScript;
+    if (this.state.cannedResponseScript) {
+      cannedResponseScript = {
         ...this.state.cannedResponseScript,
         text: message
-      },
+      };
+    } else if (this.props.campaign.firstReplyAction) {
+      const { messages } = this.props.contact || [];
+
+      // Mark contact with first reply action on only the first reply (the second message)
+      if (messages.filter(m => !m.isFromContact).length == 1) {
+        cannedResponseScript = this.state.cannedResponseScript || {
+          title: "Default Action",
+          text: message,
+          actions: [this.props.campaign.firstReplyAction]
+        };
+      }
+    }
+
+    if (!cannedResponseScript) return;
+
+    const { contact } = this.props;
+    await this.props.mutations.submitCannedResponse(
+      cannedResponseScript,
       contact.id
     );
   };
