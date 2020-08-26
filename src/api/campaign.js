@@ -86,6 +86,11 @@ export const schema = gql`
     count: Int!
   }
 
+  type SubmitAction {
+    action: String
+    actionData: String
+  }
+
   type Campaign {
     id: ID
     organization: Organization
@@ -132,6 +137,7 @@ export const schema = gql`
     phoneNumbers: [String]
     vanDatabaseMode: Int
     inventoryPhoneNumberCounts: [CampaignPhoneNumberCount]
+    firstReplyAction: SubmitAction
   }
 
   type CampaignsList {
