@@ -32,40 +32,16 @@ export const postMessageSave = async ({ contact, organization, campaign }) => {
     return {};
   }
 
-  const initialReplyCanvassResult = getConfig(
-    "NGP_VAN_INITIAL_REPLY_CANVASS_RESULT",
-    organization
-  );
-
-  let canvassResult;
-  if (contact.message_status === "needsMessage") {
-    canvassResult =
-      getConfig("NGP_VAN_INITIAL_TEXT_CANVASS_RESULT", organization) ||
-      DEFAULT_NGP_VAN_INITIAL_TEXT_CANVASS_RESULT;
-  } else if (
-    initialReplyCanvassResult &&
-    contact.message_status === "needsResponse"
-  ) {
-    const messages =
-      (await cacheableData.message.query({ campaignContactId: contact.id })) ||
-      [];
-
-    // First message not from the contact will be initial text, the second is the initial reply since the user can only send one initial text.
-    if (messages.filter(m => !m.is_from_contact).length === 2) {
-      canvassResult = initialReplyCanvassResult;
-    }
+  if (contact.message_status !== "needsMessage") {
+    return {};
   }
 
-  const clientChoiceData = await getActionChoiceData(
-    Van,
-    organization,
-    campaign
-  );
+  const clientChoiceData = await getActionChoiceData(Van, organization);
   const initialTextResult =
     getConfig("NGP_VAN_INITIAL_TEXT_CANVASS_RESULT", organization) ||
     DEFAULT_NGP_VAN_INITIAL_TEXT_CANVASS_RESULT;
 
-  const texted = clientChoiceData.find(ccd => ccd.name === canvassResult);
+  const texted = clientChoiceData.find(ccd => ccd.name === initialTextResult);
   const body = JSON.parse(texted.details);
 
   return Van.postCanvassResponse(contact, organization, body, campaign)
