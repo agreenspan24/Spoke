@@ -181,7 +181,7 @@ export class AssignmentTexterContact extends React.Component {
       } else {
         await this.props.mutations.sendMessage(message, contact.id);
         await this.handleSubmitSurveys();
-        await this.handleSubmitCannedResponse();
+        await this.handleSubmitCannedResponse(message);
       }
       this.props.onFinishContact(contact.id);
     } catch (e) {
@@ -258,14 +258,38 @@ export class AssignmentTexterContact extends React.Component {
     }
   };
 
-  handleSubmitCannedResponse = async () => {
-    if (!this.state.cannedResponseScript) {
+  handleSubmitCannedResponse = async message => {
+    if (
+      !this.state.cannedResponseScript &&
+      !this.props.campaign.firstReplyAction
+    ) {
       return; // no canned response submission
     }
 
+    let cannedResponseScript;
+    if (this.state.cannedResponseScript) {
+      cannedResponseScript = {
+        ...this.state.cannedResponseScript,
+        text: message
+      };
+    } else if (this.props.campaign.firstReplyAction) {
+      const { messages } = this.props.contact || [];
+
+      // Mark contact with first reply action on only the first reply (the second message)
+      if (messages.filter(m => !m.isFromContact).length == 1) {
+        cannedResponseScript = this.state.cannedResponseScript || {
+          title: "Default Action",
+          text: message,
+          actions: [this.props.campaign.firstReplyAction]
+        };
+      }
+    }
+
+    if (!cannedResponseScript) return;
+
     const { contact } = this.props;
     await this.props.mutations.submitCannedResponse(
-      this.state.cannedResponseScript,
+      cannedResponseScript,
       contact.id
     );
   };
@@ -410,6 +434,7 @@ export class AssignmentTexterContact extends React.Component {
           messageStatusFilter={this.props.messageStatusFilter}
           disabled={this.state.disabled}
           enabledSideboxes={this.props.enabledSideboxes}
+          cannedResponseScript={this.state.cannedResponseScript}
           onMessageFormSubmit={this.handleMessageFormSubmit}
           onOptOut={this.handleOptOut}
           onUpdateTags={this.handleUpdateTags}

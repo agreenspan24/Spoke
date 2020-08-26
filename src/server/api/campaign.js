@@ -512,6 +512,57 @@ export const resolvers = {
         campaignId: campaign.id
       });
     },
+    firstReplyAction: async (campaign, _, { user, loaders }) => {
+      await accessRequired(user, campaign.organization_id, "TEXTER", true);
+      const organization = await loaders.organization.load(
+        campaign.organization_id
+      );
+
+      const firstReplyActionName = getConfig("FIRST_REPLY_ACTION_NAME");
+      if (firstReplyActionName) {
+        const availableHandlers = await getAvailableActionHandlers(
+          organization,
+          user,
+          campaign
+        );
+
+        const firstReplyActionHandler = availableHandlers.find(
+          h => h.name == firstReplyActionName
+        );
+
+        if (firstReplyActionHandler) {
+          const actionChoiceData = await getActionChoiceData(
+            firstReplyActionHandler,
+            organization,
+            campaign,
+            user,
+            loaders
+          );
+
+          const firstReplyActionDataName = getConfig(
+            "FIRST_REPLY_ACTION_DATA_NAME"
+          );
+          let firstReplyActionData =
+            firstReplyActionDataName &&
+            actionChoiceData &&
+            actionChoiceData.find(c => c.name == firstReplyActionDataName);
+
+          const firstReplyAction = {
+            action: firstReplyActionName,
+            actionData: firstReplyActionData
+              ? JSON.stringify({
+                  label: firstReplyActionData.name,
+                  value: firstReplyActionData.details
+                })
+              : null
+          };
+
+          return firstReplyAction;
+        }
+      }
+
+      return null;
+    },
     texterUIConfig: async (campaign, _, { user, loaders }) => {
       await accessRequired(user, campaign.organization_id, "TEXTER", true);
       const organization = await loaders.organization.load(
