@@ -259,18 +259,44 @@ export class AssignmentTexterContact extends React.Component {
   };
 
   handleSubmitCannedResponse = async message => {
-    if (!this.state.cannedResponseScript) {
+    if (
+      !this.state.cannedResponseScript &&
+      !this.props.campaign.firstReplyAction
+    ) {
       return; // no canned response submission
     }
 
-    const { contact } = this.props;
-    await this.props.mutations.submitCannedResponse(
-      {
-        ...this.state.cannedResponseScript,
-        text: message
-      },
-      contact.id
-    );
+    // Mark contact with first reply action on only the first reply (the second message)
+    const { id, messages } = this.props.contact;
+    const shouldApplyFirstReplyAction =
+      this.props.campaign.firstReplyAction &&
+      messages &&
+      messages.filter(m => !m.isFromContact).length == 1;
+
+    let cannedResponseScript = {
+      text: message,
+      actions: []
+    };
+
+    if (this.state.cannedResponseScript) {
+      cannedResponseScript.title = this.state.cannedResponseScript.title;
+      cannedResponseScript.actions =
+        this.state.cannedResponseScript.actions || [];
+    }
+
+    if (shouldApplyFirstReplyAction) {
+      cannedResponseScript.title =
+        cannedResponseScript.title || "Default Action";
+
+      // Apply first reply action if message isn't a canned response or if the CR didn't have actions
+      cannedResponseScript.actions = cannedResponseScript.actions.length
+        ? cannedResponseScript.actions
+        : [this.props.campaign.firstReplyAction];
+    }
+
+    if (!cannedResponseScript.title) return;
+
+    await this.props.mutations.submitCannedResponse(cannedResponseScript, id);
   };
 
   handleUpdateTags = async tags => {
