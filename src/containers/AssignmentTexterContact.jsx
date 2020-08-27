@@ -266,32 +266,37 @@ export class AssignmentTexterContact extends React.Component {
       return; // no canned response submission
     }
 
-    let cannedResponseScript;
-    if (this.state.cannedResponseScript) {
-      cannedResponseScript = {
-        ...this.state.cannedResponseScript,
-        text: message
-      };
-    } else if (this.props.campaign.firstReplyAction) {
-      const { messages } = this.props.contact || [];
+    // Mark contact with first reply action on only the first reply (the second message)
+    const { id, messages } = this.props.contact;
+    const shouldApplyFirstReplyAction =
+      this.props.campaign.firstReplyAction &&
+      messages &&
+      messages.filter(m => !m.isFromContact).length == 1;
 
-      // Mark contact with first reply action on only the first reply (the second message)
-      if (messages.filter(m => !m.isFromContact).length == 1) {
-        cannedResponseScript = this.state.cannedResponseScript || {
-          title: "Default Action",
-          text: message,
-          actions: [this.props.campaign.firstReplyAction]
-        };
-      }
+    let cannedResponseScript = {
+      text: message,
+      actions: []
+    };
+
+    if (this.state.cannedResponseScript) {
+      cannedResponseScript.title = this.state.cannedResponseScript.title;
+      cannedResponseScript.actions =
+        this.state.cannedResponseScript.actions || [];
     }
 
-    if (!cannedResponseScript) return;
+    if (shouldApplyFirstReplyAction) {
+      cannedResponseScript.title =
+        cannedResponseScript.title || "Default Action";
 
-    const { contact } = this.props;
-    await this.props.mutations.submitCannedResponse(
-      cannedResponseScript,
-      contact.id
-    );
+      // Apply first reply action if message isn't a canned response or if the CR didn't have actions
+      cannedResponseScript.actions = cannedResponseScript.actions.length
+        ? cannedResponseScript.actions
+        : [this.props.campaign.firstReplyAction];
+    }
+
+    if (!cannedResponseScript.title) return;
+
+    await this.props.mutations.submitCannedResponse(cannedResponseScript, id);
   };
 
   handleUpdateTags = async tags => {
