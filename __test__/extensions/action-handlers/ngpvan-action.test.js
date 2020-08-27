@@ -2,6 +2,7 @@ import {
   validateActionHandler,
   validateActionHandlerWithClientChoices
 } from "../../../src/extensions/action-handlers";
+import { log } from "../../../src/lib";
 import nock from "nock";
 
 const NgpVanAction = require("../../../src/extensions/action-handlers/ngpvan-action");
@@ -1035,8 +1036,7 @@ describe("ngpvn-action", () => {
       postPeopleCanvassResponsesNock = makePostPeopleCanvassResponsesNock();
 
       await NgpVanAction.processAction({
-        questionResponse,
-        interactionStep,
+        action_data: interactionStep.answer_actions_data,
         contact,
         campaign,
         organization,
@@ -1055,8 +1055,7 @@ describe("ngpvn-action", () => {
         let error;
         try {
           await NgpVanAction.processAction({
-            questionResponse,
-            interactionStep,
+            action_data: interactionStep.answer_actions_data,
             contact,
             campaign,
             organization,
@@ -1104,8 +1103,7 @@ describe("ngpvn-action", () => {
         let error;
         try {
           await NgpVanAction.processAction({
-            questionResponse,
-            interactionStep,
+            action_data: interactionStep.answer_actions_data,
             unusedCampaignContactId,
             contact,
             campaign,
@@ -1176,7 +1174,7 @@ describe("ngpvn-action", () => {
 
     describe("when custom_fields fails to parse", () => {
       beforeEach(async () => {
-        jest.spyOn(console, "error");
+        jest.spyOn(log, "error");
         contact = {
           id: 3,
           custom_fields: "won't parse"
@@ -1192,7 +1190,7 @@ describe("ngpvn-action", () => {
         );
 
         // eslint-disable-next-line no-console
-        expect(console.error.mock.calls).toEqual([
+        expect(log.error.mock.calls).toEqual([
           [expect.stringMatching(/Error parsing custom_fields for contact 3.*/)]
         ]);
         expect(result).toEqual({});
@@ -1201,7 +1199,7 @@ describe("ngpvn-action", () => {
 
     describe("when custom_fields doesn't have VanID", () => {
       beforeEach(async () => {
-        jest.spyOn(console, "error");
+        jest.spyOn(log, "error");
         contact = {
           id: 3,
           custom_fields: "{}"
@@ -1217,7 +1215,7 @@ describe("ngpvn-action", () => {
         );
 
         // eslint-disable-next-line no-console
-        expect(console.error.mock.calls).toEqual([
+        expect(log.error.mock.calls).toEqual([
           [
             "Cannot sync results to van for campaign_contact 3. No VanID in custom fields"
           ]

@@ -134,7 +134,7 @@ export class AdminCampaignEdit extends React.Component {
     super(props);
     const isNew = props.location.query.new;
     const section = props.location.query.section;
-    console.log("SECTION", section);
+
     const expandedSection = section
       ? this.sections().findIndex(s => s.title === section)
       : isNew

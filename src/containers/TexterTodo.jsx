@@ -105,6 +105,10 @@ export const campaignQuery = gql`
             }
           }
         }
+        firstReplyAction {
+          action
+          actionData
+        }
       }
     }
   }
