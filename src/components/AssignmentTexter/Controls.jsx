@@ -980,9 +980,12 @@ export class AssignmentTexterContactControls extends React.Component {
           ref="messageScrollContainer"
           className={css(flexStyles.sectionMessageThread)}
         >
-          {internalComponent}
+          <div style={{ overflowY: "scroll" }}>{internalComponent}</div>
+          <div style={{ backgroundColor: "rgb(214, 215, 223)" }}>
+            {this.renderMessageControls(enabledSideboxes)}
+          </div>
         </div>
-        {this.renderSidebox(enabledSideboxes)}
+        <div>{this.renderSidebox(enabledSideboxes)}</div>
       </div>
     );
   }
@@ -1018,8 +1021,7 @@ export class AssignmentTexterContactControls extends React.Component {
               styles={messageListStyles}
             />,
             enabledSideboxes
-          ),
-          this.renderMessageControls(enabledSideboxes)
+          )
         ];
     return <div className={css(flexStyles.topContainer)}>{content}</div>;
   }

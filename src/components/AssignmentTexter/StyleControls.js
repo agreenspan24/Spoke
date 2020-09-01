@@ -7,7 +7,8 @@ export const messageListStyles = {
   messageList: {
     overflow: "hidden",
     overflow: "-moz-scrollbars-vertical",
-    maxWidth: "574px"
+    maxWidth: "574px",
+    flexShrink: 1
   },
   messageSent: {
     textAlign: "right",
@@ -98,8 +99,6 @@ export const flexStyles = StyleSheet.create({
   },
   superSectionMessageBox: {
     flex: "1 2 auto",
-    overflowY: "scroll",
-    overflow: "-moz-scrollbars-vertical",
     overflowX: "hidden",
     // for sidebar
     display: "flex",
@@ -109,7 +108,10 @@ export const flexStyles = StyleSheet.create({
   sectionMessageThread: {
     backgroundColor: "#f0f0f0",
     flex: "1 1 auto",
-    overflowY: "scroll"
+    overflowY: "scroll",
+    overflow: "-moz-scrollbars-vertical",
+    display: "flex",
+    flexDirection: "column"
   },
   /// * Section OptOut Dialog
   sectionOptOutDialog: {
@@ -133,7 +135,7 @@ export const flexStyles = StyleSheet.create({
     // messageField
     flex: "1 0 20px",
     padding: "0px 4px",
-    marginBottom: "8px",
+    // marginBottom: "8px",
     backgroundColor: "white"
   },
   subSectionMessageFieldTextField: {
@@ -165,7 +167,7 @@ export const flexStyles = StyleSheet.create({
     // height:105: webkit needs constraint on height sometimes
     //   during the inflection point of showing the shortcut-buttons
     //   without the height, the exit buttons get pushed down oddly
-    height: "15px", //TODO
+    // height: "15px", //TODO
     // internal:
     margin: "9px 0px 0px 9px",
     width: "100%"
