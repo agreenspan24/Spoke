@@ -116,7 +116,7 @@ export default function renderIndex(html, css, assetMap) {
         100};
       window.CONTACTS_PER_PHONE_NUMBER=${getConfig(
         "CONTACTS_PER_PHONE_NUMBER"
-      ) || 200};
+      ) || 200};  
       window.HIDE_BRANCHED_SCRIPTS=${getConfig("HIDE_BRANCHED_SCRIPTS", null, {
         truthy: 1
       }) || false};     
@@ -133,7 +133,10 @@ export default function renderIndex(html, css, assetMap) {
         {
           truthy: 1
         }
-      ) || false};
+      ) || false};    
+      window.MOBILIZE_EVENT_SHIFTER_URL='${getConfig(
+        "MOBILIZE_EVENT_SHIFTER_URL"
+      )}';
     </script>
     <script src="${assetMap["bundle.js"]}"></script>
   </body>
