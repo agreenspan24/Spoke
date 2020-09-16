@@ -41,7 +41,8 @@ export const postCanvassResponse = async (
   contact,
   organization,
   body,
-  campaign
+  campaign,
+  skipVanIdError
 ) => {
   let vanId;
   try {
@@ -57,9 +58,12 @@ export const postCanvassResponse = async (
 
   if (!vanId) {
     // eslint-disable-next-line no-console
-    log.error(
-      `Cannot sync results to van for campaign_contact ${contact.id}. No VanID in custom fields`
-    );
+    if (!skipVanIdError) {
+      log.error(
+        `Cannot sync results to van for campaign_contact ${contact.id}. No VanID in custom fields`
+      );
+    }
+
     return {};
   }
 
