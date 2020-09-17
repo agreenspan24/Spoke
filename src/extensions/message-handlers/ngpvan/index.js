@@ -31,7 +31,7 @@ export const postMessageSave = async ({ contact, organization, campaign }) => {
     return {};
   }
 
-  if (contact.message_status !== "needsMessage") {
+  if (!contact || contact.message_status !== "needsMessage") {
     return {};
   }
 
@@ -40,6 +40,7 @@ export const postMessageSave = async ({ contact, organization, campaign }) => {
     organization,
     campaign
   );
+
   const initialTextResult =
     getConfig("NGP_VAN_INITIAL_TEXT_CANVASS_RESULT", organization) ||
     DEFAULT_NGP_VAN_INITIAL_TEXT_CANVASS_RESULT;
@@ -47,7 +48,7 @@ export const postMessageSave = async ({ contact, organization, campaign }) => {
   const texted = clientChoiceData.find(ccd => ccd.name === initialTextResult);
   const body = JSON.parse(texted.details);
 
-  return Van.postCanvassResponse(contact, organization, body, campaign)
+  return Van.postCanvassResponse(contact, organization, body, campaign, true)
     .then(() => {})
     .catch(caughtError => {
       // eslint-disable-next-line no-console
