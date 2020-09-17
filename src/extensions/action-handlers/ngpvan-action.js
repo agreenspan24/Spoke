@@ -44,9 +44,12 @@ export const postCanvassResponse = async (
   campaign
 ) => {
   let vanId;
+  let contactsPhoneId;
+
   try {
     const customFields = JSON.parse(contact.custom_fields || "{}");
     vanId = customFields.VanID || customFields.vanid;
+    contactsPhoneId = customFields.contactsPhoneId;
   } catch (caughtException) {
     // eslint-disable-next-line no-console
     log.error(
@@ -61,6 +64,11 @@ export const postCanvassResponse = async (
       `Cannot sync results to van for campaign_contact ${contact.id}. No VanID in custom fields`
     );
     return {};
+  }
+
+  if (contactsPhoneId) {
+    body.canvassContext = body.canvassContext || {};
+    body.canvassContext.phoneId = contactsPhoneId;
   }
 
   const url = Van.makeUrl(`v4/people/${vanId}/canvassResponses`, organization);
