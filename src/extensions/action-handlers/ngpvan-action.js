@@ -50,7 +50,8 @@ export const postCanvassResponse = async (
   try {
     const customFields = JSON.parse(contact.custom_fields || "{}");
     vanId = customFields.VanID || customFields.vanid;
-    contactsPhoneId = customFields.contactsPhoneId;
+    contactsPhoneId =
+      customFields.contactsPhoneId || customFields.contacts_phone_id;
   } catch (caughtException) {
     // eslint-disable-next-line no-console
     log.error(
