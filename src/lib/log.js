@@ -50,7 +50,7 @@ if (isClient()) {
       miniLogInstance.warn(...msg);
     },
     error: (...msg) => {
-      if (rollbar) {
+      if (enableRollbar && rollbar) {
         rollbar.error(...msg);
       }
 

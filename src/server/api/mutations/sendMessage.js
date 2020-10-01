@@ -22,7 +22,7 @@ export const sendMessage = async (
     contact.assignment_id !== parseInt(message.assignmentId) ||
     campaign.is_archived
   ) {
-    log.error("Error: assignment changed");
+    log.warn("Error: assignment changed");
     throw new GraphQLError({
       status: 400,
       message: "Your assignment has changed"
