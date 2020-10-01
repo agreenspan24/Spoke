@@ -177,22 +177,35 @@ const deliveryReport = async ({
   service,
   messageServiceSid,
   newStatus,
-  errorCode
+  errorCode,
+  errorDescription
 }) => {
   const changes = {
     service_response_at: new Date(),
     send_status: newStatus,
     user_number: userNumber
   };
+
   if (newStatus === "ERROR") {
-    log.error("FAILED MESSAGE DELIVERY", {
-      contactNumber,
-      userNumber,
-      messageSid,
-      service,
-      messageServiceSid,
-      errorCode
-    });
+    if (!errorDescription) {
+      log.error("FAILED MESSAGE DELIVERY - UNKNOWN ERROR", {
+        contactNumber,
+        userNumber,
+        messageSid,
+        service,
+        messageServiceSid,
+        errorCode
+      });
+    } else {
+      log.warn("FAILED MESSAGE DELIVERY", {
+        contactNumber,
+        userNumber,
+        messageSid,
+        service,
+        messageServiceSid,
+        errorCode
+      });
+    }
 
     changes.error_code = errorCode;
 

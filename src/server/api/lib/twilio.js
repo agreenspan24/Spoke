@@ -487,7 +487,9 @@ export async function handleDeliveryReport(report) {
         service: "twilio",
         messageServiceSid: report.MessagingServiceSid,
         newStatus: messageStatus === "delivered" ? "DELIVERED" : "ERROR",
-        errorCode: Number(report.ErrorCode || 0) || 0
+        errorCode: Number(report.ErrorCode || 0) || 0,
+        errorDescription:
+          report.ErrorCode && errorDescriptions[report.ErrorCode]
       });
     }
   }
