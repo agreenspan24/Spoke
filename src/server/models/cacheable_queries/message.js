@@ -134,7 +134,7 @@ const incomingMessageMatching = async (messageInstance, activeCellFound) => {
     // No active thread to attach message to. This should be very RARE
     // This could happen way after a campaign is closed and a contact responds 'very late'
     // or e.g. gives the 'number for moveon' to another person altogether that tries to text it.
-    log.error("messageCache ORPHAN MESSAGE", messageInstance, activeCellFound);
+    log.warn("messageCache ORPHAN MESSAGE", messageInstance, activeCellFound);
 
     return "ORPHAN MESSAGE";
   }
@@ -224,7 +224,11 @@ const deliveryReport = async ({
     .returning("*")
     .update(changes);
 
-  if (process.env.EXPERIMENTAL_STICKY_SENDER && newStatus === "DELIVERED") {
+  if (
+    process.env.EXPERIMENTAL_STICKY_SENDER &&
+    newStatus === "DELIVERED" &&
+    message
+  ) {
     // Assign user number to contact/organization
     const campaignContact = await campaignContactCache.load(
       message.campaign_contact_id
