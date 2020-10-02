@@ -134,7 +134,7 @@ const incomingMessageMatching = async (messageInstance, activeCellFound) => {
     // No active thread to attach message to. This should be very RARE
     // This could happen way after a campaign is closed and a contact responds 'very late'
     // or e.g. gives the 'number for moveon' to another person altogether that tries to text it.
-    log.error("messageCache ORPHAN MESSAGE", messageInstance, activeCellFound);
+    log.warn("messageCache ORPHAN MESSAGE", messageInstance, activeCellFound);
 
     return "ORPHAN MESSAGE";
   }
@@ -177,22 +177,35 @@ const deliveryReport = async ({
   service,
   messageServiceSid,
   newStatus,
-  errorCode
+  errorCode,
+  errorDescription
 }) => {
   const changes = {
     service_response_at: new Date(),
     send_status: newStatus,
     user_number: userNumber
   };
+
   if (newStatus === "ERROR") {
-    log.error("FAILED MESSAGE DELIVERY", {
-      contactNumber,
-      userNumber,
-      messageSid,
-      service,
-      messageServiceSid,
-      errorCode
-    });
+    if (!errorDescription) {
+      log.error("FAILED MESSAGE DELIVERY - UNKNOWN ERROR", {
+        contactNumber,
+        userNumber,
+        messageSid,
+        service,
+        messageServiceSid,
+        errorCode
+      });
+    } else {
+      log.warn("FAILED MESSAGE DELIVERY", {
+        contactNumber,
+        userNumber,
+        messageSid,
+        service,
+        messageServiceSid,
+        errorCode
+      });
+    }
 
     changes.error_code = errorCode;
 
@@ -224,7 +237,11 @@ const deliveryReport = async ({
     .returning("*")
     .update(changes);
 
-  if (process.env.EXPERIMENTAL_STICKY_SENDER && newStatus === "DELIVERED") {
+  if (
+    process.env.EXPERIMENTAL_STICKY_SENDER &&
+    newStatus === "DELIVERED" &&
+    message
+  ) {
     // Assign user number to contact/organization
     const campaignContact = await campaignContactCache.load(
       message.campaign_contact_id

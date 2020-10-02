@@ -341,24 +341,30 @@ export function postMessageSend(
         ...changes
       }
     : {};
+
   log.info("postMessageSend", message, changes, response, err);
   let hasError = false;
+
   if (err) {
     hasError = true;
-    log.error("ERROR SENDING MESSAGE", {
+
+    log.warn("ERROR SENDING MESSAGE", {
       err,
       message,
       response
     });
   }
+
   if (response) {
     changesToSave.service_id = response.sid;
     hasError = !!response.error_code;
+
     if (hasError) {
       changesToSave.error_code = response.error_code;
       changesToSave.send_status = "ERROR";
     }
   }
+
   let updateQuery = r.knex("message").where("id", message.id);
   if (trx) {
     updateQuery = updateQuery.transacting(trx);
@@ -366,11 +372,30 @@ export function postMessageSend(
 
   if (hasError) {
     if (err) {
-      if (message.error_code <= -MAX_SEND_ATTEMPTS) {
+      if (err.Error && err.Error.code) {
+        changesToSave.error_code = err.Error.code;
         changesToSave.send_status = "ERROR";
+      } else {
+        if (message.error_code <= -MAX_SEND_ATTEMPTS) {
+          changesToSave.send_status = "ERROR";
+        }
+
+        // decrement error code starting from zero
+        changesToSave.error_code = Number(message.error_code || 0) - 1;
       }
-      // decrement error code starting from zero
-      changesToSave.error_code = Number(message.error_code || 0) - 1;
+    }
+
+    if (
+      changesToSave.error_code &&
+      errorDescriptions &&
+      changesToSave.errorCode > 0 &&
+      !errorDescriptions[changesToSave.errorCode]
+    ) {
+      log.error("UNKNOWN ERROR OCCURRED WHILE MESSAGE", {
+        err,
+        message,
+        response
+      });
     }
 
     let contactUpdateQuery = Promise.resolve(1);
@@ -462,7 +487,9 @@ export async function handleDeliveryReport(report) {
         service: "twilio",
         messageServiceSid: report.MessagingServiceSid,
         newStatus: messageStatus === "delivered" ? "DELIVERED" : "ERROR",
-        errorCode: Number(report.ErrorCode || 0) || 0
+        errorCode: Number(report.ErrorCode || 0) || 0,
+        errorDescription:
+          report.ErrorCode && errorDescriptions[report.ErrorCode]
       });
     }
   }
