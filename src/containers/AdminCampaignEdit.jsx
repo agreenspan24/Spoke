@@ -645,7 +645,7 @@ export class AdminCampaignEdit extends React.Component {
       <div
         {...dataTest("campaignIsStarted")}
         style={{
-          color: theme.colors.green,
+          color: theme.colors.coreBackgroundColor,
           fontWeight: 800
         }}
       >
@@ -795,9 +795,16 @@ export class AdminCampaignEdit extends React.Component {
           const cardHeaderStyle = {
             backgroundColor: theme.colors.lightGray
           };
+          const titleStyle = {
+            width: "100%",
+            color: theme.colors.coreTextColor
+          };
           const avatarStyle = {
             display: "inline-block",
             verticalAlign: "middle"
+          };
+          const iconStyle = {
+            color: theme.colors.coreTextColor
           };
 
           const {
@@ -815,19 +822,28 @@ export class AdminCampaignEdit extends React.Component {
             avatar = <CircularProgress style={avatarStyle} size={25} />;
             cardHeaderStyle.background = theme.colors.lightGray;
             cardHeaderStyle.width = `${savePercent}%`;
+            titleStyle.color = theme.colors.darkGray;
+            iconStyle.color = theme.colors.darkGray;
           } else if (sectionIsExpanded && sectionCanExpandOrCollapse) {
-            cardHeaderStyle.backgroundColor = theme.colors.lightYellow;
+            cardHeaderStyle.backgroundColor =
+              theme.colors.coreBackgroundColorDisabled;
           } else if (!sectionCanExpandOrCollapse) {
             cardHeaderStyle.backgroundColor = theme.colors.lightGray;
+            titleStyle.color = theme.colors.darkGray;
+            iconStyle.color = theme.colors.darkGray;
           } else if (sectionIsDone) {
             avatar = (
               <Avatar
-                icon={<DoneIcon style={{ fill: theme.colors.darkGreen }} />}
+                icon={
+                  <DoneIcon
+                    style={{ fill: theme.colors.coreBackgroundColor }}
+                  />
+                }
                 style={avatarStyle}
                 size={25}
               />
             );
-            cardHeaderStyle.backgroundColor = theme.colors.green;
+            cardHeaderStyle.backgroundColor = theme.colors.coreBackgroundColor;
           } else if (!sectionIsDone) {
             avatar = (
               <Avatar
@@ -836,7 +852,9 @@ export class AdminCampaignEdit extends React.Component {
                 size={25}
               />
             );
-            cardHeaderStyle.backgroundColor = theme.colors.yellow;
+            cardHeaderStyle.backgroundColor = theme.colors.lightGray;
+            titleStyle.color = theme.colors.darkGray;
+            iconStyle.color = theme.colors.darkGray;
           }
           return (
             <Card
@@ -853,15 +871,14 @@ export class AdminCampaignEdit extends React.Component {
             >
               <CardHeader
                 title={section.title}
-                titleStyle={{
-                  width: "100%"
-                }}
+                titleStyle={titleStyle}
                 style={cardHeaderStyle}
                 actAsExpander={!sectionIsSaving && sectionCanExpandOrCollapse}
                 showExpandableButton={
                   !sectionIsSaving && sectionCanExpandOrCollapse
                 }
                 avatar={avatar}
+                iconStyle={iconStyle}
               />
               <CardText expandable>
                 {this.renderCampaignFormSection(section, sectionIsSaving)}

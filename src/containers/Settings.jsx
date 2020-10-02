@@ -271,7 +271,8 @@ class Settings extends React.Component {
         <Card>
           <CardHeader
             title="Settings"
-            style={{ backgroundColor: theme.colors.green }}
+            titleStyle={{ color: theme.colors.coreTextColor }}
+            style={{ backgroundColor: theme.colors.coreBackgroundColor }}
           />
           <CardText>
             <div className={css(styles.section)}>
@@ -342,7 +343,8 @@ class Settings extends React.Component {
           <Card>
             <CardHeader
               title="Texter UI Defaults"
-              style={{ backgroundColor: theme.colors.green }}
+              titleStyle={{ color: theme.colors.coreTextColor }}
+              style={{ backgroundColor: theme.colors.coreTextColor }}
               actAsExpander={true}
               showExpandableButton={true}
             />
@@ -372,7 +374,8 @@ class Settings extends React.Component {
           <Card>
             <CardHeader
               title="Overriding default settings"
-              style={{ backgroundColor: theme.colors.green }}
+              titleStyle={{ color: theme.colors.lightGray }}
+              style={{ backgroundColor: theme.colors.coreBackgroundColor }}
               actAsExpander={true}
               showExpandableButton={true}
             />

@@ -61,7 +61,7 @@ class CannedResponseForm extends React.Component {
             <FlatButton
               {...dataTest("addResponse")}
               label={formButtonText}
-              backgroundColor={theme.colors.green}
+              backgroundColor={theme.colors.coreBackgroundColor}
               labelStyle={{ color: "white" }}
               style={{
                 display: "inline-block"
