@@ -21,7 +21,7 @@ const inlineStyles = {
     color: theme.colors.orange
   },
   good: {
-    color: theme.colors.green
+    color: theme.colors.coreBackgroundColor
   },
   warnUnsent: {
     color: theme.colors.darkBlue
