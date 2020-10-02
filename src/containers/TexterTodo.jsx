@@ -65,6 +65,7 @@ export const campaignQuery = gql`
         batchSize
         organization {
           id
+          name
           tags(group: $tagGroup) {
             id
             name
