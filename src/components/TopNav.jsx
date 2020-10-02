@@ -57,7 +57,15 @@ class TopNav extends React.Component {
         </Link>
       );
     }
-    return <div />;
+    return (
+      <div>
+        <img
+          src="https://lh5.googleusercontent.com/UhS-VL5q693s3XEIFLOkz5zNGdCvEb_0f_ZqnhflYG46opeiC4pTvz471hd3AUrbyT0tcTo=w16383"
+          height="50"
+          style={{ marginRight: 16 }}
+        />
+      </div>
+    );
   }
 
   render() {

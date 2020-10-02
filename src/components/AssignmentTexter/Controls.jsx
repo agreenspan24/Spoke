@@ -127,7 +127,7 @@ export class AssignmentTexterContactControls extends React.Component {
   blockWithCtrl = evt => {
     // HACK: This blocks Ctrl-Enter from triggering 'click'
     // after a shortcut key has been pressed (instead of doing a send)
-    if (evt.ctrlKey && evt.key === "Enter") {
+    if (!evt.ctrlKey && !evt.shiftKey && evt.key === "Enter") {
       evt.preventDefault();
     }
   };
@@ -160,17 +160,17 @@ export class AssignmentTexterContactControls extends React.Component {
     // if document.activeElement then ignore a naked keypress to be safe
     // console.log('KEYBOARD', evt.key, document.activeElement);
     if (
-      // SEND: Ctrl-Enter/Ctrl-z
-      (evt.key === "Enter" || evt.key === "z") &&
+      // SEND: Ctrl-z or Enter without shift/ctrl
+      (evt.ctrlKey && evt.key === "z") ||
       // need to use ctrlKey in non-first texting context for accessibility
-      evt.ctrlKey
+      (evt.key === "Enter" && !evt.ctrlKey && !evt.shiftKey)
     ) {
       evt.preventDefault();
       if (this.state.optOutDialogOpen) {
         const { optOutMessageText } = this.state;
         this.props.onOptOut({ optOutMessageText });
       } else {
-        this.handleClickSendMessageButton(true);
+        this.handleClickSendMessageButton();
       }
       return;
     }
@@ -992,9 +992,7 @@ export class AssignmentTexterContactControls extends React.Component {
       this.renderToolbar(enabledSideboxes),
       this.renderMessageBox(
         <Empty
-          title={
-            "This is your first message to " + this.props.contact.firstName
-          }
+          title={`This is your first message to ${this.props.contact.firstName} ${this.props.contact.lastName}`}
           icon={<CreateIcon color="rgb(83, 180, 119)" />}
         />,
         enabledSideboxes
