@@ -43,9 +43,9 @@ const text = {
   },
   link_light_bg: {
     fontWeight: 400,
-    color: colors.green,
+    color: colors.coreBackgroundColor,
     textDecoration: "none",
-    borderBottom: `1px solid ${colors.green}`,
+    borderBottom: `1px solid ${colors.coreBackgroundColor}`,
     cursor: "pointer",
     ":hover": {
       borderBottom: 0,
