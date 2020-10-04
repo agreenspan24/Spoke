@@ -193,7 +193,9 @@ class Settings extends React.Component {
         <CardHeader
           title="Twilio Credentials"
           style={{
-            backgroundColor: allSet ? theme.colors.green : theme.colors.yellow
+            backgroundColor: allSet
+              ? theme.colors.coreBackgroundColor
+              : theme.colors.yellow
           }}
         />
         {allSet && (
