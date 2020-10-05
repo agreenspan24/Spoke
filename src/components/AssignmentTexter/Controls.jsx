@@ -953,7 +953,7 @@ export class AssignmentTexterContactControls extends React.Component {
       this.renderToolbar(enabledSideboxes),
       this.renderMessageBox(
         <Empty
-          title={`This is your first message to ${this.props.contact.firstName} ${this.props.contact.lastName}`}
+          title={`This is your first message to ${this.props.contact.firstName}`}
           icon={<CreateIcon color={theme.colors.coreBackgroundColor} />}
         />,
         enabledSideboxes
