@@ -2,6 +2,7 @@ import { getConfig } from "../../../server/api/lib/config";
 const Van = require("../../../extensions/action-handlers/ngpvan-action");
 import { log } from "../../../lib";
 import { getActionChoiceData } from "../../../extensions/action-handlers";
+import { cacheableData } from "../../../server/models";
 
 export const DEFAULT_NGP_VAN_INITIAL_TEXT_CANVASS_RESULT = "Texted";
 
