@@ -49,9 +49,18 @@ export const postCanvassResponse = async (
 
   try {
     const customFields = JSON.parse(contact.custom_fields || "{}");
-    vanId = customFields.VanID || customFields.vanid;
+    vanId =
+      customFields.VanID ||
+      customFields.vanid ||
+      customFields.van_id ||
+      customFields.myc_van_id ||
+      customFields.myv_van_id;
     contactsPhoneId =
-      customFields.contactsPhoneId || customFields.contacts_phone_id;
+      customFields.contactsPhoneId ||
+      customFields.contacts_phone_id ||
+      customFields.contactsphoneid ||
+      customFields.phone_id ||
+      customFields.phoneid;
   } catch (caughtException) {
     // eslint-disable-next-line no-console
     log.error(
