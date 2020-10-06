@@ -44,7 +44,11 @@ export const available = organization => {
   );
 };
 
-export const preMessageSave = async ({ messageToSave, organization }) => {
+export const preMessageSave = async ({
+  messageToSave,
+  organization,
+  contact
+}) => {
   if (
     !messageToSave.is_from_contact &&
     getConfig("PROFANITY_TEXTER_BLOCK_SEND", organization, { truthy: true })
@@ -59,6 +63,12 @@ export const preMessageSave = async ({ messageToSave, organization }) => {
         send_status: "ERROR",
         error_code: -166
       });
+
+      await r
+        .knex("campaign_contact")
+        .where("id", contact.id)
+        .update({ error_code: -166 });
+
       return {
         messageToSave
       };
@@ -89,7 +99,7 @@ async function maybeSuspendTexter(
       "campaign_contact.id"
     )
     .where({
-      "tag_campaign_contact.tag_id": tagId,
+      "tag_campaign_contact.tag_id": tagId || null,
       "campaign.is_archived": false,
       "assignment.user_id": message.user_id,
       "message.user_id": message.user_id,
