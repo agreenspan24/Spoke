@@ -1,4 +1,5 @@
 import { StyleSheet, css } from "aphrodite";
+import theme from "../../styles/theme";
 
 const bgGrey = "rgb(214, 215, 223)";
 
@@ -96,9 +97,20 @@ export const flexStyles = StyleSheet.create({
       display: "none"
     }
   },
+  sectionLeftSideBox: {
+    flex: "0 1 240px",
+    padding: "12px",
+    maxWidth: "240px",
+    backgroundColor: theme.colors.coreBackgroundColor,
+    overflow: "hidden scroll",
+    "@media(max-width: 575px)": {
+      display: "none"
+    }
+  },
   superSectionMessagePage: {
     display: "flex",
-    flexGrow: 1
+    flexGrow: 1,
+    overflow: "hidden scroll"
   },
   superSectionMessageListAndControls: {
     display: "flex",

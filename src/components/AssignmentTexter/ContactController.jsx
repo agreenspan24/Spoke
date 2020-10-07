@@ -63,7 +63,13 @@ export class ContactController extends React.Component {
       if (startIndex === -1) {
         startIndex = 0;
       }
+    } else if (this.props.messageStatusFilter !== "needsMessage") {
+      startIndex =
+        this.props.contacts.findIndex(
+          c => c.messageStatus === this.props.messageStatusFilter
+        ) || 0;
     }
+
     this.updateCurrentContactIndex(startIndex);
   }
 
@@ -278,7 +284,7 @@ export class ContactController extends React.Component {
   }
 
   handleFinishContact = contactId => {
-    if (this.hasNext()) {
+    if (this.props.messageStatusFilter === "needsMessage") {
       this.setState({ finishedContactId: null }, () => {
         this.handleNavigateNext();
       });
@@ -290,6 +296,8 @@ export class ContactController extends React.Component {
       this.setState({ finishedContactId: contactId }, () => {
         if (!this.props.reviewContactId) {
           this.props.refreshData();
+          this.clearContactIdOldData(contactId);
+          this.updateCurrentContactIndex(this.state.currentContactIndex);
         }
       });
     }

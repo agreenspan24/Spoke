@@ -908,7 +908,7 @@ export class AssignmentTexterContactControls extends React.Component {
     const { contacts } = assignment;
 
     return (
-      <div className={css(flexStyles.sectionSideBox)}>
+      <div className={css(flexStyles.sectionLeftSideBox)}>
         <AssignmentContactsList
           contacts={contacts}
           currentContact={contact}

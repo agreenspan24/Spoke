@@ -218,7 +218,10 @@ const queries = {
       return {
         variables: {
           contactsFilter: {
-            messageStatus: ownProps.messageStatus,
+            messageStatus:
+              ownProps.messageStatus === "needsMessage"
+                ? ownProps.messageStatus
+                : "allConversations",
             ...(!ownProps.params.reviewContactId && { isOptedOut: false }),
             ...(ownProps.params.reviewContactId && {
               contactId: ownProps.params.reviewContactId
