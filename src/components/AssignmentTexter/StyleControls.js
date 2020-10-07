@@ -96,8 +96,21 @@ export const flexStyles = StyleSheet.create({
       display: "none"
     }
   },
+  superSectionMessagePage: {
+    display: "flex",
+    flexGrow: 1
+  },
+  superSectionMessageListAndControls: {
+    display: "flex",
+    flexDirection: "column",
+    flexGrow: 1
+  },
+  sectionMessageControls: {
+    flexShrink: 0,
+    position: "relative"
+  },
   superSectionMessageBox: {
-    flex: "1 2 auto",
+    flex: "1 2 0px",
     overflowY: "scroll",
     overflow: "-moz-scrollbars-vertical",
     overflowX: "hidden",
@@ -165,7 +178,7 @@ export const flexStyles = StyleSheet.create({
     // height:105: webkit needs constraint on height sometimes
     //   during the inflection point of showing the shortcut-buttons
     //   without the height, the exit buttons get pushed down oddly
-    height: "15px", //TODO
+    // height: "15px", //TODO
     // internal:
     margin: "9px 0px 0px 9px",
     width: "100%"

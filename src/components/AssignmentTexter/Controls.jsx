@@ -3,6 +3,7 @@ import React from "react";
 import { StyleSheet, css } from "aphrodite";
 import Toolbar from "./Toolbar";
 import MessageList from "./MessageList";
+import AssignmentContactsList from "./AssignmentContactsList";
 import CannedResponseMenu from "./CannedResponseMenu";
 import Survey from "./Survey";
 import ScriptList from "./ScriptList";
@@ -902,6 +903,21 @@ export class AssignmentTexterContactControls extends React.Component {
     );
   }
 
+  renderAssignmentContactList() {
+    const { assignment, contact } = this.props;
+    const { contacts } = assignment;
+
+    return (
+      <div className={css(flexStyles.sectionSideBox)}>
+        <AssignmentContactsList
+          contacts={contacts}
+          currentContact={contact}
+          updateCurrentContactById={this.props.updateCurrentContactById}
+        />
+      </div>
+    );
+  }
+
   renderSidebox(enabledSideboxes) {
     if (!enabledSideboxes || !enabledSideboxes.length) {
       return null;
@@ -932,7 +948,7 @@ export class AssignmentTexterContactControls extends React.Component {
     return <div className={css(flexStyles.sectionSideBox)}>{sideboxList}</div>;
   }
 
-  renderMessageBox(internalComponent, enabledSideboxes) {
+  renderMessageBox(internalComponent) {
     return (
       <div ref="messageBox" className={css(flexStyles.superSectionMessageBox)}>
         <div
@@ -943,7 +959,6 @@ export class AssignmentTexterContactControls extends React.Component {
         >
           {internalComponent}
         </div>
-        {this.renderSidebox(enabledSideboxes)}
       </div>
     );
   }
@@ -972,15 +987,23 @@ export class AssignmentTexterContactControls extends React.Component {
       ? this.renderFirstMessage(enabledSideboxes)
       : [
           this.renderToolbar(enabledSideboxes),
-          this.renderMessageBox(
-            <MessageList
-              contact={this.props.contact}
-              messages={this.props.contact.messages}
-              styles={messageListStyles}
-            />,
-            enabledSideboxes
-          ),
-          this.renderMessageControls(enabledSideboxes)
+          <div className={css(flexStyles.superSectionMessagePage)}>
+            {this.renderAssignmentContactList()}
+            <div className={css(flexStyles.superSectionMessageListAndControls)}>
+              {this.renderMessageBox(
+                <MessageList
+                  contact={this.props.contact}
+                  messages={this.props.contact.messages}
+                  styles={messageListStyles}
+                />,
+                enabledSideboxes
+              )}
+              <div className={css(flexStyles.sectionMessageControls)}>
+                {this.renderMessageControls(enabledSideboxes)}
+              </div>
+            </div>
+            {this.renderSidebox(enabledSideboxes)}
+          </div>
         ];
     return <div className={css(flexStyles.topContainer)}>{content}</div>;
   }
@@ -1010,7 +1033,8 @@ AssignmentTexterContactControls.propTypes = {
   onExitTexter: PropTypes.func,
   onEditStatus: PropTypes.func,
   refreshData: PropTypes.func,
-  getMessageTextFromScript: PropTypes.func
+  getMessageTextFromScript: PropTypes.func,
+  updateCurrentContactById: PropTypes.func
 };
 
 export default AssignmentTexterContactControls;

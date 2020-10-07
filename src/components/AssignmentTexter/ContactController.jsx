@@ -238,6 +238,12 @@ export class ContactController extends React.Component {
     this.getContactData(newIndex);
   }
 
+  updateCurrentContactById = newId => {
+    const newIndex = this.props.contacts.findIndex(c => c.id == newId);
+
+    this.updateCurrentContactIndex(newIndex);
+  };
+
   hasPrevious() {
     return this.state.currentContactIndex > 0;
   }
@@ -445,6 +451,7 @@ export class ContactController extends React.Component {
         refreshData={this.props.refreshData}
         onExitTexter={this.handleExitTexter}
         messageStatusFilter={this.props.messageStatusFilter}
+        updateCurrentContactById={this.updateCurrentContactById}
       />
     );
   }

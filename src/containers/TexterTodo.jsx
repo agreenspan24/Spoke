@@ -124,6 +124,9 @@ export const dataQuery = gql`
       hasUnassignedContactsForTexter
       contacts(contactsFilter: $contactsFilter) {
         id
+        firstName
+        lastName
+        messageStatus
       }
       allContactsCount: contactsCount
       unmessagedCount: contactsCount(contactsFilter: $needsMessageFilter)
