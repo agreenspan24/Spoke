@@ -118,14 +118,16 @@ class ScriptList extends React.Component {
       scripts.length === 0 ? null : (
         <List style={styles.overflowHidden}>
           {subheader ? <Subheader>{subheader}</Subheader> : ""}
-          <GSTextField
-            name="search"
-            floatingLabelText="Search for canned responses"
-            value={this.state.search}
-            onChange={text => this.setState({ search: text })}
-            style={styles.search}
-            fullWidth
-          />
+          {window.HIDE_BRANCHED_SCRIPTS && (
+            <GSTextField
+              name="search"
+              floatingLabelText="Search for canned responses"
+              value={this.state.search}
+              onChange={text => this.setState({ search: text })}
+              style={styles.search}
+              fullWidth
+            />
+          )}
           {listItems}
           <Divider />
         </List>
