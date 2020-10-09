@@ -26,6 +26,25 @@ const inlineStyles = {
   }
 };
 
+const momentConfigShort = {
+  future: "%s",
+  past: "%s",
+  s: "%ds",
+  ss: "%ds",
+  m: "%dm",
+  mm: "%dm",
+  h: "%dh",
+  hh: "%dh",
+  d: "%dd",
+  dd: "%dd",
+  w: "%dw",
+  ww: "%dw",
+  M: "%dmo",
+  MM: "%dmo",
+  y: "%dy",
+  yy: "%dy"
+};
+
 class AssignmentContactsList extends React.Component {
   constructor(props) {
     super(props);
@@ -57,7 +76,7 @@ class AssignmentContactsList extends React.Component {
     }
   }
 
-  render() {
+  renderContacts = () => {
     const { contacts, updateCurrentContactById, currentContact } = this.props;
 
     // Filter contacts by message status and search
@@ -69,26 +88,40 @@ class AssignmentContactsList extends React.Component {
         c.messageStatus === this.state.messageStatus
     );
 
-    moment.updateLocale("en", {
-      relativeTime: {
-        future: "in %s",
-        past: "%s ago",
-        s: "%ds",
-        ss: "%ds",
-        m: "%dm",
-        mm: "%dm",
-        h: "%dh",
-        hh: "%dh",
-        d: "%dd",
-        dd: "%dd",
-        w: "%dw",
-        ww: "%dw",
-        M: "%dmo",
-        MM: "%dmo",
-        y: "%dy",
-        yy: "%dy"
-      }
-    });
+    return filteredContacts.map(contact => (
+      <ListItem
+        key={contact.id}
+        id={this.getContactListItemId(contact.id)}
+        primaryText={`${contact.firstName} ${contact.lastName}`}
+        rightIcon={
+          <span style={inlineStyles.updatedAt}>
+            {moment.utc(contact.updated_at).fromNow()}
+          </span>
+        }
+        disabled={contact.id === currentContact.id}
+        onClick={() => updateCurrentContactById(contact.id)}
+        style={{
+          color: theme.colors.veryLightGray,
+          backgroundColor:
+            contact.id === currentContact.id
+              ? theme.colors.coreBackgroundColorDisabled
+              : null
+        }}
+      />
+    ));
+  };
+
+  render() {
+    const momentConfigOrig = moment()
+      .locale("en")
+      .localeData()._relativeTime;
+
+    // Hack around fromNow formatting. We want to keep formatting short only here, so we have to revert back after rendering.
+    moment.updateLocale("en", { relativeTime: momentConfigShort });
+
+    const contactList = this.renderContacts();
+
+    moment.updateLocale("en", { relativeTime: momentConfigOrig });
 
     return (
       <div style={inlineStyles.contactsListParent}>
@@ -107,27 +140,7 @@ class AssignmentContactsList extends React.Component {
           style={inlineStyles.contactsListSearch}
         />
         <List style={inlineStyles.contactListScrollContainer}>
-          {filteredContacts.map(contact => (
-            <ListItem
-              key={contact.id}
-              id={this.getContactListItemId(contact.id)}
-              primaryText={`${contact.firstName} ${contact.lastName}`}
-              rightIcon={
-                <span style={inlineStyles.updatedAt}>
-                  {moment.utc(contact.updated_at).fromNow()}
-                </span>
-              }
-              disabled={contact.id === currentContact.id}
-              onClick={() => updateCurrentContactById(contact.id)}
-              style={{
-                color: theme.colors.coreTextColor,
-                backgroundColor:
-                  contact.id === currentContact.id
-                    ? theme.colors.coreBackgroundColorDisabled
-                    : null
-              }}
-            />
-          ))}
+          {contactList}
         </List>
       </div>
     );
