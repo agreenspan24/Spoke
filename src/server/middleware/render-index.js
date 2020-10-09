@@ -137,7 +137,12 @@ export default function renderIndex(html, css, assetMap) {
       ) || false};    
       window.MOBILIZE_EVENT_SHIFTER_URL='${getConfig(
         "MOBILIZE_EVENT_SHIFTER_URL"
-      )}';
+      )}';     
+      window.ASSIGNMENT_CONTACTS_SIDEBAR=${getConfig(
+        "ASSIGNMENT_CONTACTS_SIDEBAR",
+        null,
+        { truthy: 1 }
+      )};
     </script>
     <script src="${assetMap["bundle.js"]}"></script>
   </body>
