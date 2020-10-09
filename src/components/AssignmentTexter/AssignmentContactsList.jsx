@@ -69,6 +69,27 @@ class AssignmentContactsList extends React.Component {
         c.messageStatus === this.state.messageStatus
     );
 
+    moment.updateLocale("en", {
+      relativeTime: {
+        future: "in %s",
+        past: "%s ago",
+        s: "%ds",
+        ss: "%ds",
+        m: "%dm",
+        mm: "%dm",
+        h: "%dh",
+        hh: "%dh",
+        d: "%dd",
+        dd: "%dd",
+        w: "%dw",
+        ww: "%dw",
+        M: "%dmo",
+        MM: "%dmo",
+        y: "%dy",
+        yy: "%dy"
+      }
+    });
+
     return (
       <div style={inlineStyles.contactsListParent}>
         <Tabs
