@@ -226,7 +226,16 @@ export class AssignmentTexterContactControls extends React.Component {
     } else {
       this.refs.form.submit();
       this.setState({
-        doneFirstClick: false,
+        doneFirstClick: false
+      });
+    }
+  };
+
+  handleMessageFormSubmit = async formValues => {
+    const success = await this.props.onMessageFormSubmit(formValues);
+
+    if (success) {
+      this.setState({
         messageText: ""
       });
     }
@@ -592,7 +601,7 @@ export class AssignmentTexterContactControls extends React.Component {
           ref="form"
           schema={this.messageSchema}
           value={{ messageText: this.state.messageText }}
-          onSubmit={this.props.onMessageFormSubmit}
+          onSubmit={this.handleMessageFormSubmit}
           onChange={
             this.state.messageReadOnly
               ? null // message is uneditable for firstMessage

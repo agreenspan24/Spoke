@@ -177,11 +177,15 @@ export class AssignmentTexterContact extends React.Component {
         await this.handleSubmitSurveys();
       }
       this.props.onFinishContact(contact.id);
+
+      return true;
     } catch (e) {
       this.handleSendMessageError(e);
       setTimeout(() => {
         this.props.onFinishContact(contact.id);
       }, 750);
+
+      return false;
     }
   };
 
