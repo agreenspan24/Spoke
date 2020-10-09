@@ -4,6 +4,7 @@ import { List, ListItem } from "material-ui/List";
 import { Tabs, Tab } from "material-ui/Tabs";
 import SearchBar from "material-ui-search-bar";
 import theme from "../../styles/theme";
+import moment from "moment";
 
 const inlineStyles = {
   contactsListParent: {
@@ -16,6 +17,12 @@ const inlineStyles = {
   },
   contactsListSearch: {
     marginTop: 10
+  },
+  updatedAt: {
+    fontSize: 12,
+    width: "auto",
+    top: "auto",
+    margin: "0 4px"
   }
 };
 
@@ -84,6 +91,11 @@ class AssignmentContactsList extends React.Component {
               key={contact.id}
               id={this.getContactListItemId(contact.id)}
               primaryText={`${contact.firstName} ${contact.lastName}`}
+              rightIcon={
+                <span style={inlineStyles.updatedAt}>
+                  {moment.utc(contact.updated_at).fromNow()}
+                </span>
+              }
               disabled={contact.id === currentContact.id}
               onClick={() => updateCurrentContactById(contact.id)}
               style={{
