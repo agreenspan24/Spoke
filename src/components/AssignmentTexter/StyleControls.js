@@ -8,7 +8,8 @@ export const messageListStyles = {
   messageList: {
     overflow: "hidden",
     overflow: "-moz-scrollbars-vertical",
-    maxWidth: "574px"
+    maxWidth: "574px",
+    padding: 8
   },
   messageSent: {
     textAlign: "right",
@@ -157,7 +158,7 @@ export const flexStyles = StyleSheet.create({
   sectionMessageField: {
     // messageField
     flex: "1 0 20px",
-    padding: "0px 4px",
+    padding: "0px 16px",
     marginBottom: "8px",
     backgroundColor: "white"
   },
@@ -183,7 +184,8 @@ export const flexStyles = StyleSheet.create({
     // flexWrap: "wrap",
     overflow: "hidden",
     position: "relative",
-    backgroundColor: bgGrey
+    backgroundColor: bgGrey,
+    paddingLeft: 12
   },
   subButtonsAnswerButtons: {
     flex: "1 1 auto", // keeps bottom buttons in place
@@ -243,7 +245,7 @@ export const flexStyles = StyleSheet.create({
     flexDirection: "column",
     flexWrap: "wrap",
     alignContent: "space-between",
-    padding: "9px",
+    padding: "9px 20px",
     "@media (hover: hover) and (pointer: fine)": {
       // for touchpads and phones, the edge of the tablet is easier
       // vs for desktops, we want to maximize how far the mouse needs to travel

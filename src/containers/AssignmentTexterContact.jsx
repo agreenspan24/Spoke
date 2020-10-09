@@ -74,8 +74,6 @@ export class AssignmentTexterContact extends React.Component {
       snackbarActionTitle,
       snackbarOnTouchTap
     };
-
-    this.setDisabled = this.setDisabled.bind(this);
   }
 
   componentDidMount() {
@@ -87,14 +85,10 @@ export class AssignmentTexterContact extends React.Component {
     } else if (!this.isContactBetweenTextingHours(contact)) {
       setTimeout(() => {
         this.props.refreshData();
-        this.setState({ disabled: false });
+        this.props.setDisabled(false);
       }, 1500);
     }
   }
-
-  setDisabled = async (disabled = true) => {
-    this.setState({ disabled });
-  };
 
   getMessageTextFromScript = script => {
     const { campaign, contact, texter } = this.props;
@@ -143,16 +137,16 @@ export class AssignmentTexterContact extends React.Component {
         this.setState(newState);
       } else {
         // opt out or send message Error
+        this.props.setDisabled();
         this.setState({
-          disabled: true,
           disabledText: e.message
         });
         this.skipContact();
       }
     } else {
       console.error(e);
+      this.props.setDisabled();
       this.setState({
-        disabled: true,
         snackbarError: "Something went wrong!"
       });
     }
@@ -162,10 +156,10 @@ export class AssignmentTexterContact extends React.Component {
     const { contact, messageStatusFilter } = this.props;
     try {
       const message = this.createMessageToContact(messageText);
-      if (this.state.disabled) {
+      if (this.props.disabled) {
         return; // stops from multi-send
       }
-      this.setState({ disabled: true });
+      this.props.setDisabled();
       console.log("sendMessage", contact.id);
       if (
         messageStatusFilter === "needsMessage" &&
@@ -274,10 +268,10 @@ export class AssignmentTexterContact extends React.Component {
     const { contact } = this.props;
     const { assignment } = this.props;
     const message = this.createMessageToContact(optOutMessageText);
-    if (this.state.disabled) {
+    if (this.props.disabled) {
       return; // stops from multi-send
     }
-    this.setState({ disabled: true });
+    this.props.setDisabled();
     try {
       if (optOutMessageText.length) {
         await this.props.mutations.sendMessage(message, contact.id);
@@ -372,9 +366,21 @@ export class AssignmentTexterContact extends React.Component {
       window.DEPRECATED_TEXTERUI === "GONE_SOON"
         ? OldControls
         : Controls;
+
+    const { assignment, contact, campaign } = this.props;
+    let disabled = false;
+
+    if (assignment.id !== contact.assignmentId || campaign.isArchived) {
+      disabled = true;
+    } else if (contact.optOut && !this.props.reviewContactId) {
+      disabled = true;
+    } else if (!this.isContactBetweenTextingHours(contact)) {
+      disabled = true;
+    }
+
     return (
       <div {...dataTest("assignmentTexterContactFirstDiv")}>
-        {this.state.disabled &&
+        {(this.props.disabled || disabled) &&
         this.props.messageStatusFilter !== "needsMessage" ? (
           <div className={css(styles.overlay)}>
             <CircularProgress size={0.5} />
@@ -391,7 +397,7 @@ export class AssignmentTexterContact extends React.Component {
           currentUser={this.props.currentUser}
           navigationToolbarChildren={this.props.navigationToolbarChildren}
           messageStatusFilter={this.props.messageStatusFilter}
-          disabled={this.state.disabled}
+          disabled={this.props.disabled || disabled}
           enabledSideboxes={this.props.enabledSideboxes}
           onMessageFormSubmit={this.handleMessageFormSubmit}
           onOptOut={this.handleOptOut}
@@ -412,7 +418,7 @@ export class AssignmentTexterContact extends React.Component {
             assignment={this.props.assignment}
             onFinishContact={this.props.onFinishContact}
             bulkSendMessages={this.bulkSendMessages}
-            setDisabled={this.setDisabled}
+            setDisabled={this.props.setDisabled}
           />
         ) : (
           ""

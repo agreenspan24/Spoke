@@ -52,6 +52,11 @@ export class ContactController extends React.Component {
       reloadDelay: 200,
       finishedContactId: null
     };
+
+    // Get the latest data for the sidebar every 30 seconds to catch new messages
+    if (window.ASSIGNMENT_CONTACTS_SIDEBAR) {
+      setInterval(this.props.refreshData, 30000);
+    }
   }
 
   componentWillMount() {
@@ -172,11 +177,14 @@ export class ContactController extends React.Component {
     const BATCH_FORWARD = 25; // when to reach out and get more
     let getIds = [];
     // if we don't have current data, get that
-    if (contacts[newIndex] && !this.state.contactCache[contacts[newIndex].id]) {
+    if (
+      contacts[newIndex] &&
+      (!this.state.contactCache[contacts[newIndex].id] || force)
+    ) {
       getIds = contacts
         .slice(newIndex, newIndex + BATCH_GET)
         .map(c => c.id)
-        .filter(cId => !force || !this.state.contactCache[cId]);
+        .filter(cId => force || !this.state.contactCache[cId]);
       // console.log('getContactData missing current', newIndex, getIds)
     }
     // if we DO have current data, but don't have data base BATCH_FORWARD...
@@ -188,12 +196,11 @@ export class ContactController extends React.Component {
       getIds = contacts
         .slice(newIndex + BATCH_FORWARD, newIndex + BATCH_FORWARD + BATCH_GET)
         .map(c => c.id)
-        .filter(cId => !force || !this.state.contactCache[cId]);
+        .filter(cId => force || !this.state.contactCache[cId]);
       // console.log('getContactData batch forward ', getIds)
     }
     if (getIds.length) {
       // console.log('getContactData length', newIndex, getIds.length)
-      this.setState({ loading: true });
       const contactData = await this.props.loadContacts(getIds);
       const {
         data: { getAssignmentContacts }
@@ -283,8 +290,13 @@ export class ContactController extends React.Component {
     return false;
   }
 
-  handleFinishContact = contactId => {
-    if (this.props.messageStatusFilter === "needsMessage") {
+  handleFinishContact = async contactId => {
+    // Go to the next contact if sidebar isn't enabled or we're sending initial messages
+    if (
+      window.ASSIGNMENT_CONTACTS_SIDEBAR
+        ? this.props.messageStatusFilter === "needsMessage"
+        : this.hasNext()
+    ) {
       this.setState({ finishedContactId: null }, () => {
         this.handleNavigateNext();
       });
@@ -296,10 +308,19 @@ export class ContactController extends React.Component {
       this.setState({ finishedContactId: contactId }, () => {
         if (!this.props.reviewContactId) {
           this.props.refreshData();
-          this.clearContactIdOldData(contactId);
-          this.updateCurrentContactIndex(this.state.currentContactIndex);
         }
       });
+
+      // Refresh the data on the current person, forcing it
+      await this.getContactData(this.state.currentContactIndex, true);
+
+      // Re-scroll the message container to the most recent message
+      var messageScrollContainer = document.getElementById(
+        "messageScrollContainer"
+      );
+      if (messageScrollContainer) {
+        messageScrollContainer.scrollTop = messageScrollContainer.scrollHeight;
+      }
     }
   };
 
@@ -383,6 +404,10 @@ export class ContactController extends React.Component {
     };
   }
 
+  setDisabled = (disabled = true) => {
+    this.setState({ loading: disabled });
+  };
+
   renderTexter(enabledSideboxes) {
     const { assignment, campaign, ChildComponent } = this.props;
     const { texter } = assignment;
@@ -442,6 +467,7 @@ export class ContactController extends React.Component {
       }, self.state.reloadDelay);
       return <LoadingIndicator />;
     }
+
     // ChildComponent is AssignmentTexterContact except for demo/testing
     return (
       <ChildComponent
@@ -460,6 +486,8 @@ export class ContactController extends React.Component {
         onExitTexter={this.handleExitTexter}
         messageStatusFilter={this.props.messageStatusFilter}
         updateCurrentContactById={this.updateCurrentContactById}
+        setDisabled={this.setDisabled}
+        disabled={this.state.loading}
       />
     );
   }

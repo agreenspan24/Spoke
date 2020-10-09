@@ -5,6 +5,17 @@ import { Tabs, Tab } from "material-ui/Tabs";
 import SearchBar from "material-ui-search-bar";
 import theme from "../../styles/theme";
 
+const inlineStyles = {
+  contactsListParent: {
+    display: "flex",
+    flexDirection: "column",
+    maxHeight: "100%"
+  },
+  contactListScrollContainer: {
+    overflow: "hidden scroll"
+  }
+};
+
 class AssignmentContactsList extends React.Component {
   constructor(props) {
     super(props);
@@ -17,39 +28,38 @@ class AssignmentContactsList extends React.Component {
     };
   }
 
+  getContactListItemId(id) {
+    return `switch-to-contact-id-${id}`;
+  }
+
   componentDidMount() {
     const { currentContact } = this.props;
 
-    setTimeout(() => {
-      document
-        .getElementById(`switch-to-contact-id-${currentContact.id}`)
-        .scrollIntoView({
-          block: "center"
-        });
-    }, 0);
+    const node = document.getElementById(
+      this.getContactListItemId(currentContact.id)
+    );
+
+    // Scroll the list item element to center if possible, so it's always displayed in the sidebar
+    if (node) {
+      node.scrollIntoView({
+        block: "center"
+      });
+    }
   }
 
   render() {
     const { contacts, updateCurrentContactById, currentContact } = this.props;
 
-    // Get the currently selected conversation and put it first
-    let filteredContacts = [];
-
-    // Filter the rest of the conversations based on matching the search and message status
-    filteredContacts = filteredContacts.concat(
-      contacts.filter(
-        c =>
-          `${c.firstName} ${c.lastName}`
-            .toLowerCase()
-            .includes(this.state.search.toLowerCase()) &&
-          c.messageStatus === this.state.messageStatus
-      )
+    const filteredContacts = contacts.filter(
+      c =>
+        `${c.firstName} ${c.lastName}`
+          .toLowerCase()
+          .includes(this.state.search.toLowerCase()) &&
+        c.messageStatus === this.state.messageStatus
     );
 
     return (
-      <div
-        style={{ display: "flex", flexDirection: "column", maxHeight: "100%" }}
-      >
+      <div style={inlineStyles.contactsListParent}>
         <Tabs
           value={this.state.messageStatus}
           onChange={messageStatus => this.setState({ messageStatus })}
@@ -64,11 +74,11 @@ class AssignmentContactsList extends React.Component {
           value={this.state.search}
           style={{ marginTop: 10 }}
         />
-        <List style={{ overflow: "hidden scroll" }} ref="contactListContainer">
+        <List style={inlineStyles.contactListScrollContainer}>
           {filteredContacts.map(contact => (
             <ListItem
               key={contact.id}
-              id={`switch-to-contact-id-${contact.id}`}
+              id={this.getContactListItemId(contact.id)}
               primaryText={`${contact.firstName} ${contact.lastName}`}
               disabled={contact.id === currentContact.id}
               onClick={() => updateCurrentContactById(contact.id)}

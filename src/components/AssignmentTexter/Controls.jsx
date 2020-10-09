@@ -225,7 +225,10 @@ export class AssignmentTexterContactControls extends React.Component {
       this.setState({ doneFirstClick: true });
     } else {
       this.refs.form.submit();
-      this.setState({ doneFirstClick: false });
+      this.setState({
+        doneFirstClick: false,
+        messageText: ""
+      });
     }
   };
 
@@ -955,6 +958,7 @@ export class AssignmentTexterContactControls extends React.Component {
           {...dataTest("messageList")}
           key="messageScrollContainer"
           ref="messageScrollContainer"
+          id="messageScrollContainer"
           className={css(flexStyles.sectionMessageThread)}
         >
           {internalComponent}
@@ -988,7 +992,8 @@ export class AssignmentTexterContactControls extends React.Component {
       : [
           this.renderToolbar(enabledSideboxes),
           <div className={css(flexStyles.superSectionMessagePage)}>
-            {this.renderAssignmentContactList()}
+            {window.ASSIGNMENT_CONTACTS_SIDEBAR &&
+              this.renderAssignmentContactList()}
             <div className={css(flexStyles.superSectionMessageListAndControls)}>
               {this.renderMessageBox(
                 <MessageList
