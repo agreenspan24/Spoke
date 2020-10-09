@@ -52,11 +52,6 @@ export class ContactController extends React.Component {
       reloadDelay: 200,
       finishedContactId: null
     };
-
-    // Get the latest data for the sidebar every 30 seconds to catch new messages
-    if (window.ASSIGNMENT_CONTACTS_SIDEBAR) {
-      setInterval(this.props.refreshData, 30000);
-    }
   }
 
   componentWillMount() {
@@ -300,7 +295,7 @@ export class ContactController extends React.Component {
         ? this.props.messageStatusFilter === "needsMessage"
         : this.hasNext()
     ) {
-      this.setState({ finishedContactId: null }, () => {
+      this.setState({ finishedContactId: null, loading: false }, () => {
         this.handleNavigateNext();
       });
       this.clearContactIdOldData(contactId);
