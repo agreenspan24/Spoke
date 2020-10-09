@@ -163,13 +163,13 @@ export class TexterTodo extends React.Component {
     // Get the latest data for the sidebar every 30 seconds to catch new messages
     if (window.ASSIGNMENT_CONTACTS_SIDEBAR && !this.refreshInterval) {
       this.refreshInterval = setInterval(this.refreshData, 30000);
-      console.log("mounting", this.refreshInterval);
     }
   }
 
   componentWillUnmount() {
-    clearInterval(this.refreshInterval);
-    console.log("unmounting", this.refreshInterval);
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
   }
 
   loadContacts = async contactIds => {
