@@ -13,6 +13,9 @@ const inlineStyles = {
   },
   contactListScrollContainer: {
     overflow: "hidden scroll"
+  },
+  contactsListSearch: {
+    marginTop: 10
   }
 };
 
@@ -50,6 +53,7 @@ class AssignmentContactsList extends React.Component {
   render() {
     const { contacts, updateCurrentContactById, currentContact } = this.props;
 
+    // Filter contacts by message status and search
     const filteredContacts = contacts.filter(
       c =>
         `${c.firstName} ${c.lastName}`
@@ -72,7 +76,7 @@ class AssignmentContactsList extends React.Component {
           onChange={search => this.setState({ search: search || "" })}
           onRequestSearch={() => undefined}
           value={this.state.search}
-          style={{ marginTop: 10 }}
+          style={inlineStyles.contactsListSearch}
         />
         <List style={inlineStyles.contactListScrollContainer}>
           {filteredContacts.map(contact => (

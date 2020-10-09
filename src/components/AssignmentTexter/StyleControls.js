@@ -100,8 +100,8 @@ export const flexStyles = StyleSheet.create({
   },
   sectionLeftSideBox: {
     flex: "0 1 240px",
-    padding: "12px",
-    maxWidth: "240px",
+    padding: 12,
+    maxWidth: 240,
     backgroundColor: theme.colors.coreBackgroundColor,
     overflow: "hidden scroll",
     "@media(max-width: 575px)": {
@@ -116,14 +116,11 @@ export const flexStyles = StyleSheet.create({
   superSectionMessageListAndControls: {
     display: "flex",
     flexDirection: "column",
-    flexGrow: 1
-  },
-  sectionMessageControls: {
-    flexShrink: 0,
-    position: "relative"
+    flexGrow: 1,
+    maxHeight: "100%"
   },
   superSectionMessageBox: {
-    flex: "1 2 0px",
+    flex: "1 2 auto",
     overflowY: "scroll",
     overflow: "-moz-scrollbars-vertical",
     overflowX: "hidden",
@@ -157,7 +154,7 @@ export const flexStyles = StyleSheet.create({
   /// * Section Texting Input Field
   sectionMessageField: {
     // messageField
-    flex: "1 0 20px",
+    flex: "0 0 20px",
     padding: "0px 16px",
     marginBottom: "8px",
     backgroundColor: "white"

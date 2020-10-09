@@ -219,6 +219,7 @@ const queries = {
         variables: {
           contactsFilter: {
             messageStatus:
+              !window.ASSIGNMENT_CONTACTS_SIDEBAR ||
               ownProps.messageStatus === "needsMessage"
                 ? ownProps.messageStatus
                 : "allConversations",

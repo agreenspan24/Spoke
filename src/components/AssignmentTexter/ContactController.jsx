@@ -68,7 +68,10 @@ export class ContactController extends React.Component {
       if (startIndex === -1) {
         startIndex = 0;
       }
-    } else if (this.props.messageStatusFilter !== "needsMessage") {
+    } else if (
+      window.ASSIGNMENT_CONTACTS_SIDEBAR &&
+      this.props.messageStatusFilter !== "needsMessage"
+    ) {
       startIndex =
         this.props.contacts.findIndex(
           c => c.messageStatus === this.props.messageStatusFilter

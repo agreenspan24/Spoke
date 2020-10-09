@@ -46,7 +46,6 @@ export class AssignmentTexterContact extends React.Component {
     const { assignment, campaign } = this.props;
     const { contact } = this.props;
 
-    let disabled = false;
     let disabledText = "Sending...";
     let snackbarOnTouchTap = null;
     let snackbarActionTitle = null;
@@ -54,20 +53,16 @@ export class AssignmentTexterContact extends React.Component {
 
     if (assignment.id !== contact.assignmentId || campaign.isArchived) {
       disabledText = "";
-      disabled = true;
       snackbarError = "Your assignment has changed";
       snackbarOnTouchTap = this.goBackToTodos;
       snackbarActionTitle = "Back to Todos";
     } else if (contact.optOut && !this.props.reviewContactId) {
       disabledText = "Skipping opt-out...";
-      disabled = true;
     } else if (!this.isContactBetweenTextingHours(contact)) {
       disabledText = "Refreshing ...";
-      disabled = true;
     }
 
     this.state = {
-      disabled,
       disabledText,
       // this prevents jitter by not showing the optout/skip buttons right after sending
       snackbarError,

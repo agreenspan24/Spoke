@@ -225,9 +225,7 @@ export class AssignmentTexterContactControls extends React.Component {
       this.setState({ doneFirstClick: true });
     } else {
       this.refs.form.submit();
-      this.setState({
-        doneFirstClick: false
-      });
+      this.setState({ doneFirstClick: false });
     }
   };
 
@@ -235,9 +233,7 @@ export class AssignmentTexterContactControls extends React.Component {
     const success = await this.props.onMessageFormSubmit(formValues);
 
     if (success) {
-      this.setState({
-        messageText: ""
-      });
+      this.setState({ messageText: "" });
     }
   };
 
@@ -1012,9 +1008,7 @@ export class AssignmentTexterContactControls extends React.Component {
                 />,
                 enabledSideboxes
               )}
-              <div className={css(flexStyles.sectionMessageControls)}>
-                {this.renderMessageControls(enabledSideboxes)}
-              </div>
+              {this.renderMessageControls(enabledSideboxes)}
             </div>
             {this.renderSidebox(enabledSideboxes)}
           </div>
