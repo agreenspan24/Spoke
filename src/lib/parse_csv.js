@@ -189,8 +189,12 @@ export const parseCannedResponseCsv = (
           text: response[scriptLabel].trim()
         };
 
+        if (!newCannedResponse.title || !newCannedResponse.text) {
+          continue;
+        }
+
         // If there are actions and an action provided, add them
-        if (availableActions.length && actionsLabel) {
+        if (availableActions.length && actionsLabel && response[actionsLabel]) {
           const actionsString = response[actionsLabel];
           const responseActions = [];
 
@@ -248,6 +252,12 @@ export const parseCannedResponseCsv = (
                       label: actionData.name,
                       value: actionData.details
                     });
+                  } else {
+                    onCompleteCallback({
+                      error: `Action ${actionDataLabel} for response ${newCannedResponse.title} could not be mapped.`
+                    });
+
+                    return;
                   }
                 } else {
                   console.log({ action, actionDataLabel }, actionsArray[j]);
