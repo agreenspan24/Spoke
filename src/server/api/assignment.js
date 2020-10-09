@@ -16,6 +16,8 @@ export function addWhereClauseForContactsFilterMessageStatusIrrespectiveOfPastDu
     query.whereIn("message_status", ["needsResponse", "needsMessage"]);
   } else if (messageStatusFilter === "allReplies") {
     query.whereNotIn("message_status", ["messaged", "needsMessage"]);
+  } else if (messageStatusFilter === "allConversations") {
+    query.whereIn("message_status", ["needsResponse", "convo", "closed"]);
   } else if (messageStatusFilter === "needsResponseExpired") {
     query
       .where("message_status", "needsResponse")
