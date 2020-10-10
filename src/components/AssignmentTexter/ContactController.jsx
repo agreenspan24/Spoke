@@ -63,7 +63,16 @@ export class ContactController extends React.Component {
       if (startIndex === -1) {
         startIndex = 0;
       }
+    } else if (
+      window.ASSIGNMENT_CONTACTS_SIDEBAR &&
+      this.props.messageStatusFilter !== "needsMessage"
+    ) {
+      startIndex =
+        this.props.contacts.findIndex(
+          c => c.messageStatus === this.props.messageStatusFilter
+        ) || 0;
     }
+
     this.updateCurrentContactIndex(startIndex);
   }
 
@@ -166,11 +175,14 @@ export class ContactController extends React.Component {
     const BATCH_FORWARD = 25; // when to reach out and get more
     let getIds = [];
     // if we don't have current data, get that
-    if (contacts[newIndex] && !this.state.contactCache[contacts[newIndex].id]) {
+    if (
+      contacts[newIndex] &&
+      (!this.state.contactCache[contacts[newIndex].id] || force)
+    ) {
       getIds = contacts
         .slice(newIndex, newIndex + BATCH_GET)
         .map(c => c.id)
-        .filter(cId => !force || !this.state.contactCache[cId]);
+        .filter(cId => force || !this.state.contactCache[cId]);
       // console.log('getContactData missing current', newIndex, getIds)
     }
     // if we DO have current data, but don't have data base BATCH_FORWARD...
@@ -182,12 +194,11 @@ export class ContactController extends React.Component {
       getIds = contacts
         .slice(newIndex + BATCH_FORWARD, newIndex + BATCH_FORWARD + BATCH_GET)
         .map(c => c.id)
-        .filter(cId => !force || !this.state.contactCache[cId]);
+        .filter(cId => force || !this.state.contactCache[cId]);
       // console.log('getContactData batch forward ', getIds)
     }
     if (getIds.length) {
       // console.log('getContactData length', newIndex, getIds.length)
-      this.setState({ loading: true });
       const contactData = await this.props.loadContacts(getIds);
       const {
         data: { getAssignmentContacts }
@@ -238,6 +249,12 @@ export class ContactController extends React.Component {
     this.getContactData(newIndex);
   }
 
+  updateCurrentContactById = newId => {
+    const newIndex = this.props.contacts.findIndex(c => c.id == newId);
+
+    this.updateCurrentContactIndex(newIndex);
+  };
+
   hasPrevious() {
     return this.state.currentContactIndex > 0;
   }
@@ -271,9 +288,14 @@ export class ContactController extends React.Component {
     return false;
   }
 
-  handleFinishContact = contactId => {
-    if (this.hasNext()) {
-      this.setState({ finishedContactId: null }, () => {
+  handleFinishContact = async contactId => {
+    // Go to the next contact if sidebar isn't enabled or we're sending initial messages
+    if (
+      this.hasNext() &&
+      (!window.ASSIGNMENT_CONTACTS_SIDEBAR ||
+        this.props.messageStatusFilter === "needsMessage")
+    ) {
+      this.setState({ finishedContactId: null, loading: false }, () => {
         this.handleNavigateNext();
       });
       this.clearContactIdOldData(contactId);
@@ -286,6 +308,23 @@ export class ContactController extends React.Component {
           this.props.refreshData();
         }
       });
+
+      if (
+        window.ASSIGNMENT_CONTACTS_SIDEBAR &&
+        this.props.messageStatusFilter !== "needsMessage"
+      ) {
+        // Refresh the data on the current person, forcing it
+        await this.getContactData(this.state.currentContactIndex, true);
+
+        // Re-scroll the message container to the most recent message
+        var messageScrollContainer = document.getElementById(
+          "messageScrollContainer"
+        );
+        if (messageScrollContainer) {
+          messageScrollContainer.scrollTop =
+            messageScrollContainer.scrollHeight;
+        }
+      }
     }
   };
 
@@ -369,6 +408,10 @@ export class ContactController extends React.Component {
     };
   }
 
+  setDisabled = (disabled = true) => {
+    this.setState({ loading: disabled });
+  };
+
   renderTexter(enabledSideboxes) {
     const { assignment, campaign, ChildComponent } = this.props;
     const { texter } = assignment;
@@ -428,6 +471,7 @@ export class ContactController extends React.Component {
       }, self.state.reloadDelay);
       return <LoadingIndicator />;
     }
+
     // ChildComponent is AssignmentTexterContact except for demo/testing
     return (
       <ChildComponent
@@ -445,6 +489,9 @@ export class ContactController extends React.Component {
         refreshData={this.props.refreshData}
         onExitTexter={this.handleExitTexter}
         messageStatusFilter={this.props.messageStatusFilter}
+        updateCurrentContactById={this.updateCurrentContactById}
+        setDisabled={this.setDisabled}
+        disabled={this.state.loading}
       />
     );
   }

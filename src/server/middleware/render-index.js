@@ -116,6 +116,11 @@ export default function renderIndex(html, css, assetMap) {
       window.CONTACTS_PER_PHONE_NUMBER=${getConfig(
         "CONTACTS_PER_PHONE_NUMBER"
       ) || 200};      
+      window.ASSIGNMENT_CONTACTS_SIDEBAR=${getConfig(
+        "ASSIGNMENT_CONTACTS_SIDEBAR",
+        null,
+        { truthy: 1 }
+      )}
     </script>
     <script src="${assetMap["bundle.js"]}"></script>
   </body>

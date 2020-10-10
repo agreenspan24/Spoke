@@ -124,6 +124,10 @@ export const dataQuery = gql`
       hasUnassignedContactsForTexter
       contacts(contactsFilter: $contactsFilter) {
         id
+        firstName
+        lastName
+        messageStatus
+        updated_at
       }
       allContactsCount: contactsCount
       unmessagedCount: contactsCount(contactsFilter: $needsMessageFilter)
@@ -143,6 +147,19 @@ export class TexterTodo extends React.Component {
     const { assignment } = this.props.campaignData;
     if (!assignment || assignment.campaign.isArchived) {
       this.props.router.push(`/app/${this.props.params.organizationId}/todos`);
+    }
+  }
+
+  componentDidMount() {
+    // Get the latest data for the sidebar every 30 seconds to catch new messages
+    if (window.ASSIGNMENT_CONTACTS_SIDEBAR && !this.refreshInterval) {
+      this.refreshInterval = setInterval(this.refreshData, 30000);
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
     }
   }
 
@@ -215,7 +232,11 @@ const queries = {
       return {
         variables: {
           contactsFilter: {
-            messageStatus: ownProps.messageStatus,
+            messageStatus:
+              !window.ASSIGNMENT_CONTACTS_SIDEBAR ||
+              ownProps.messageStatus === "needsMessage"
+                ? ownProps.messageStatus
+                : "allConversations",
             ...(!ownProps.params.reviewContactId && { isOptedOut: false }),
             ...(ownProps.params.reviewContactId && {
               contactId: ownProps.params.reviewContactId
