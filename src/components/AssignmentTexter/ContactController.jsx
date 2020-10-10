@@ -291,9 +291,9 @@ export class ContactController extends React.Component {
   handleFinishContact = async contactId => {
     // Go to the next contact if sidebar isn't enabled or we're sending initial messages
     if (
-      window.ASSIGNMENT_CONTACTS_SIDEBAR
-        ? this.props.messageStatusFilter === "needsMessage"
-        : this.hasNext()
+      this.hasNext() &&
+      (!window.ASSIGNMENT_CONTACTS_SIDEBAR ||
+        this.props.messageStatusFilter === "needsMessage")
     ) {
       this.setState({ finishedContactId: null, loading: false }, () => {
         this.handleNavigateNext();
@@ -309,15 +309,21 @@ export class ContactController extends React.Component {
         }
       });
 
-      // Refresh the data on the current person, forcing it
-      await this.getContactData(this.state.currentContactIndex, true);
+      if (
+        window.ASSIGNMENT_CONTACTS_SIDEBAR &&
+        this.props.messageStatusFilter !== "needsMessage"
+      ) {
+        // Refresh the data on the current person, forcing it
+        await this.getContactData(this.state.currentContactIndex, true);
 
-      // Re-scroll the message container to the most recent message
-      var messageScrollContainer = document.getElementById(
-        "messageScrollContainer"
-      );
-      if (messageScrollContainer) {
-        messageScrollContainer.scrollTop = messageScrollContainer.scrollHeight;
+        // Re-scroll the message container to the most recent message
+        var messageScrollContainer = document.getElementById(
+          "messageScrollContainer"
+        );
+        if (messageScrollContainer) {
+          messageScrollContainer.scrollTop =
+            messageScrollContainer.scrollHeight;
+        }
       }
     }
   };
