@@ -17,10 +17,19 @@ function getConversationsJoinsAndWhereClause(
 
   query = addCampaignsFilterToQuery(query, campaignsFilter, organizationId);
 
-  if (assignmentsFilter && assignmentsFilter.texterId) {
-    query = query.where({ "assignment.user_id": assignmentsFilter.texterId });
+  if (assignmentsFilter) {
+    if (assignmentsFilter.texterId) {
+      query = query.where({ "assignment.user_id": assignmentsFilter.texterId });
+    } else if (assignmentsFilter.texterId === null) {
+      query = query.where(r.knex.raw("campaign_contact.assignment_id IS NULL"));
+    }
   }
-  if (forData || (assignmentsFilter && assignmentsFilter.texterId)) {
+
+  if (
+    forData ||
+    (assignmentsFilter &&
+      (assignmentsFilter.texterId || assignmentsFilter.texterId === null))
+  ) {
     query = query
       .leftJoin("assignment", "campaign_contact.assignment_id", "assignment.id")
       .leftJoin("user", "assignment.user_id", "user.id")
@@ -342,20 +351,25 @@ export async function reassignConversations(
   // ensure existence of assignments
   const campaignIdAssignmentIdMap = new Map();
   for (const [campaignId, _] of campaignIdContactIdsMap) {
-    let assignment = await r
-      .table("assignment")
-      .getAll(newTexterUserId, { index: "user_id" })
-      .filter({ campaign_id: campaignId })
-      .limit(1)(0)
-      .default(null);
-    if (!assignment) {
-      assignment = await Assignment.save({
-        user_id: newTexterUserId,
-        campaign_id: campaignId,
-        max_contacts: parseInt(process.env.MAX_CONTACTS_PER_TEXTER || 0, 10)
-      });
+    let assignment = {};
+    if (newTexterUserId) {
+      assignment = await r
+        .table("assignment")
+        .getAll(newTexterUserId, { index: "user_id" })
+        .filter({ campaign_id: campaignId })
+        .limit(1)(0)
+        .default(null);
+
+      if (!assignment) {
+        assignment = await Assignment.save({
+          user_id: newTexterUserId,
+          campaign_id: campaignId,
+          max_contacts: parseInt(process.env.MAX_CONTACTS_PER_TEXTER || 0, 10)
+        });
+      }
     }
-    campaignIdAssignmentIdMap.set(campaignId, assignment.id);
+
+    campaignIdAssignmentIdMap.set(campaignId, assignment.id || null);
   }
 
   // do the reassignment
@@ -390,7 +404,7 @@ export async function reassignConversations(
 
       returnCampaignIdAssignmentIds.push({
         campaignId,
-        assignmentId: assignmentId.toString()
+        assignmentId: assignmentId ? assignmentId.toString() : null
       });
     }
   } catch (error) {

@@ -49,6 +49,7 @@ export const preMessageSave = async ({
   organization,
   contact
 }) => {
+  console.log("profanity tagger", contact);
   if (
     !messageToSave.is_from_contact &&
     getConfig("PROFANITY_TEXTER_BLOCK_SEND", organization, { truthy: true })
@@ -58,7 +59,12 @@ export const preMessageSave = async ({
       getConfig("PROFANITY_REGEX_BASE64", organization) ||
       DEFAULT_PROFANITY_TEXTER_REGEX_BASE64;
     const re = new RegExp(Buffer.from(regexText, "base64").toString(), "i");
-    if (String(messageToSave.text).match(re)) {
+    const matches = String(messageToSave.text).match(re);
+    if (
+      matches &&
+      matches.length &&
+      matches.all(m => m !== contact.first_name && m !== contact.last_name)
+    ) {
       Object.assign(messageToSave, {
         send_status: "ERROR",
         error_code: -166
@@ -119,7 +125,7 @@ async function maybeSuspendTexter(
   }
 }
 
-export const postMessageSave = async ({ message, organization }) => {
+export const postMessageSave = async ({ message, organization, contact }) => {
   let tagId = null;
   let regexText = null;
   const blockSend = getConfig("PROFANITY_TEXTER_BLOCK_SEND", organization, {
@@ -149,7 +155,14 @@ export const postMessageSave = async ({ message, organization }) => {
           [{ id: tagId }]
         );
       }
+
       if (!message.is_from_contact) {
+        // Revert back to old message status
+        await r
+          .knex("campaign_contact")
+          .where("id", contact.id)
+          .update({ message_status: contact.message_status });
+
         // SUSPENDING TEXTER
         const suspendThreshold = getConfig(
           "PROFANITY_TEXTER_SUSPEND_COUNT",

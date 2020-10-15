@@ -5,15 +5,22 @@ import { getDynamicAssignmentBatchPolicy } from "../../../extensions/dynamicassi
 
 export const findNewCampaignContact = async (
   _,
-  { assignment: bulKSendAssignment, assignmentId, numberContacts },
+  {
+    assignment: bulKSendAssignment,
+    assignmentId,
+    numberContacts,
+    messageStatus
+  },
   { user, loaders }
 ) => {
+  messageStatus = messageStatus || "needsMessage";
   const falseRetVal = {
     found: false,
     assignment: {
       id: assignmentId,
       // stop people from getting another batch right after they get the current one
-      hasUnassignedContactsForTexter: 0
+      hasUnassignedContactsForTexter: 0,
+      hasUnassignedRepliesForTexter: 0
     }
   };
   /* This attempts to find new contacts for the assignment, in the case that useDynamicAssigment == true */
@@ -45,7 +52,11 @@ export const findNewCampaignContact = async (
     const organization = await loaders.organization.load(
       campaign.organization_id
     );
-    const policy = getDynamicAssignmentBatchPolicy({ organization, campaign });
+    const policy = getDynamicAssignmentBatchPolicy({
+      organization,
+      campaign,
+      messageStatus
+    });
     if (!policy || !policy.requestNewBatchCount) {
       return falseRetVal; // to be safe, default to never
     }
@@ -57,7 +68,8 @@ export const findNewCampaignContact = async (
       organization,
       campaign,
       assignment,
-      texter: user
+      texter: user,
+      messageStatus
     });
   }
 
@@ -84,7 +96,7 @@ export const findNewCampaignContact = async (
   const result = await r.getCount(
     r.knex("campaign_contact").where({
       assignment_id: assignmentId,
-      message_status: "needsMessage",
+      message_status: messageStatus,
       is_opted_out: false
     })
   );
@@ -102,7 +114,7 @@ export const findNewCampaignContact = async (
         .whereNull("assignment_id")
         .where({
           // FUTURE: a function in the batch policy could allow convo contacts, too
-          message_status: "needsMessage",
+          message_status: messageStatus,
           campaign_id: campaign.id
         })
         .limit(numberContacts)

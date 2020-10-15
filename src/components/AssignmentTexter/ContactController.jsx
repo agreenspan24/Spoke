@@ -67,10 +67,14 @@ export class ContactController extends React.Component {
       window.ASSIGNMENT_CONTACTS_SIDEBAR &&
       this.props.messageStatusFilter !== "needsMessage"
     ) {
-      startIndex =
-        this.props.contacts.findIndex(
-          c => c.messageStatus === this.props.messageStatusFilter
-        ) || 0;
+      startIndex = this.props.contacts.findIndex(
+        c => c.messageStatus === this.props.messageStatusFilter
+      );
+
+      if (startIndex === -1) {
+        startIndex = 0;
+      }
+      console.log({ startIndex });
     }
 
     this.updateCurrentContactIndex(startIndex);
@@ -443,14 +447,17 @@ export class ContactController extends React.Component {
           //   Maybe they don't have access to that contact, etc
           // Strategy: see if we can just skip to the next one
 
-          // console.log('try something',
-          //             self.state.currentContactIndex,
-          //             self.state.reloadDelay,
-          //             self.props.contacts[self.state.currentContactIndex + 1],
-          //             (self.props.contacts[self.state.currentContactIndex + 1]||{}).id,
-          //             self.props.contacts,
-          //             self.state.contactCache[
-          //               (self.props.contacts[self.state.currentContactIndex + 1]||{}).id])
+          console.log(
+            "try something",
+            self.state.currentContactIndex,
+            self.state.reloadDelay,
+            self.props.contacts[self.state.currentContactIndex + 1],
+            (self.props.contacts[self.state.currentContactIndex + 1] || {}).id,
+            self.props.contacts,
+            self.state.contactCache[
+              (self.props.contacts[self.state.currentContactIndex + 1] || {}).id
+            ]
+          );
           if (
             this.state.contactCache[contact.id] === null &&
             self.props.contacts.length > self.state.currentContactIndex + 1
@@ -539,13 +546,8 @@ export class ContactController extends React.Component {
     const { texter } = assignment || {};
     const contact = this.currentContact();
     const navigationToolbarChildren = this.getNavigationToolbarChildren();
-    const { finishedContactId, loading } = this.state;
-    const finished =
-      !contact ||
-      (navigationToolbarChildren &&
-        !navigationToolbarChildren.onNext &&
-        finishedContactId &&
-        Number(contact.id) === Number(finishedContactId));
+    const { loading } = this.state;
+    const finished = !contacts.some(c => c.messageStatus === "needsResponse");
     const settingsData = JSON.parse(
       (campaign &&
         campaign.texterUIConfig &&

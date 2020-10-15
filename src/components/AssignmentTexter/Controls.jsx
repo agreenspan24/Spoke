@@ -226,6 +226,7 @@ export class AssignmentTexterContactControls extends React.Component {
     ) {
       this.setState({ doneFirstClick: true });
     } else {
+      console.log("clicking button", Date.now());
       this.refs.form.submit();
       this.setState({ doneFirstClick: false });
     }
@@ -853,6 +854,7 @@ export class AssignmentTexterContactControls extends React.Component {
 
   renderMessagingRowSendSkip(contact) {
     const firstMessage = this.props.messageStatusFilter === "needsMessage";
+
     return (
       <div
         className={css(flexStyles.sectionSend)}
@@ -1012,13 +1014,22 @@ export class AssignmentTexterContactControls extends React.Component {
   }
 
   renderFirstMessage(enabledSideboxes) {
+    const { messages } = this.props.contact;
     return [
       this.renderToolbar(enabledSideboxes),
       this.renderMessageBox(
-        <Empty
-          title={`This is your first message to ${this.props.contact.firstName} ${this.props.contact.lastName}`}
-          icon={<CreateIcon color={theme.colors.coreBackgroundColor} />}
-        />,
+        messages && messages.length ? (
+          <MessageList
+            contact={this.props.contact}
+            messages={messages}
+            styles={messageListStyles}
+          />
+        ) : (
+          <Empty
+            title={`This is your first message to ${this.props.contact.firstName} ${this.props.contact.lastName}`}
+            icon={<CreateIcon color={theme.colors.coreBackgroundColor} />}
+          />
+        ),
         enabledSideboxes
       ),
       this.renderMessagingRowMessage(),
@@ -1042,8 +1053,7 @@ export class AssignmentTexterContactControls extends React.Component {
                   contact={this.props.contact}
                   messages={this.props.contact.messages}
                   styles={messageListStyles}
-                />,
-                enabledSideboxes
+                />
               )}
               {this.renderMessageControls(enabledSideboxes)}
             </div>

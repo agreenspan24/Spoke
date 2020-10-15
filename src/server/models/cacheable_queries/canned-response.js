@@ -31,8 +31,7 @@ const cannedResponseCache = {
     const cannedResponses = await r
       .table("canned_response")
       .getAll(campaignId, { index: "campaign_id" })
-      .filter({ user_id: userId || "" })
-      .orderBy("title");
+      .filter({ user_id: userId || "" });
 
     const responseActions = await r
       .knex("canned_response_action")

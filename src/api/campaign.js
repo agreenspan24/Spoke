@@ -111,6 +111,7 @@ export const schema = gql`
     contactsCount: Int
     hasUnassignedContacts: Boolean
     hasUnassignedContactsForTexter: Boolean
+    hasUnassignedRepliesForTexter: Boolean
     hasUnsentInitialMessages: Boolean
     customFields: [String]
     cannedResponses(userId: String): [CannedResponse]

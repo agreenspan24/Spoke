@@ -5,6 +5,7 @@ import moment from "moment";
 import ProhibitedIcon from "material-ui/svg-icons/av/not-interested";
 import Divider from "material-ui/Divider";
 import { red300 } from "material-ui/styles/colors";
+import theme from "../../styles/theme";
 
 const defaultStyles = {
   optOut: {
@@ -54,7 +55,19 @@ const MessageList = function MessageList(props) {
           style={message.isFromContact ? received : sent}
           key={message.id}
           primaryText={message.text}
-          secondaryText={moment.utc(message.createdAt).fromNow()}
+          secondaryText={
+            <div
+              style={{
+                color: message.errorMessage
+                  ? message.isFromContact
+                    ? theme.colors.lightRed
+                    : theme.colors.red
+                  : null
+              }}
+            >
+              {message.errorMessage || moment.utc(message.createdAt).fromNow()}
+            </div>
+          }
         />
       ))}
       {optOutItem}

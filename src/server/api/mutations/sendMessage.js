@@ -134,11 +134,14 @@ export const sendMessage = async (
     organization,
     texter: user
   });
+
   if (!saveResult.message) {
     throw new GraphQLError(
       `Message send error ${saveResult.texterError || ""}`
     );
   }
+
+  const oldContactStatus = contact.message_status;
   contact.message_status = saveResult.contactStatus;
 
   if (!saveResult.blockSend) {
@@ -148,7 +151,8 @@ export const sendMessage = async (
       // TODO: start a transaction inside the service send message function
       trx: null,
       organization,
-      campaign
+      campaign,
+      oldContactStatus
     });
   }
 

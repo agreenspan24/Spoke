@@ -21,6 +21,7 @@ export const showSidebox = ({
   messageStatusFilter,
   finished
 }) => {
+  console.log({ finished, campaign, assignment, messageStatusFilter });
   // Return anything False-y to not show
   // Return anything Truth-y to show
   // Return 'popup' to force a popup on mobile screens (instead of letting it hide behind a button)
@@ -29,7 +30,8 @@ export const showSidebox = ({
     campaign.useDynamicAssignment &&
     (assignment.hasUnassignedContactsForTexter ||
       messageStatusFilter === "needsMessage" ||
-      assignment.unmessagedCount) &&
+      assignment.unmessagedCount ||
+      assignment.hasUnassignedRepliesForTexter) &&
     (messageStatusFilter === "needsMessage" ||
       messageStatusFilter === "needsResponse")
   ) {
@@ -39,7 +41,8 @@ export const showSidebox = ({
 
 export const showSummary = ({ campaign, assignment, settingsData }) =>
   campaign.useDynamicAssignment &&
-  assignment.hasUnassignedContactsForTexter &&
+  (assignment.hasUnassignedContactsForTexter ||
+    assignment.hasUnassignedRepliesForTexter) &&
   !assignment.unmessagedCount &&
   assignment.maxContacts !== 0;
 
@@ -57,6 +60,24 @@ export class TexterSideboxClass extends React.Component {
         this.gotoInitials();
       } else {
         this.props.refreshData();
+      }
+    }
+  };
+
+  requestNewReplies = async () => {
+    const { assignment, messageStatusFilter } = this.props;
+    const didAddContacts = (
+      await this.props.mutations.findNewCampaignContact("needsResponse")
+    ).data.findNewCampaignContact;
+    console.log(
+      "default-dynamicassignment:requestNewContacts added?",
+      didAddContacts
+    );
+    if (didAddContacts && didAddContacts.found) {
+      if (messageStatusFilter !== "needsMessage") {
+        this.props.refreshData();
+      } else {
+        this.gotoReplies();
       }
     }
   };
@@ -103,11 +124,12 @@ export class TexterSideboxClass extends React.Component {
       assignment.allContactsCount === 0
         ? "Start texting"
         : settingsData.dynamicAssignmentRequestMoreLabel || "Send more texts";
+
     const headerStyle = messageStatusFilter ? { textAlign: "center" } : {};
     return (
       <div style={headerStyle}>
         {assignment.hasUnassignedContactsForTexter ? (
-          <div>
+          <div style={{ marginTop: "8px", paddingLeft: "12px" }}>
             <h3>{nextBatchMessage}</h3>
             <RaisedButton
               label={nextBatchMoreLabel}
@@ -116,8 +138,17 @@ export class TexterSideboxClass extends React.Component {
             />
           </div>
         ) : null}
+        {assignment.hasUnassignedRepliesForTexter ? (
+          <div style={{ marginTop: "8px", paddingLeft: "12px" }}>
+            <RaisedButton
+              label="Send Unanswered Replies"
+              primary
+              onClick={this.requestNewReplies}
+            />
+          </div>
+        ) : null}
         {messageStatusFilter === "needsMessage" && assignment.unrepliedCount ? (
-          <div style={{ marginBottom: "8px", paddingLeft: "12px" }}>
+          <div style={{ marginTop: "8px", paddingLeft: "12px" }}>
             <Badge
               badgeStyle={{ ...inlineStyles.badge }}
               badgeContent={assignment.unrepliedCount}
@@ -131,7 +162,7 @@ export class TexterSideboxClass extends React.Component {
         {messageStatusFilter &&
         messageStatusFilter !== "needsMessage" &&
         assignment.unmessagedCount ? (
-          <div style={{ marginBottom: "8px", paddingLeft: "12px" }}>
+          <div style={{ marginTop: "8px", paddingLeft: "12px" }}>
             <Badge
               badgeStyle={{ ...inlineStyles.badge }}
               badgeContent={assignment.unmessagedCount}
@@ -146,7 +177,7 @@ export class TexterSideboxClass extends React.Component {
           </div>
         ) : null}
         {contact /*the empty list*/ ? (
-          <div style={{ marginBottom: "8px" }}>
+          <div style={{ marginTop: "8px" }}>
             <RaisedButton label="Back To Todos" onClick={this.gotoTodos} />
           </div>
         ) : null}
@@ -171,27 +202,31 @@ TexterSideboxClass.propTypes = {
 };
 
 export const mutations = {
-  findNewCampaignContact: ownProps => () => ({
+  findNewCampaignContact: ownProps => messageStatus => ({
     mutation: gql`
       mutation findNewCampaignContact(
         $assignmentId: String!
         $numberContacts: Int!
+        $messageStatus: String
       ) {
         findNewCampaignContact(
           assignmentId: $assignmentId
           numberContacts: $numberContacts
+          messageStatus: $messageStatus
         ) {
           found
           assignment {
             id
             hasUnassignedContactsForTexter
+            hasUnassignedRepliesForTexter
           }
         }
       }
     `,
     variables: {
       assignmentId: ownProps.assignment.id,
-      numberContacts: ownProps.campaign.batchSize
+      numberContacts: ownProps.campaign.batchSize,
+      messageStatus
     }
   })
 };

@@ -183,7 +183,14 @@ async function getContactUserNumber(organization, contactNumber) {
   return null;
 }
 
-async function sendMessage(message, contact, trx, organization, campaign) {
+async function sendMessage(
+  message,
+  contact,
+  trx,
+  organization,
+  campaign,
+  oldContactStatus
+) {
   const twilio = await getTwilio(organization);
   const APITEST = /twilioapitest/.test(message.text);
   if (!twilio && !APITEST) {
@@ -305,7 +312,8 @@ async function sendMessage(message, contact, trx, organization, campaign) {
         fakeErr,
         fakeResponse,
         organization,
-        changes
+        changes,
+        oldContactStatus
       );
     } else {
       twilio.messages.create(messageParams, (err, response) => {
@@ -318,7 +326,8 @@ async function sendMessage(message, contact, trx, organization, campaign) {
           err,
           response,
           organization,
-          changes
+          changes,
+          oldContactStatus
         );
       });
     }
@@ -334,7 +343,8 @@ export function postMessageSend(
   err,
   response,
   organization,
-  changes
+  changes,
+  oldContactStatus
 ) {
   let changesToSave = changes
     ? {
@@ -349,7 +359,6 @@ export function postMessageSend(
     hasError = true;
 
     log.warn("ERROR SENDING MESSAGE", {
-      err,
       message,
       response
     });
@@ -403,7 +412,10 @@ export function postMessageSend(
       contactUpdateQuery = r
         .knex("campaign_contact")
         .where("id", message.campaign_contact_id)
-        .update("error_code", changesToSave.error_code);
+        .update({
+          error_code: changesToSave.error_code,
+          message_status: oldContactStatus
+        });
       if (trx) {
         contactUpdateQuery = contactUpdateQuery.transacting(trx);
       }
