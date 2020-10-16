@@ -543,9 +543,10 @@ export class ContactController extends React.Component {
     const contact = this.currentContact();
     const navigationToolbarChildren = this.getNavigationToolbarChildren();
     const { loading } = this.state;
-    const finished = !contacts.some(
-      c => c.messageStatus === messageStatusFilter
-    );
+    const finished =
+      (messageStatusFilter == "needsMessage" ||
+        messageStatusFilter == "needsResponse") &&
+      !contacts.some(c => c.messageStatus === messageStatusFilter);
     const settingsData = JSON.parse(
       (campaign &&
         campaign.texterUIConfig &&
