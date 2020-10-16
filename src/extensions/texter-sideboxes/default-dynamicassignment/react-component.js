@@ -69,14 +69,11 @@ export class TexterSideboxClass extends React.Component {
   };
 
   requestNewReplies = async () => {
-    const { assignment, messageStatusFilter } = this.props;
+    const { messageStatusFilter } = this.props;
     const didAddContacts = (
       await this.props.mutations.findNewCampaignContact(75, "needsResponse")
     ).data.findNewCampaignContact;
-    console.log(
-      "default-dynamicassignment:requestNewContacts added?",
-      didAddContacts
-    );
+
     if (didAddContacts && didAddContacts.found) {
       if (messageStatusFilter !== "needsMessage") {
         this.props.refreshData();

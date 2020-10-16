@@ -188,7 +188,6 @@ export const resolvers = {
       return suggestedCount;
     },
     hasUnassignedRepliesForTexter: async (assignment, _, { loaders, user }) => {
-      console.log("getting unassigned replies");
       if (assignment.hasOwnProperty("hasUnassignedRepliesForTexter")) {
         return assignment.hasUnassignedRepliesForTexter;
       }
@@ -224,7 +223,6 @@ export const resolvers = {
         availableCount
       );
 
-      console.log({ suggestedCount, availableCount });
       return suggestedCount;
     },
     contactsCount: async (

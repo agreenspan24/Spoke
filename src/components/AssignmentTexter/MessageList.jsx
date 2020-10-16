@@ -27,8 +27,6 @@ const MessageList = function MessageList(props) {
   const { contact, styles } = props;
   const { optOut, messages } = contact;
 
-  const filteredMessages = messages.filter(m => !!m.errorCode);
-
   const received = (styles && styles.messageReceived) || defaultStyles.received;
   const sent = (styles && styles.messageSent) || defaultStyles.sent;
   const listStyle = (styles && styles.messageList) || {};
@@ -51,7 +49,7 @@ const MessageList = function MessageList(props) {
 
   return (
     <List style={listStyle}>
-      {filteredMessages.map(message => (
+      {messages.map(message => (
         <ListItem
           disabled
           style={message.isFromContact ? received : sent}

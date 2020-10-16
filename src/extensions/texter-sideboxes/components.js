@@ -42,7 +42,6 @@ export const getSideboxes = (
   context
 ) => {
   const popups = [];
-  console.log({ enabledSideboxes });
   const enabledSideboxes = (
     (campaign &&
       campaign.texterUIConfig &&

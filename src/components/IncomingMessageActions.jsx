@@ -131,6 +131,7 @@ class IncomingMessageActions extends Component {
                     texterSearchText: ""
                   })
                 }
+                onBlur={this.onReassignChanged}
                 onUpdateInput={texterSearchText =>
                   this.setState({ texterSearchText })
                 }
