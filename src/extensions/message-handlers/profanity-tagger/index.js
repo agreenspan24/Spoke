@@ -64,16 +64,6 @@ export const preMessageSave = async ({
       matches.length &&
       matches.every(m => m !== contact.first_name && m !== contact.last_name)
     ) {
-      // Object.assign(messageToSave, {
-      //   send_status: "ERROR",
-      //   error_code: -166
-      // });
-
-      // await r
-      //   .knex("campaign_contact")
-      //   .where("id", contact.id)
-      //   .update({ error_code: -166 });
-
       return {
         cancel: true,
         texterError:
