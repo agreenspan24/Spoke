@@ -446,7 +446,7 @@ const queries = {
           messageStatus: "needsMessage"
         }
       },
-      pollInterval: 5000
+      pollInterval: 30000
     })
   },
   organizationData: {

@@ -58,19 +58,26 @@ export const preMessageSave = async ({
       getConfig("PROFANITY_REGEX_BASE64", organization) ||
       DEFAULT_PROFANITY_TEXTER_REGEX_BASE64;
     const re = new RegExp(Buffer.from(regexText, "base64").toString(), "i");
-    if (String(messageToSave.text).match(re)) {
-      Object.assign(messageToSave, {
-        send_status: "ERROR",
-        error_code: -166
-      });
+    const matches = String(messageToSave.text).match(re);
+    if (
+      matches &&
+      matches.length &&
+      matches.every(m => m !== contact.first_name && m !== contact.last_name)
+    ) {
+      // Object.assign(messageToSave, {
+      //   send_status: "ERROR",
+      //   error_code: -166
+      // });
 
-      await r
-        .knex("campaign_contact")
-        .where("id", contact.id)
-        .update({ error_code: -166 });
+      // await r
+      //   .knex("campaign_contact")
+      //   .where("id", contact.id)
+      //   .update({ error_code: -166 });
 
       return {
-        messageToSave
+        cancel: true,
+        texterError:
+          "Please remove invalid content and try again: " + matches.join(", ")
       };
     }
   }
@@ -142,7 +149,12 @@ export const postMessageSave = async ({ message, organization }) => {
 
   if (regexText) {
     const re = new RegExp(Buffer.from(regexText, "base64").toString(), "i");
-    if (String(message.text).match(re)) {
+    const matches = String(message.text).match(re);
+    if (
+      matches &&
+      matches.length &&
+      matches.every(m => m !== contact.first_name && m !== contact.last_name)
+    ) {
       if (tagId) {
         await cacheableData.tagCampaignContact.save(
           message.campaign_contact_id,

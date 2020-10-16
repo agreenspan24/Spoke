@@ -176,81 +176,6 @@ export const resolvers = {
       JobRequest
     )
   },
-  CampaignStats: {
-    sentMessagesCount: async (campaign, _, { user }) => {
-      await accessRequired(
-        user,
-        campaign.organization_id,
-        "SUPERVOLUNTEER",
-        true
-      );
-      return r.getCount(
-        r
-          .knex("campaign_contact")
-          .join("message", "message.campaign_contact_id", "campaign_contact.id")
-          .where({
-            "campaign_contact.campaign_id": campaign.id,
-            "message.is_from_contact": false
-          })
-      );
-    },
-    receivedMessagesCount: async (campaign, _, { user }) => {
-      await accessRequired(
-        user,
-        campaign.organization_id,
-        "SUPERVOLUNTEER",
-        true
-      );
-      return r.getCount(
-        r
-          .knex("campaign_contact")
-          .join("message", "message.campaign_contact_id", "campaign_contact.id")
-          .where({
-            "campaign_contact.campaign_id": campaign.id,
-            "message.is_from_contact": true
-          })
-      );
-    },
-    optOutsCount: async (campaign, _, { user }) => {
-      await accessRequired(
-        user,
-        campaign.organization_id,
-        "SUPERVOLUNTEER",
-        true
-      );
-      return await r.getCount(
-        r
-          .knex("campaign_contact")
-          .where({ is_opted_out: true, campaign_id: campaign.id })
-      );
-    },
-    errorCounts: async (campaign, _, { user, loaders }) => {
-      await accessRequired(
-        user,
-        campaign.organization_id,
-        "SUPERVOLUNTEER",
-        true
-      );
-      const errorCounts = await r
-        .knex("campaign_contact")
-        .where("campaign_id", campaign.id)
-        .whereNotNull("error_code")
-        .select("error_code", r.knex.raw("count(*) as error_count"))
-        .groupBy("error_code")
-        .orderByRaw("count(*) DESC");
-      const organization = loaders.organization.load(campaign.organization_id);
-      const isTwilio = getConfig("DEFAULT_SERVICE", organization) === "twilio";
-      return errorCounts.map(e => ({
-        code: String(e.error_code),
-        count: e.error_count,
-        description: errorDescriptions[e.error_code] || null,
-        link:
-          e.error_code > 0 && isTwilio
-            ? `https://www.twilio.com/docs/api/errors/${e.error_code}`
-            : null
-      }));
-    }
-  },
   CampaignsReturn: {
     __resolveType(obj, context, _) {
       if (Array.isArray(obj)) {
@@ -420,6 +345,74 @@ export const resolvers = {
       });
 
       return Promise.all(promises);
+    },
+    stats: async (campaign, _, { user, loaders }) => {
+      await accessRequired(
+        user,
+        campaign.organization_id,
+        "SUPERVOLUNTEER",
+        true
+      );
+
+      const messageCountsQuery = r
+        .knex("campaign_contact")
+        .leftJoin(
+          "message",
+          "message.campaign_contact_id",
+          "campaign_contact.id"
+        )
+        .where({ campaign_id: campaign.id })
+        .select(
+          r.knex.raw(
+            "SUM(CASE WHEN NOT is_from_contact THEN 1 ELSE 0 END) AS sent_count"
+          ),
+          r.knex.raw(
+            "SUM(CASE WHEN is_from_contact THEN 1 ELSE 0 END) AS received_count"
+          ),
+          r.knex.raw(
+            "SUM(CASE WHEN is_opted_out THEN 1 ELSE 0 END) AS opt_out_count"
+          )
+        );
+
+      const errorCountsQuery = r
+        .knex("campaign_contact")
+        .where("campaign_id", campaign.id)
+        .whereNotNull("error_code")
+        .select("error_code", r.knex.raw("count(*) as error_count"))
+        .groupBy("error_code")
+        .orderByRaw("count(*) DESC");
+
+      const organizationPromise = loaders.organization.load(
+        campaign.organization_id
+      );
+
+      const [
+        messageCountsResult,
+        errorCounts,
+        organization
+      ] = await Promise.all([
+        messageCountsQuery,
+        errorCountsQuery,
+        organizationPromise
+      ]);
+
+      const [messageCounts] = messageCountsResult;
+      const isTwilio = getConfig("DEFAULT_SERVICE", organization) === "twilio";
+
+      return {
+        sentMessagesCount: Number(messageCounts.sent_count),
+        receivedMessagesCount: Number(messageCounts.received_count),
+        optOutsCount: Number(messageCounts.opt_out_count),
+        errorCounts: errorCounts.map(e => ({
+          code: String(e.error_code),
+          count: e.error_count,
+          description: errorDescriptions[e.error_code] || null,
+          link:
+            e.error_code > 0 && isTwilio
+              ? `https://www.twilio.com/docs/api/errors/${e.error_code}`
+              : null
+        }))
+      };
     },
     completionStats: async campaign => {
       // must be cache-loaded or bust:
@@ -655,7 +648,6 @@ export const resolvers = {
     customFields: async campaign =>
       campaign.customFields ||
       cacheableData.campaign.dbCustomFields(campaign.id),
-    stats: async campaign => campaign,
     cacheable: (campaign, _, { user }) => Boolean(r.redis),
     editors: async (campaign, _, { user }) => {
       await accessRequired(
