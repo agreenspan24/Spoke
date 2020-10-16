@@ -76,9 +76,9 @@ export const resolvers = {
       return await loaders.zipCode.load(mainZip);
     },
     messages: async campaignContact => {
-      // if (campaignContact.message_status === "needsMessage") {
-      //   return []; // it's the beginning, so there won't be any
-      // }
+      if (campaignContact.message_status === "needsMessage") {
+        return []; // it's the beginning, so there won't be any
+      }
 
       if ("messages" in campaignContact) {
         return campaignContact.messages;

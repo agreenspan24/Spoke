@@ -109,7 +109,6 @@ export class CampaignContactsForm extends React.Component {
   }
 
   handleUploadSuccess(validationStats, contacts, customFields) {
-    console.log("setting state");
     this.setState({
       validationStats,
       customFields,
@@ -127,13 +126,9 @@ export class CampaignContactsForm extends React.Component {
 
     const clientData = JSON.parse(this.props.clientChoiceData);
 
-    console.log("zipping");
     gzip(JSON.stringify(contactCollection)).then(gzippedData => {
-      console.log("zipped");
       const data = gzippedData.toString("base64");
       axios.put(clientData.s3Url, data).then(res => {
-        console.log("uploaded to s3");
-        s;
         self.props.onChange(clientData.s3key);
       });
     });

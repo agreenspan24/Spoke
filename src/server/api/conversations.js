@@ -21,7 +21,7 @@ function getConversationsJoinsAndWhereClause(
     if (assignmentsFilter.texterId) {
       query = query.where({ "assignment.user_id": assignmentsFilter.texterId });
     } else if (assignmentsFilter.texterId === null) {
-      query = query.where(r.knex.raw("campaign_contact.assignment_id IS NULL"));
+      query = query.whereNull("campaign_contact.assignment_id");
     }
   }
 

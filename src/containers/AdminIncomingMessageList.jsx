@@ -135,7 +135,6 @@ export class AdminIncomingMessageList extends Component {
 
   handleTexterChanged = async texterId => {
     const assignmentsFilter = {};
-    console.log("texter changed", texterId);
     if (texterId >= 0 || texterId === null) {
       assignmentsFilter.texterId = texterId;
     }

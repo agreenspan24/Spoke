@@ -226,7 +226,6 @@ export class AssignmentTexterContactControls extends React.Component {
     ) {
       this.setState({ doneFirstClick: true });
     } else {
-      console.log("clicking button", Date.now());
       this.refs.form.submit();
       this.setState({ doneFirstClick: false });
     }
@@ -1014,23 +1013,13 @@ export class AssignmentTexterContactControls extends React.Component {
   }
 
   renderFirstMessage(enabledSideboxes) {
-    const { messages } = this.props.contact;
     return [
       this.renderToolbar(enabledSideboxes),
       this.renderMessageBox(
-        messages && messages.length ? (
-          <MessageList
-            contact={this.props.contact}
-            messages={messages}
-            styles={messageListStyles}
-          />
-        ) : (
-          <Empty
-            title={`This is your first message to ${this.props.contact.firstName} ${this.props.contact.lastName}`}
-            icon={<CreateIcon color={theme.colors.coreBackgroundColor} />}
-          />
-        ),
-        enabledSideboxes
+        <Empty
+          title={`This is your first message to ${this.props.contact.firstName} ${this.props.contact.lastName}`}
+          icon={<CreateIcon color={theme.colors.coreBackgroundColor} />}
+        />
       ),
       this.renderMessagingRowMessage(),
       this.renderMessagingRowSendSkip(this.props.contact)

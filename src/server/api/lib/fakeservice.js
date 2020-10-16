@@ -42,7 +42,8 @@ async function sendMessage(
         .where("id", message.campaign_contact_id)
         .update({
           error_code: errorCode[1],
-          message_status: oldContactStatus
+          message_status:
+            oldContactStatus === "needsMessage" ? "messaged" : oldContactStatus
         });
     }
   }

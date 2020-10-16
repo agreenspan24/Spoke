@@ -123,7 +123,6 @@ class IncomingMessageFilter extends Component {
 
   onTexterSelected = (selection, index) => {
     let texterUserId = undefined;
-    console.log(selection);
     if (index === -1) {
       const texter = this.props.texters.find(texter => {
         return texter.displayName === selection;

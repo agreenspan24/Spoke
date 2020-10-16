@@ -49,7 +49,6 @@ export const preMessageSave = async ({
   organization,
   contact
 }) => {
-  console.log("profanity tagger", contact);
   if (
     !messageToSave.is_from_contact &&
     getConfig("PROFANITY_TEXTER_BLOCK_SEND", organization, { truthy: true })

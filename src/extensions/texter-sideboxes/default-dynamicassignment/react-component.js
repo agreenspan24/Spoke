@@ -21,7 +21,6 @@ export const showSidebox = ({
   messageStatusFilter,
   finished
 }) => {
-  console.log({ finished, campaign, assignment, messageStatusFilter });
   // Return anything False-y to not show
   // Return anything Truth-y to show
   // Return 'popup' to force a popup on mobile screens (instead of letting it hide behind a button)
@@ -49,12 +48,17 @@ export const showSummary = ({ campaign, assignment, settingsData }) =>
 export class TexterSideboxClass extends React.Component {
   requestNewContacts = async () => {
     const { assignment, messageStatusFilter } = this.props;
-    const didAddContacts = (await this.props.mutations.findNewCampaignContact())
-      .data.findNewCampaignContact;
+    const didAddContacts = (
+      await this.props.mutations.findNewCampaignContact(
+        ownProps.campaign.batchSize
+      )
+    ).data.findNewCampaignContact;
+
     console.log(
       "default-dynamicassignment:requestNewContacts added?",
       didAddContacts
     );
+
     if (didAddContacts && didAddContacts.found) {
       if (messageStatusFilter !== "needsMessage") {
         this.gotoInitials();
@@ -67,7 +71,7 @@ export class TexterSideboxClass extends React.Component {
   requestNewReplies = async () => {
     const { assignment, messageStatusFilter } = this.props;
     const didAddContacts = (
-      await this.props.mutations.findNewCampaignContact("needsResponse")
+      await this.props.mutations.findNewCampaignContact(75, "needsResponse")
     ).data.findNewCampaignContact;
     console.log(
       "default-dynamicassignment:requestNewContacts added?",
@@ -129,7 +133,7 @@ export class TexterSideboxClass extends React.Component {
     return (
       <div style={headerStyle}>
         {assignment.hasUnassignedContactsForTexter ? (
-          <div style={{ marginTop: "8px", paddingLeft: "12px" }}>
+          <div style={{ marginBottom: "8px", paddingLeft: "12px" }}>
             <h3>{nextBatchMessage}</h3>
             <RaisedButton
               label={nextBatchMoreLabel}
@@ -139,7 +143,7 @@ export class TexterSideboxClass extends React.Component {
           </div>
         ) : null}
         {assignment.hasUnassignedRepliesForTexter ? (
-          <div style={{ marginTop: "8px", paddingLeft: "12px" }}>
+          <div style={{ marginBottom: "8px", paddingLeft: "12px" }}>
             <RaisedButton
               label="Send Unanswered Replies"
               primary
@@ -148,7 +152,7 @@ export class TexterSideboxClass extends React.Component {
           </div>
         ) : null}
         {messageStatusFilter === "needsMessage" && assignment.unrepliedCount ? (
-          <div style={{ marginTop: "8px", paddingLeft: "12px" }}>
+          <div style={{ marginBottom: "8px", paddingLeft: "12px" }}>
             <Badge
               badgeStyle={{ ...inlineStyles.badge }}
               badgeContent={assignment.unrepliedCount}
@@ -162,7 +166,7 @@ export class TexterSideboxClass extends React.Component {
         {messageStatusFilter &&
         messageStatusFilter !== "needsMessage" &&
         assignment.unmessagedCount ? (
-          <div style={{ marginTop: "8px", paddingLeft: "12px" }}>
+          <div style={{ marginBottom: "8px", paddingLeft: "12px" }}>
             <Badge
               badgeStyle={{ ...inlineStyles.badge }}
               badgeContent={assignment.unmessagedCount}
@@ -177,7 +181,7 @@ export class TexterSideboxClass extends React.Component {
           </div>
         ) : null}
         {contact /*the empty list*/ ? (
-          <div style={{ marginTop: "8px" }}>
+          <div style={{ marginBottom: "8px" }}>
             <RaisedButton label="Back To Todos" onClick={this.gotoTodos} />
           </div>
         ) : null}
@@ -202,7 +206,7 @@ TexterSideboxClass.propTypes = {
 };
 
 export const mutations = {
-  findNewCampaignContact: ownProps => messageStatus => ({
+  findNewCampaignContact: ownProps => (numberContacts, messageStatus) => ({
     mutation: gql`
       mutation findNewCampaignContact(
         $assignmentId: String!
@@ -225,7 +229,7 @@ export const mutations = {
     `,
     variables: {
       assignmentId: ownProps.assignment.id,
-      numberContacts: ownProps.campaign.batchSize,
+      numberContacts,
       messageStatus
     }
   })

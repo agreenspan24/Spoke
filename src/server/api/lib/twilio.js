@@ -414,7 +414,8 @@ export function postMessageSend(
         .where("id", message.campaign_contact_id)
         .update({
           error_code: changesToSave.error_code,
-          message_status: oldContactStatus
+          message_status:
+            oldContactStatus === "needsMessage" ? "messaged" : oldContactStatus
         });
       if (trx) {
         contactUpdateQuery = contactUpdateQuery.transacting(trx);
