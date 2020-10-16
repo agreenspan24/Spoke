@@ -67,10 +67,13 @@ export class ContactController extends React.Component {
       window.ASSIGNMENT_CONTACTS_SIDEBAR &&
       this.props.messageStatusFilter !== "needsMessage"
     ) {
-      startIndex =
-        this.props.contacts.findIndex(
-          c => c.messageStatus === this.props.messageStatusFilter
-        ) || 0;
+      startIndex = this.props.contacts.findIndex(
+        c => c.messageStatus === this.props.messageStatusFilter
+      );
+
+      if (startIndex === -1) {
+        startIndex = 0;
+      }
     }
 
     this.updateCurrentContactIndex(startIndex);
@@ -539,13 +542,10 @@ export class ContactController extends React.Component {
     const { texter } = assignment || {};
     const contact = this.currentContact();
     const navigationToolbarChildren = this.getNavigationToolbarChildren();
-    const { finishedContactId, loading } = this.state;
-    const finished =
-      !contact ||
-      (navigationToolbarChildren &&
-        !navigationToolbarChildren.onNext &&
-        finishedContactId &&
-        Number(contact.id) === Number(finishedContactId));
+    const { loading } = this.state;
+    const finished = !contacts.some(
+      c => c.messageStatus === messageStatusFilter
+    );
     const settingsData = JSON.parse(
       (campaign &&
         campaign.texterUIConfig &&
