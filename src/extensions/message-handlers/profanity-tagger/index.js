@@ -116,7 +116,7 @@ async function maybeSuspendTexter(
   }
 }
 
-export const postMessageSave = async ({ message, organization }) => {
+export const postMessageSave = async ({ message, organization, contact }) => {
   let tagId = null;
   let regexText = null;
   const blockSend = getConfig("PROFANITY_TEXTER_BLOCK_SEND", organization, {
