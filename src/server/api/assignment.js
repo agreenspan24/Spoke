@@ -153,9 +153,9 @@ export const resolvers = {
       { loaders, user }
     ) => {
       console.log({ assignment });
-      // if (assignment.hasOwnProperty("hasUnassignedContactsForTexter")) {
-      //   return assignment.hasUnassignedContactsForTexter;
-      // }
+      if (assignment.hasOwnProperty("hasUnassignedContactsForTexter")) {
+        return assignment.hasUnassignedContactsForTexter;
+      }
       const campaign = await loaders.campaign.load(assignment.campaign_id);
       console.log({ campaign });
       if (campaign.is_archived) {
