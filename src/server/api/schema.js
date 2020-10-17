@@ -5,7 +5,6 @@ import isUrl from "is-url";
 
 import { gzip, makeTree, getHighestRole, log } from "../../lib";
 import _ from "lodash";
-\;
 import { capitalizeWord, groupCannedResponses } from "./lib/utils";
 import twilio from "./lib/twilio";
 import ownedPhoneNumber from "./lib/owned-phone-number";

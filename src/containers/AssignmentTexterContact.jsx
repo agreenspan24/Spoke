@@ -149,7 +149,8 @@ export class AssignmentTexterContact extends React.Component {
     }
   };
 
-  handleMessageFormSubmit = cannedResponseId => async ({ messageText }) => {
+  handleMessageFormSubmit = async ({ messageText, cannedResponseId }) => {
+    console.log("assignment");
     const { contact, messageStatusFilter } = this.props;
     try {
       const message = this.createMessageToContact(messageText);
