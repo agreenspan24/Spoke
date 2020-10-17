@@ -33,8 +33,8 @@ export const DEFAULT_NGP_VAN_CONTACT_TYPE = "SMS Text";
 export const DEFAULT_NGP_VAN_INPUT_TYPE = "API";
 export const DEFAULT_NGP_VAN_ACTION_HANDLER_CACHE_TTL = 600;
 
-export function clientChoiceDataCacheKey(organization) {
-  return `${organization.id}`;
+export function clientChoiceDataCacheKey() {
+  return "";
 }
 
 export const postCanvassResponse = async (
@@ -96,7 +96,7 @@ export const postCanvassResponse = async (
   return httpRequest(url, {
     method: "POST",
     retries: 0,
-    timeout: 32000,
+    timeout: Van.getNgpVanTimeout(organization),
     headers: {
       Authorization: Van.getAuth(
         organization,
@@ -133,10 +133,10 @@ export async function processAction({
 
 async function getContactTypeIdAndInputTypeId(organization, campaign) {
   const contactTypesPromise = httpRequest(
-    `https://api.securevan.com/v4/canvassResponses/contactTypes`,
+    Van.makeUrl(`v4/canvassResponses/contactTypes`),
     {
       method: "GET",
-      timeout: 32000,
+      timeout: Van.getNgpVanTimeout(organization),
       headers: {
         Authorization: Van.getAuth(
           organization,
@@ -154,10 +154,10 @@ async function getContactTypeIdAndInputTypeId(organization, campaign) {
     });
 
   const inputTypesPromise = httpRequest(
-    `https://api.securevan.com/v4/canvassResponses/inputTypes`,
+    Van.makeUrl(`v4/canvassResponses/inputTypes`),
     {
       method: "GET",
-      timeout: 32000,
+      timeout: Van.getNgpVanTimeout(organization),
       headers: {
         Authorization: Van.getAuth(
           organization,
@@ -241,10 +241,10 @@ export async function getClientChoiceData(organization, campaign) {
   const cycle = await getConfig("NGP_VAN_ELECTION_CYCLE_FILTER", organization);
   const cycleFilter = (cycle && `&cycle=${cycle}`) || "";
   const surveyQuestionsPromise = httpRequest(
-    `https://api.securevan.com/v4/surveyQuestions?statuses=Active${cycleFilter}`,
+    Van.makeUrl(`v4/surveyQuestions?statuses=Active${cycleFilter}&$top=200`),
     {
       method: "GET",
-      timeout: 32000,
+      timeout: Van.getNgpVanTimeout(organization),
       headers: {
         Authorization: Van.getAuth(
           organization,
@@ -262,10 +262,10 @@ export async function getClientChoiceData(organization, campaign) {
     });
 
   const activistCodesPromise = httpRequest(
-    `https://api.securevan.com/v4/activistCodes?statuses=Active`,
+    Van.makeUrl(`v4/activistCodes?statuses=Active&$top=200`),
     {
       method: "GET",
-      timeout: 32000,
+      timeout: Van.getNgpVanTimeout(organization),
       headers: {
         Authorization: Van.getAuth(
           organization,
@@ -283,10 +283,10 @@ export async function getClientChoiceData(organization, campaign) {
     });
 
   const canvassResultCodesPromise = httpRequest(
-    `https://api.securevan.com/v4/canvassResponses/resultCodes`,
+    Van.makeUrl(`v4/canvassResponses/resultCodes?$top=200`),
     {
       method: "GET",
-      timeout: 32000,
+      timeout: Van.getNgpVanTimeout(organization),
       headers: {
         Authorization: Van.getAuth(
           organization,

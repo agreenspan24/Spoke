@@ -8,6 +8,9 @@ import wrap from "./wrap";
 import { capitalizeWord } from "./api/lib/utils";
 import { log } from "../lib";
 
+export const nextUrlRedirect = (nextUrl, defaultPath) =>
+  nextUrl && !nextUrl.startsWith("http") ? nextUrl : defaultPath || "/";
+
 export function setupAuth0Passport() {
   const strategy = new Auth0Strategy(
     {
@@ -66,11 +69,17 @@ export function setupAuth0Passport() {
             email: req.user._json.email,
             is_superadmin: false
           };
-          await User.save(userData);
-          res.redirect(req.query.state || "terms");
+          const finalUser = await User.save(userData);
+          if (finalUser && finalUser.id === 1) {
+            await r
+              .knex("user")
+              .where("id", 1)
+              .update({ is_superadmin: true });
+          }
+          res.redirect(nextUrlRedirect(req.query.state, "terms"));
           return;
         }
-        res.redirect(req.query.state || "/");
+        res.redirect(nextUrlRedirect(req.query.state));
         return;
       })
     ]
@@ -128,7 +137,7 @@ export function setupLocalAuthPassport() {
     loginCallback: [
       passport.authenticate("local"),
       (req, res) => {
-        res.redirect(req.body.nextUrl || "/");
+        res.redirect(nextUrlRedirect(req.body.nextUrl));
       }
     ]
   };
@@ -224,7 +233,7 @@ export function setupSlackPassport(app) {
 
         if (existingUser.length > 0) {
           // user already exists
-          res.redirect(req.query.state || "/");
+          res.redirect(nextUrlRedirect(req.query.state));
           return;
         }
 
@@ -239,9 +248,14 @@ export function setupSlackPassport(app) {
           email: slackUser.email,
           is_superadmin: false
         };
-        await User.save(userData);
-
-        res.redirect(req.query.state || "/"); // TODO: terms?
+        const finalUser = await User.save(userData);
+        if (finalUser && finalUser.id === 1) {
+          await r
+            .knex("user")
+            .where("id", 1)
+            .update({ is_superadmin: true });
+        }
+        res.redirect(nextUrlRedirect(req.query.state)); // TODO: terms?
       })
     ]
   };

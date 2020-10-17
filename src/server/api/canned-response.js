@@ -10,7 +10,8 @@ export const resolvers = {
       return CannedResponseAction.getAll(cannedResponse.id, {
         index: "canned_response_id"
       });
-    }
+    },
+    tagIds: cannedResponse => cannedResponse.tagIds || []
   },
   CannedResponseAction: {
     ...mapFieldsToModel(["action", "actionData"], CannedResponseAction)

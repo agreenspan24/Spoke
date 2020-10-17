@@ -72,6 +72,7 @@ const rootSchema = gql`
     useDynamicAssignment: Boolean
     requestAfterReply: Boolean
     batchSize: Int
+    batchPolicies: [String]
     responseWindow: Float
     ingestMethod: String
     contactData: String
@@ -159,6 +160,11 @@ const rootSchema = gql`
     description: String
     isDeleted: Boolean
     organizationId: String
+  }
+
+  input ContactTagInput {
+    id: String
+    value: String
   }
 
   type FoundContact {
@@ -289,6 +295,7 @@ const rootSchema = gql`
     sendMessage(
       message: MessageInput!
       campaignContactId: String!
+      cannedResponseId: String
     ): CampaignContact
     createOptOut(
       optOut: OptOutInput!
@@ -303,7 +310,10 @@ const rootSchema = gql`
       interactionStepIds: [String]
       campaignContactId: String!
     ): CampaignContact
-    updateContactTags(tags: [TagInput], campaignContactId: String!): String
+    updateContactTags(
+      tags: [ContactTagInput]
+      campaignContactId: String!
+    ): CampaignContact
     updateQuestionResponses(
       questionResponses: [QuestionResponseInput]
       campaignContactId: String!
@@ -325,6 +335,7 @@ const rootSchema = gql`
     findNewCampaignContact(
       assignmentId: String!
       numberContacts: Int!
+      batchType: String
     ): FoundContact
     releaseContacts(
       assignmentId: String!
@@ -355,6 +366,7 @@ const rootSchema = gql`
       addToOrganizationMessagingService: Boolean
     ): JobRequest
     releaseCampaignNumbers(campaignId: ID!): Campaign!
+    clearCachedOrgAndExtensionCaches(organizationId: String!): String
   }
 
   schema {

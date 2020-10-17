@@ -4,7 +4,9 @@ import { GraphQLError } from "graphql/error";
 import isUrl from "is-url";
 
 import { gzip, makeTree, getHighestRole, log } from "../../lib";
-import { capitalizeWord } from "./lib/utils";
+import _ from "lodash";
+\;
+import { capitalizeWord, groupCannedResponses } from "./lib/utils";
 import twilio from "./lib/twilio";
 import ownedPhoneNumber from "./lib/owned-phone-number";
 
@@ -64,10 +66,10 @@ import {
   updateContactTags,
   updateQuestionResponses,
   releaseCampaignNumbers,
-  submitCannedResponse
+  submitCannedResponse,
+  clearCachedOrgAndExtensionCaches
 } from "./mutations";
 
-const ActionHandlers = require("../../extensions/action-handlers");
 import { jobRunner } from "../../extensions/job-runners";
 import { Jobs } from "../../workers/job-processes";
 import { Tasks } from "../../workers/tasks";
@@ -172,6 +174,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     dueBy,
     useDynamicAssignment,
     batchSize,
+    batchPolicies,
     responseWindow,
     logoImageUrl,
     introHtml,
@@ -241,6 +244,12 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     Object.assign(features, {
       TEXTER_UI_SETTINGS: campaign.texterUIConfig.options
     });
+  }
+  if (batchPolicies) {
+    Object.assign(features, {
+      DYNAMICASSIGNMENT_BATCHES: batchPolicies.join(",")
+    });
+    campaignUpdates.features = JSON.stringify(features);
   }
 
   campaignUpdates.features = JSON.stringify(features);
@@ -438,6 +447,7 @@ const rootMutations = {
     sendMessage,
     startCampaign,
     releaseCampaignNumbers,
+    clearCachedOrgAndExtensionCaches,
     userAgreeTerms: async (_, { userId }, { user }) => {
       // We ignore userId: you can only agree to terms for yourself
       await r
@@ -716,13 +726,13 @@ const rootMutations = {
 
       return await Organization.get(organizationId);
     },
-    createInvite: async (_, { user }) => {
+    createInvite: async (_, { invite }, { user }) => {
       if (
         (user && user.is_superadmin) ||
         !getConfig("SUPPRESS_SELF_INVITE", null, { truthy: true })
       ) {
         const inviteInstance = new Invite({
-          is_valid: true,
+          is_valid: invite.is_valid,
           hash: uuidv4()
         });
         const newInvite = await inviteInstance.save();
@@ -776,7 +786,18 @@ const rootMutations = {
         creator_id: user.id,
         title: "COPY - " + campaign.title,
         description: campaign.description,
-        due_by: campaign.dueBy,
+        due_by: campaign.due_by,
+        features: campaign.features,
+        intro_html: campaign.intro_html,
+        primary_color: campaign.primary_color,
+        logo_image_url: campaign.logo_image_url,
+        override_organization_texting_hours:
+          campaign.override_organization_texting_hours,
+        texting_hours_enforced: campaign.texting_hours_enforced,
+        texting_hours_start: campaign.texting_hours_start,
+        texting_hours_end: campaign.texting_hours_end,
+        timezone: campaign.timezone,
+        use_dynamic_assignment: campaign.use_dynamic_assignment,
         batch_size:
           campaign.batch_size ||
           Number(getConfig("DEFAULT_BATCHSIZE", organization) || 300),
@@ -796,7 +817,8 @@ const rootMutations = {
 
       let interactions = await r
         .knex("interaction_step")
-        .where({ campaign_id: oldCampaignId, is_deleted: false });
+        .where({ campaign_id: oldCampaignId, is_deleted: false })
+        .orderBy("id"); // Ensure that the copy is deterministic.
 
       const interactionsArr = [];
       interactions.forEach((interaction, index) => {
@@ -828,7 +850,6 @@ const rootMutations = {
           interactionsArr.push(is);
         }
       });
-
       await updateInteractionSteps(
         newCampaignId,
         [makeTree(interactionsArr, (id = null))],
@@ -1010,7 +1031,7 @@ const rootMutations = {
     getAssignmentContacts: async (
       _,
       { assignmentId, contactIds, findNew },
-      { user }
+      { user, loaders }
     ) => {
       if (contactIds.length === 0) {
         return [];
@@ -1060,7 +1081,29 @@ const rootMutations = {
         });
       }
       console.log("getAssignedContacts", contacts.length, updatedContacts);
-      return contacts.map(c => c && (updatedContacts[c.id] || c)).map(hasAssn);
+      const finalContacts = contacts
+        .map(c => c && (updatedContacts[c.id] || c))
+        .map(hasAssn);
+      if (finalContacts.length && r.redis) {
+        // find out used fields so we can only send back those
+        const campaign = await loaders.campaign.load(firstContact.campaign_id);
+        const cannedResponses = await cacheableData.cannedResponse.query({
+          campaignId: firstContact.campaign_id
+        });
+        if (
+          campaign.usedFields &&
+          (!cannedResponses.length || cannedResponses[0].usedFields)
+        ) {
+          const usedFields = campaign.usedFields;
+          if (cannedResponses.length && cannedResponses[0].usedFields) {
+            Object.keys(cannedResponses[0].usedFields).forEach(f => {
+              usedFields[f] = 1;
+            });
+          }
+          return finalContacts.map(c => (c && { ...c, usedFields }) || c);
+        }
+      }
+      return finalContacts;
     },
     createOptOut: async (
       _,
@@ -1089,9 +1132,9 @@ const rootMutations = {
         campaignContactId,
         contact.campaign_id
       );
-      const { assignmentId, cell, reason } = optOut;
+      const { assignmentId, reason } = optOut;
       await cacheableData.optOut.save({
-        cell,
+        cell: contact.cell,
         campaignContactId,
         reason,
         assignmentId,
@@ -1103,9 +1146,8 @@ const rootMutations = {
         campaignContactId,
         contact.campaign_id
       );
-      await cacheableData.campaignContact.clear(campaignContactId.toString());
 
-      return cacheableData.campaignContact.load(campaignContactId);
+      return cacheableData.campaignContact.updateCacheForOptOut(contact);
     },
     deleteQuestionResponses: async (
       _,
@@ -1285,6 +1327,9 @@ const rootResolvers = {
         );
         assignmentId = campaignContact.assignment_id;
       }
+      if (!assignmentId) {
+        return null;
+      }
       const assignment = await loaders.assignment.load(assignmentId);
       if (!assignment) {
         return null;
@@ -1308,7 +1353,7 @@ const rootResolvers = {
       return assignment;
     },
     organization: async (_, { id }, { user, loaders }) => {
-      await accessRequired(user, id, "TEXTER");
+      await accessRequired(user, id, "TEXTER", true);
       return await loaders.organization.load(id);
     },
     inviteByHash: async (_, { hash }, { loaders, user }) => {

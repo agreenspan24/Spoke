@@ -24,6 +24,7 @@ export const schema = `
     text: String
     isUserCreated: Boolean
     actions: [CannedResponseActionInput]
+    tagIds: [Int]
   }
 
   type CannedResponse {
@@ -32,5 +33,6 @@ export const schema = `
     text: String
     isUserCreated: Boolean
     actions: [CannedResponseAction]
+    tagIds: [ID]
   }
 `;

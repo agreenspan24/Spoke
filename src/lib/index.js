@@ -37,6 +37,13 @@ export {
 } from "./interaction-step-helpers";
 
 export {
+  getCampaignsFilterForCampaignArchiveStatus,
+  getContactsFilterForConversationOptOutStatus,
+  getConversationFiltersFromQuery,
+  tagsFilterStateFromTagsFilter
+} from "./conversations";
+
+export {
   ROLE_HIERARCHY,
   getHighestRole,
   hasRole,

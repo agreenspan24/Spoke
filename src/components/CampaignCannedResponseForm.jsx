@@ -5,6 +5,7 @@ import yup from "yup";
 import GSForm from "./forms/GSForm";
 import Form from "react-formal";
 import FlatButton from "material-ui/FlatButton";
+import AutoComplete from "material-ui/AutoComplete";
 import { dataTest } from "../lib/attributes";
 import theme from "../styles/theme";
 import IconButton from "material-ui/IconButton";
@@ -182,6 +183,31 @@ class CannedResponseForm extends React.Component {
       </div>
     );
   };
+  // import TagChips from "./TagChips";
+
+  // const styles = StyleSheet.create({
+  //   buttonRow: {
+  //     marginTop: 5
+  //   },
+  //   tagChips: {
+  //     display: "flex",
+  //     flexWrap: "wrap"
+  //   }
+  // });
+
+  // // THIS IS A COPY/PASTE FROM CANNED RESPONSE FORM BECAUSE I CANT MAKE FORM.CONTEXT WORK
+  // export default class CannedResponseForm extends React.Component {
+  // constructor(props) {
+  //   super(props);
+  //   this.state = {
+  //     ...this.props.defaultValue,
+  //     tagIds: this.props.defaultValue.tagIds || []
+  //   };
+  // }
+  handleSave = () => {
+    const { onSaveCannedResponse } = this.props;
+    onSaveCannedResponse(this.state);
+  };
 
   render() {
     const modelSchema = yup.object({
@@ -202,7 +228,8 @@ class CannedResponseForm extends React.Component {
       customFields,
       handleCloseAddForm,
       formButtonText,
-      availableActions
+      availableActions,
+      tags
     } = this.props;
 
     const actions = this.state.formValues.actions;
@@ -215,6 +242,7 @@ class CannedResponseForm extends React.Component {
           onChange={this.handleFormChange}
           onSubmit={this.handleSave}
           value={this.state.formValues}
+          defaultValue={this.state}
         >
           <Form.Field
             {...dataTest("title")}
@@ -237,8 +265,36 @@ class CannedResponseForm extends React.Component {
                 this.renderActionRow(a, idx)
               )
             : ""}
-
-          <div>
+          <AutoComplete
+            ref="autocompleteInput"
+            floatingLabelText="Tags"
+            filter={AutoComplete.fuzzyFilter}
+            dataSource={
+              tags && tags.filter(t => this.state.tagIds.indexOf(t.id) === -1)
+            }
+            maxSearchResults={8}
+            onNewRequest={({ id }) => {
+              this.refs.autocompleteInput.setState({ searchText: "" });
+              this.setState({ tagIds: [...this.state.tagIds, id] });
+            }}
+            dataSourceConfig={{
+              text: "name",
+              value: "id"
+            }}
+            fullWidth
+          />
+          <TagChips
+            tags={tags}
+            tagIds={this.state.tagIds}
+            onRequestDelete={listedTag => {
+              this.setState({
+                tagIds: this.state.tagIds.filter(
+                  tagId => tagId !== listedTag.id
+                )
+              });
+            }}
+          />
+          <div className={css(styles.buttonRow)}>
             <FlatButton
               {...dataTest("addResponse")}
               label={formButtonText}
@@ -276,7 +332,6 @@ CannedResponseForm.propTypes = {
   customFields: type.array,
   formButtonText: type.string,
   defaultValue: type.object,
-  availableActions: type.array
+  availableActions: type.array,
+  tags: type.array
 };
-
-export default CannedResponseForm;

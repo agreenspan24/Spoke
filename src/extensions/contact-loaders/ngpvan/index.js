@@ -95,7 +95,7 @@ export function addServerEndpoints(expressApp) {
   );
 }
 
-export function clientChoiceDataCacheKey(organization, campaign, user) {
+export function clientChoiceDataCacheKey(campaign, user) {
   // / returns a string to cache getClientChoiceData -- include items that relate to cacheability
   return `${organization.id}-${(campaign.features || {}).van_database_mode}`;
 }
@@ -123,7 +123,7 @@ export async function getClientChoiceData(organization, campaign, user) {
         )
       },
       retries: 0,
-      timeout: 5000
+      timeout: Van.getNgpVanTimeout(organization)
     });
 
     responseJson = await response.json();
@@ -179,13 +179,17 @@ const getPhoneNumberIfLikelyCell = (phoneType, row) => {
   const dialingPrefixKey = `${phoneType.typeName}PhoneDialingPrefix`;
   const countryCodeKey = `${phoneType.typeName}PhoneCountryCode`;
   const isCellPhoneKey = `Is${phoneType.typeName}PhoneACellExchange`;
+  const phoneIdKey = `${phoneType.typeName}PhoneId`;
 
   if (row[phoneKey]) {
     if (
       countryCodeOk(row[countryCodeKey]) &&
       treatAsCellPhone(row[isCellPhoneKey], phoneType.assumeCellIfPresent)
     ) {
-      return `${row[dialingPrefixKey]}${row[phoneKey]}`;
+      return {
+        number: `${row[dialingPrefixKey]}${row[phoneKey]}`,
+        id: row[phoneIdKey]
+      };
     }
   }
 
@@ -200,16 +204,16 @@ export const getCellFromRow = (row, cautious = true) => {
     { typeName: "Home", assumeCellIfPresent: !cautious || false },
     { typeName: "Work", assumeCellIfPresent: !cautious || false }
   ];
-  let cell = undefined;
+  let phone = undefined;
   phoneTypes.some(phoneType => {
-    cell = getPhoneNumberIfLikelyCell(phoneType, row);
-    if (cell) {
+    phone = getPhoneNumberIfLikelyCell(phoneType, row);
+    if (phone) {
       return true; // stop iterating
     }
     return false;
   });
 
-  return cell;
+  return phone;
 };
 
 export const makeRowTransformer = (cautious = true) => (
@@ -222,8 +226,10 @@ export const makeRowTransformer = (cautious = true) => (
     ...originalRow
   };
 
-  row.cell = exports.getCellFromRow(originalRow, cautious);
-  if (row.cell) {
+  const foundCell = exports.getCellFromRow(originalRow, cautious);
+  if (foundCell) {
+    row.cell = foundCell.number;
+    row.VanPhoneId = foundCell.id;
     addedFields.push("cell");
   }
 
@@ -277,7 +283,7 @@ export async function processContactLoad(
     const response = await HttpRequest(url, {
       method: "POST",
       retries: 0,
-      timeout: 5000,
+      timeout: Van.getNgpVanTimeout(organization),
       headers: {
         Authorization: Van.getAuth(
           organization,
@@ -331,7 +337,7 @@ export async function processContactLoad(
     vanResponse = await HttpRequest(downloadUrl, {
       method: "GET",
       retries: 0,
-      timeout: 5000
+      timeout: Van.getNgpVanTimeout(organization)
     });
   } catch (error) {
     await exports.handleFailedContactLoad(
@@ -353,7 +359,8 @@ export async function processContactLoad(
 
     const { validationStats, contacts } = await parseCSVAsync(vanContacts, {
       rowTransformer: exports.makeRowTransformer(cautiousCellPhoneSelection),
-      headerTransformer
+      headerTransformer,
+      additionalCustomFields: ["VanPhoneId"]
     });
 
     if (contacts.length === 0) {

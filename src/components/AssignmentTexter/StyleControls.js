@@ -12,7 +12,7 @@ export const messageListStyles = {
     padding: 8
   },
   messageSent: {
-    textAlign: "right",
+    textAlign: "left",
     marginLeft: "20%",
     marginRight: "10px",
     backgroundColor: "white",

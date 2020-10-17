@@ -447,9 +447,12 @@ describe("ngpvan", () => {
       expect(config.getConfig.mock.calls).toEqual([
         ["NGP_VAN_WEBHOOK_BASE_URL", organization],
         ["NGP_VAN_API_BASE_URL", organization],
+        ["NGP_VAN_TIMEOUT", organization],
         ["NGP_VAN_APP_NAME", organization],
         ["NGP_VAN_API_KEY", organization],
+        ["NGP_VAN_DATABASE_MODE", organization],
         ["NGP_VAN_EXPORT_JOB_TYPE_ID", organization],
+        ["NGP_VAN_TIMEOUT", organization],
         ["NGP_VAN_CAUTIOUS_CELL_PHONE_SELECTION", organization]
       ]);
 
@@ -734,9 +737,10 @@ describe("ngpvan", () => {
     let inputRow;
 
     beforeEach(() => {
-      getCellFromRowSpy = jest
-        .spyOn(ngpvan, "getCellFromRow")
-        .mockReturnValue("12024561414");
+      getCellFromRowSpy = jest.spyOn(ngpvan, "getCellFromRow").mockReturnValue({
+        number: "12024561414",
+        id: "123"
+      });
       getZipFromRowSpy = jest
         .spyOn(ngpvan, "getZipFromRow")
         .mockReturnValue("07052");
@@ -762,6 +766,7 @@ describe("ngpvan", () => {
       expect(getZipFromRowSpy.mock.calls).toEqual([[inputRow]]);
       expect(transformedRow.row).toEqual({
         VanID: "abc",
+        VanPhoneId: "123",
         external_id: "abc",
         cell: "12024561414",
         zip: "07052",
@@ -785,14 +790,28 @@ describe("ngpvan", () => {
 
   describe("getCellFromRow", () => {
     each([
-      [{ CellPhone: "2024561111", CellPhoneDialingPrefix: "1" }, "12024561111"],
       [
         {
           CellPhone: "2024561111",
+          CellPhoneId: "772024561111",
+          CellPhoneDialingPrefix: "1"
+        },
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
+      ],
+      [
+        {
+          CellPhone: "2024561111",
+          CellPhoneId: "772024561111",
           CellPhoneDialingPrefix: "1",
           CellPhoneCountryCode: "US"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
@@ -803,160 +822,270 @@ describe("ngpvan", () => {
         undefined
       ],
       [
-        { OptInPhone: "2024561111", OptInPhoneDialingPrefix: "1" },
-        "12024561111"
+        {
+          OptInPhone: "2024561111",
+          OptInPhoneId: "772024561111",
+          OptInPhoneDialingPrefix: "1"
+        },
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
           OptInPhone: "2024561111",
+          OptInPhoneId: "772024561111",
           OptInPhoneDialingPrefix: "1",
           IsOptInPhoneACellExchange: "1"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
           OptInPhone: "2024561111",
+          OptInPhoneId: "772024561111",
           OptInPhoneDialingPrefix: "1",
           IsOptInPhoneACellExchange: "0"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
           OptInPhone: "2024561111",
+          OptInPhoneId: "772024561111",
           OptInPhoneDialingPrefix: "1",
           IsOptInPhoneACellExchange: "a"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
-      [{ Phone: "2024561111", PhoneDialingPrefix: "1" }, "12024561111"],
       [
         {
           Phone: "2024561111",
+          PhoneId: "772024561111",
+          PhoneDialingPrefix: "1"
+        },
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
+      ],
+      [
+        {
+          Phone: "2024561111",
+          PhoneId: "772024561111",
           PhoneDialingPrefix: "1",
           IsPhoneACellExchange: "1"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
           Phone: "2024561111",
+          PhoneId: "772024561111",
           PhoneDialingPrefix: "1",
           IsPhoneACellExchange: "0"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
           Phone: "2024561111",
+          PhoneId: "772024561111",
           PhoneDialingPrefix: "1",
           IsPhoneACellExchange: "a"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
-      [{ HomePhone: "2024561111", HomePhoneDialingPrefix: "1" }, "12024561111"],
       [
         {
           HomePhone: "2024561111",
+          HomePhoneId: "772024561111",
+          HomePhoneDialingPrefix: "1"
+        },
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
+      ],
+      [
+        {
+          HomePhone: "2024561111",
+          HomePhoneId: "772024561111",
           HomePhoneDialingPrefix: "1",
           IsHomePhoneACellExchange: "1"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
           HomePhone: "2024561111",
+          HomePhoneId: "772024561111",
           HomePhoneDialingPrefix: "1",
           IsHomePhoneACellExchange: "0"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
           HomePhone: "2024561111",
+          HomePhoneId: "772024561111",
           HomePhoneDialingPrefix: "1",
           IsHomePhoneACellExchange: "a"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
           HomePhone: "2024561111",
+          HomePhoneId: "772024561111",
           HomePhoneDialingPrefix: "1",
           WorkPhone: "2024561414",
+          WorkPhoneId: "772024561414",
           WorkPhoneDialingPrefix: "1"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
           HomePhone: "2024561111",
+          HomePhoneId: "772024561111",
           HomePhoneDialingPrefix: "1",
           IsHomePhoneACellExchange: "1",
           WorkPhone: "2024561414",
+          WorkPhoneId: "772024561414",
           WorkPhoneDialingPrefix: "1",
           IsWorkPhoneACellExchange: "0"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
           HomePhone: "2024561111",
+          HomePhoneId: "772024561111",
           HomePhoneDialingPrefix: "1",
           IsHomePhoneACellExchange: "0",
           WorkPhone: "2024561414",
+          WorkPhoneId: "772024561414",
           WorkPhoneDialingPrefix: "1",
           IsWorkPhoneACellExchange: "0"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
           HomePhone: "2024561111",
+          HomePhoneId: "772024561111",
           HomePhoneDialingPrefix: "1",
           IsHomePhoneACellExchange: "a",
           WorkPhone: "2024561414",
+          WorkPhoneId: "772024561414",
           WorkPhoneDialingPrefix: "1",
           IsWorkPhoneACellExchange: "0"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ],
       [
         {
           WorkPhone: "2024561414",
+          WorkPhoneId: "772024561414",
           WorkPhoneDialingPrefix: "1",
           IsWorkPhoneACellExchange: "1"
         },
-        "12024561414"
+        {
+          number: "12024561414",
+          id: "772024561414"
+        }
       ],
       [
         {
           WorkPhone: "2024561414",
+          WorkPhoneId: "772024561414",
           WorkPhoneDialingPrefix: "1",
           IsWorkPhoneACellExchange: "0"
         },
-        "12024561414"
+        {
+          number: "12024561414",
+          id: "772024561414"
+        }
       ],
       [
         {
           WorkPhone: "2024561414",
+          WorkPhoneId: "772024561414",
           WorkPhoneDialingPrefix: "1",
           IsWorkPhoneACellExchange: "a"
         },
-        "12024561414"
+        {
+          number: "12024561414",
+          id: "772024561414"
+        }
       ],
-      [{ WorkPhone: "2024561414", WorkPhoneDialingPrefix: "1" }, "12024561414"],
+      [
+        {
+          WorkPhone: "2024561414",
+          WorkPhoneId: "772024561414",
+          WorkPhoneDialingPrefix: "1"
+        },
+        {
+          number: "12024561414",
+          id: "772024561414"
+        }
+      ],
       [
         {
           HomePhone: "2024561111",
+          HomePhoneId: "772024561111",
           HomePhoneDialingPrefix: "1",
           IsHomePhoneACellExchange: "0",
           WorkPhone: "2024561414",
+          WorkPhoneId: "772024561414",
           WorkPhoneDialingPrefix: "1",
           IsWorkPhoneACellExchange: "1"
         },
-        "12024561111"
+        {
+          number: "12024561111",
+          id: "772024561111"
+        }
       ]
     ]).test("getZipFromRow( %j ) returns %s", (row, allegedPhone) => {
       expect(getCellFromRow(row, false)).toEqual(allegedPhone);
@@ -964,16 +1093,27 @@ describe("ngpvan", () => {
     describe("when cautious is true", () => {
       each([
         [
-          { CellPhone: "2024561111", CellPhoneDialingPrefix: "1" },
-          "12024561111"
+          {
+            CellPhone: "2024561111",
+            CellPhoneId: "772024561111",
+            CellPhoneDialingPrefix: "1"
+          },
+          {
+            number: "12024561111",
+            id: "772024561111"
+          }
         ],
         [
           {
             CellPhone: "2024561111",
+            CellPhoneId: "772024561111",
             CellPhoneDialingPrefix: "1",
             CellPhoneCountryCode: "US"
           },
-          "12024561111"
+          {
+            number: "12024561111",
+            id: "772024561111"
+          }
         ],
         [
           {
@@ -987,10 +1127,14 @@ describe("ngpvan", () => {
         [
           {
             OptInPhone: "2024561111",
+            OptInPhoneId: "772024561111",
             OptInPhoneDialingPrefix: "1",
             IsOptInPhoneACellExchange: "1"
           },
-          "12024561111"
+          {
+            number: "12024561111",
+            id: "772024561111"
+          }
         ],
         [
           {
@@ -1008,14 +1152,25 @@ describe("ngpvan", () => {
           },
           undefined
         ],
-        [{ Phone: "2024561111", PhoneDialingPrefix: "1" }, undefined],
         [
           {
             Phone: "2024561111",
+            PhoneId: "772024561111",
+            PhoneDialingPrefix: "1"
+          },
+          undefined
+        ],
+        [
+          {
+            Phone: "2024561111",
+            PhoneId: "772024561111",
             PhoneDialingPrefix: "1",
             IsPhoneACellExchange: "1"
           },
-          "12024561111"
+          {
+            number: "12024561111",
+            id: "772024561111"
+          }
         ],
         [
           {
@@ -1037,10 +1192,14 @@ describe("ngpvan", () => {
         [
           {
             HomePhone: "2024561111",
+            HomePhoneId: "772024561111",
             HomePhoneDialingPrefix: "1",
             IsHomePhoneACellExchange: "1"
           },
-          "12024561111"
+          {
+            number: "12024561111",
+            id: "772024561111"
+          }
         ],
         [
           {
@@ -1070,13 +1229,17 @@ describe("ngpvan", () => {
         [
           {
             HomePhone: "2024561111",
+            HomePhoneId: "772024561111",
             HomePhoneDialingPrefix: "1",
             IsHomePhoneACellExchange: "1",
             WorkPhone: "2024561414",
             WorkPhoneDialingPrefix: "1",
             IsWorkPhoneACellExchange: "0"
           },
-          "12024561111"
+          {
+            number: "12024561111",
+            id: "772024561111"
+          }
         ],
         [
           {
@@ -1103,10 +1266,14 @@ describe("ngpvan", () => {
         [
           {
             WorkPhone: "2024561414",
+            WorkPhoneId: "772024561414",
             WorkPhoneDialingPrefix: "1",
             IsWorkPhoneACellExchange: "1"
           },
-          "12024561414"
+          {
+            number: "12024561414",
+            id: "772024561414"
+          }
         ],
         [
           {
@@ -1128,13 +1295,18 @@ describe("ngpvan", () => {
         [
           {
             HomePhone: "2024561111",
+            HomePhoneId: "772024561111",
             HomePhoneDialingPrefix: "1",
             IsHomePhoneACellExchange: "0",
             WorkPhone: "2024561414",
+            WorkPhoneId: "772024561414",
             WorkPhoneDialingPrefix: "1",
             IsWorkPhoneACellExchange: "1"
           },
-          "12024561414"
+          {
+            number: "12024561414",
+            id: "772024561414"
+          }
         ]
       ]).test("getZipFromRow( %j ) returns %s", (row, allegedPhone) => {
         expect(getCellFromRow(row, true)).toEqual(allegedPhone);

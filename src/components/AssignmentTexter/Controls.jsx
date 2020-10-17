@@ -232,7 +232,11 @@ export class AssignmentTexterContactControls extends React.Component {
   };
 
   handleMessageFormSubmit = async formValues => {
-    const success = await this.props.onMessageFormSubmit(formValues);
+    const success = await this.props.onMessageFormSubmit({
+      ...formValues,
+      cannedResponseId:
+        this.state.cannedResponseScript && this.state.cannedResponseScript.id
+    });
 
     if (success) {
       this.setState({ messageText: "" });
@@ -602,6 +606,7 @@ export class AssignmentTexterContactControls extends React.Component {
   }
 
   renderMessagingRowMessage() {
+    const { cannedResponseScript } = this.state;
     return (
       <div className={css(flexStyles.sectionMessageField)}>
         <GSForm

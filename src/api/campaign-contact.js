@@ -6,6 +6,7 @@ export const schema = `
     includePastDue: Boolean
     tags: [String]
     contactId: String
+    errorCode: [Int]
   }
 
   type Timezone {
@@ -28,7 +29,7 @@ export const schema = `
     external_id: String
     customFields: JSON
     messages: [Message]
-    tags: [ContactTag]
+    tags(tagId: String): [ContactTag]
     location: Location
     optOut: OptOut
     campaign: Campaign
@@ -37,5 +38,6 @@ export const schema = `
     messageStatus: String
     assignmentId: String
     updated_at: Date
+    errorCode: Int
   }
 `;

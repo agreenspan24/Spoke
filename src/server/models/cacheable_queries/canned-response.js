@@ -1,5 +1,7 @@
 import { r, CannedResponse, CannedResponseAction } from "../../models";
 
+import { groupCannedResponses } from "../../api/lib/utils";
+import { getUsedScriptFields } from "../../../lib/interaction-step-helpers";
 // Datastructure:
 // * regular GET/SET with JSON ordered list of the objects {id,title,text}
 // * keyed by campaignId-userId pairs -- userId is '' for global campaign records
@@ -20,7 +22,7 @@ const cannedResponseCache = {
   clearQuery: async ({ campaignId, userId }) => {
     await clearQuery({ campaignId, userId });
   },
-  query: async ({ campaignId, userId }) => {
+  query: async ({ campaignId, userId, cannedResponseId }) => {
     if (r.redis) {
       const cannedData = await r.redis.getAsync(cacheKey(campaignId, userId));
 

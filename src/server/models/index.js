@@ -37,10 +37,13 @@ function createLoader(model, opts) {
     if (cacheObj && cacheObj.load) {
       return keys.map(async key => await cacheObj.load(key));
     }
-    const docs = await model.getAll(...keys, { index: idKey });
-    return keys.map(key =>
-      docs.find(doc => doc[idKey].toString() === key.toString())
-    );
+    const docs = await thinky.r
+      .knexReadOnly(model.tableName)
+      .whereIn(idKey, keys);
+    return keys.map(key => {
+      const result = docs.find(doc => doc[idKey].toString() === key.toString());
+      return result ? new model(result) : null;
+    });
   });
 }
 
@@ -67,6 +70,7 @@ const tableList = [
   "question_response",
   "tag",
   "tag_campaign_contact",
+  "tag_canned_response",
   "owned_phone_number",
   "user_cell",
   "user_organization",
@@ -93,6 +97,20 @@ function dropTables() {
     return thinky.dropTables(["knex_migrations", "knex_migrations_lock"]);
   });
 }
+
+const truncateTables = async () => {
+  // FUTURE: maybe this would speed up tests?
+  // Tentative experiments suggest it might shave a minute off
+  const isSqlite = /sqlite/.test(thinky.k.client.config.client);
+  if (isSqlite) {
+    await Promise.all(tableList.map(t => thinky.k(t).truncate()));
+  } else {
+    // Postgres lets (and requires) that you drop them all at once
+    await thinky.k.raw(
+      'TRUNCATE "' + tableList.join('", "') + '" RESTART IDENTITY'
+    );
+  }
+};
 
 const createLoaders = () => ({
   // Note: loaders with cacheObj should also run loaders.XX.clear(id)
@@ -136,6 +154,7 @@ export {
   createTablesIfNecessary,
   dropTables,
   datawarehouse,
+  truncateTables,
   Assignment,
   Campaign,
   CampaignAdmin,

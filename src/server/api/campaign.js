@@ -9,12 +9,12 @@ import {
   getMethodChoiceData
 } from "../../extensions/contact-loaders";
 import twilio from "./lib/twilio";
-import { getConfig } from "./lib/config";
 import {
   getAvailableActionHandlers,
   getActionChoiceData
 } from "../../extensions/action-handlers";
 
+import { getConfig, getFeatures } from "./lib/config";
 import ownedPhoneNumber from "./lib/owned-phone-number";
 const title = 'lower("campaign"."title")';
 import { camelizeKeys } from "humps";
@@ -50,14 +50,23 @@ export function addCampaignsFilterToQuery(
     }
 
     if ("searchString" in campaignsFilter && campaignsFilter.searchString) {
+      var neg =
+        campaignsFilter.searchString.length > 0 &&
+        campaignsFilter.searchString[0] === "-";
       const searchStringWithPercents = (
         "%" +
-        campaignsFilter.searchString +
+        campaignsFilter.searchString.slice(neg) +
         "%"
       ).toLocaleLowerCase();
-      query = query.andWhere(
-        r.knex.raw(`${title} like ?`, [searchStringWithPercents])
-      );
+      if (neg) {
+        query = query.andWhere(
+          r.knex.raw(`${title} not like ?`, [searchStringWithPercents])
+        );
+      } else {
+        query = query.andWhere(
+          r.knex.raw(`${title} like ?`, [searchStringWithPercents])
+        );
+      }
     }
 
     if (resultSize && !pageSize) {
@@ -238,6 +247,12 @@ export const resolvers = {
       return campaign.join_token;
     },
     batchSize: campaign => campaign.batch_size || 300,
+    batchPolicies: campaign => {
+      const features = getFeatures(campaign);
+      return features.DYNAMICASSIGNMENT_BATCHES
+        ? features.DYNAMICASSIGNMENT_BATCHES.split(",")
+        : [];
+    },
     responseWindow: campaign => campaign.response_window || 48,
     organization: async (campaign, _, { loaders }) =>
       campaign.organization ||
@@ -479,6 +494,9 @@ export const resolvers = {
               ...fields,
               r.knex.raw(
                 "SUM(CASE WHEN campaign_contact.message_status = 'needsMessage' THEN 1 ELSE 0 END) as needs_message_count"
+              ),
+              r.knex.raw(
+                "SUM(CASE WHEN campaign_contact.message_status = 'needsResponse' THEN 1 ELSE 0 END) as unrepliedcount"
               ),
               r.knex.raw("COUNT(*) as contacts_count")
             )

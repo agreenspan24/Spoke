@@ -98,6 +98,7 @@ export const schema = gql`
     description: String
     joinToken: String
     batchSize: Int
+    batchPolicies: [String]
     responseWindow: Float
     dueBy: Date
     isStarted: Boolean

@@ -8,12 +8,12 @@ import { log } from "../../../lib";
 export const updateContactTags = async (
   _,
   { tags, campaignContactId },
-  { user }
+  { user, loaders }
 ) => {
   let contact;
   try {
     contact = await cacheableData.campaignContact.load(campaignContactId);
-    const campaign = await cacheableData.campaign.load(contact.campaign_id);
+    const campaign = await loaders.campaign.load(contact.campaign_id);
     await assignmentRequiredOrAdminRole(
       user,
       campaign.organization_id,
@@ -23,7 +23,7 @@ export const updateContactTags = async (
 
     await cacheableData.tagCampaignContact.save(campaignContactId, tags);
 
-    const organization = await cacheableData.organization.load(
+    const organization = await loaders.organization.load(
       campaign.organization_id
     );
 
@@ -54,5 +54,9 @@ export const updateContactTags = async (
     throw err;
   }
 
-  return contact.id;
+  // just enough so the client can update apollo cache
+  return {
+    id: contact.id,
+    tags: tags.map(t => ({ ...t, campaign_contact_id: campaignContactId }))
+  };
 };
