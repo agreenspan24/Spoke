@@ -340,6 +340,32 @@ class AdminCampaignStats extends React.Component {
             <Stat title="Opt-outs" count={campaign.stats.optOutsCount} />
           </div>
         </div>
+        <div className={css(styles.container)}>
+          <div className={css(styles.flexColumn, styles.spacer)}>
+            <Stat
+              title="Needs Message"
+              count={campaign.stats.needsMessageCount}
+            />
+          </div>
+          <div className={css(styles.flexColumn, styles.spacer)}>
+            <Stat
+              title="Unassigned Needs Message"
+              count={campaign.stats.unassignedNeedsMessageCount}
+            />
+          </div>
+          <div className={css(styles.flexColumn, styles.spacer)}>
+            <Stat
+              title="Needs Response"
+              count={campaign.stats.needsResponseCount}
+            />
+          </div>
+          <div className={css(styles.flexColumn)}>
+            <Stat
+              title="Unassigned Needs Response"
+              count={campaign.stats.unassignedNeedsResponseCount}
+            />
+          </div>
+        </div>
         {window.HIDE_BRANCHED_SCRIPTS ? (
           ""
         ) : (
@@ -425,6 +451,10 @@ const queries = {
             sentMessagesCount
             receivedMessagesCount
             optOutsCount
+            needsMessageCount
+            needsResponseCount
+            unassignedNeedsMessageCount
+            unassignedNeedsResponseCount
             errorCounts {
               code
               count

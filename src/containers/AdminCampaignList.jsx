@@ -381,7 +381,6 @@ const campaignInfoFragment = `
     contactsCount
     errorCount
     messagedCount
-    needsResponseCount
   }
 `;
 

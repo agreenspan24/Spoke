@@ -15,6 +15,8 @@ export const sendMessage = async (
   { message, campaignContactId },
   { user }
 ) => {
+  log.info("sending message", message, campaignContactId);
+
   // contact is mutated, so we don't use a loader
   let contact = await cacheableData.campaignContact.load(campaignContactId);
   const campaign = await cacheableData.campaign.load(contact.campaign_id);
