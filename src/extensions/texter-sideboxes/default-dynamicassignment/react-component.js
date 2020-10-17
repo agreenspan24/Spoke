@@ -93,6 +93,7 @@ export class TexterSideboxClass extends React.Component {
       settingsData,
       messageStatusFilter
     } = this.props;
+    console.log({ assignment });
     // need to see whether they have already texted anyone and if there are replies
     const nextBatchMessage =
       assignment.allContactsCount === 0
