@@ -74,7 +74,6 @@ export class ContactController extends React.Component {
       if (startIndex === -1) {
         startIndex = 0;
       }
-      console.log({ startIndex });
     }
 
     this.updateCurrentContactIndex(startIndex);
@@ -549,7 +548,10 @@ export class ContactController extends React.Component {
     const contact = this.currentContact();
     const navigationToolbarChildren = this.getNavigationToolbarChildren();
     const { loading } = this.state;
-    const finished = !contacts.some(c => c.messageStatus === "needsResponse");
+    const finished =
+      (messageStatusFilter == "needsMessage" ||
+        messageStatusFilter == "needsResponse") &&
+      !contacts.some(c => c.messageStatus === messageStatusFilter);
     const settingsData = JSON.parse(
       (campaign &&
         campaign.texterUIConfig &&

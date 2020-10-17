@@ -136,9 +136,7 @@ export const sendMessage = async (
   });
 
   if (!saveResult.message) {
-    throw new GraphQLError(
-      `Message send error ${saveResult.texterError || ""}`
-    );
+    throw new GraphQLError(saveResult.texterError || "Message send error");
   }
 
   const oldContactStatus = contact.message_status;

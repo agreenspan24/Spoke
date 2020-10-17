@@ -23,6 +23,7 @@ const cannedResponseCache = {
   query: async ({ campaignId, userId }) => {
     if (r.redis) {
       const cannedData = await r.redis.getAsync(cacheKey(campaignId, userId));
+
       if (cannedData) {
         return JSON.parse(cannedData);
       }

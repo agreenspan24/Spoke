@@ -354,7 +354,7 @@ export const resolvers = {
         true
       );
 
-      const [messageCounts] = await r
+      const messageCountsQuery = r
         .knex("campaign_contact")
         .leftJoin(
           "message",
@@ -374,14 +374,28 @@ export const resolvers = {
           )
         );
 
-      const errorCounts = await r
+      const errorCountsQuery = r
         .knex("campaign_contact")
         .where("campaign_id", campaign.id)
         .whereNotNull("error_code")
         .select("error_code", r.knex.raw("count(*) as error_count"))
         .groupBy("error_code")
         .orderByRaw("count(*) DESC");
-      const organization = loaders.organization.load(campaign.organization_id);
+      const organizationPromise = loaders.organization.load(
+        campaign.organization_id
+      );
+
+      const [
+        messageCountsResult,
+        errorCounts,
+        organization
+      ] = await Promise.all([
+        messageCountsQuery,
+        errorCountsQuery,
+        organizationPromise
+      ]);
+
+      const [messageCounts] = messageCountsResult;
       const isTwilio = getConfig("DEFAULT_SERVICE", organization) === "twilio";
 
       return {

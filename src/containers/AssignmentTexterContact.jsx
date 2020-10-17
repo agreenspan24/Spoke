@@ -142,7 +142,9 @@ export class AssignmentTexterContact extends React.Component {
       console.error(e);
       this.props.setDisabled();
       this.setState({
-        snackbarError: "Something went wrong!"
+        snackbarError: e.message
+          ? e.message.replace("GraphQL error: ", "")
+          : "Something went wrong!"
       });
     }
   };
@@ -182,9 +184,7 @@ export class AssignmentTexterContact extends React.Component {
       return true;
     } catch (e) {
       this.handleSendMessageError(e);
-      setTimeout(() => {
-        this.props.onFinishContact(contact.id);
-      }, 750);
+      this.props.setDisabled(false);
 
       return false;
     }

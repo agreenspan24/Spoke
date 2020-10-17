@@ -62,20 +62,12 @@ export const preMessageSave = async ({
     if (
       matches &&
       matches.length &&
-      matches.all(m => m !== contact.first_name && m !== contact.last_name)
+      matches.every(m => m !== contact.first_name && m !== contact.last_name)
     ) {
-      Object.assign(messageToSave, {
-        send_status: "ERROR",
-        error_code: -166
-      });
-
-      await r
-        .knex("campaign_contact")
-        .where("id", contact.id)
-        .update({ error_code: -166 });
-
       return {
-        messageToSave
+        cancel: true,
+        texterError:
+          "Please remove invalid content and try again: " + matches.join(", ")
       };
     }
   }
@@ -127,6 +119,7 @@ async function maybeSuspendTexter(
 export const postMessageSave = async ({ message, organization, contact }) => {
   let tagId = null;
   let regexText = null;
+  contact = contact || {};
   const blockSend = getConfig("PROFANITY_TEXTER_BLOCK_SEND", organization, {
     truthy: true
   });
@@ -147,7 +140,12 @@ export const postMessageSave = async ({ message, organization, contact }) => {
 
   if (regexText) {
     const re = new RegExp(Buffer.from(regexText, "base64").toString(), "i");
-    if (String(message.text).match(re)) {
+    const matches = String(message.text).match(re);
+    if (
+      matches &&
+      matches.length &&
+      matches.every(m => m !== contact.first_name && m !== contact.last_name)
+    ) {
       if (tagId) {
         await cacheableData.tagCampaignContact.save(
           message.campaign_contact_id,
