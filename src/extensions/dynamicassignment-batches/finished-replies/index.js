@@ -25,7 +25,6 @@ export const requestNewBatchCount = async ({
       })
       .whereNull("assignment_id")
   );
-  console.log({ availableCount });
   // Make sure they don't have any needsResponse(s)
   if (availableCount) {
     const hasOpenReplies = await getContacts(
@@ -39,7 +38,6 @@ export const requestNewBatchCount = async ({
       campaign,
       true // forCount=true because we don't care about ordering
     ).first();
-    console.log({ hasOpenReplies });
     if (hasOpenReplies) {
       return 0;
     }

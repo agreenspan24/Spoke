@@ -71,14 +71,12 @@ export const getSideboxes = (
           context === "TexterTodoList" &&
           componentList[sb].showSummary
         ) {
-          console.log({ settingsData, campaign, assignment, texter });
           res = componentList[sb].showSummary({
             settingsData,
             campaign,
             assignment,
             texter
           });
-          console.log({ res });
         }
         if (res === "popup") {
           popups.push(sb);

@@ -152,12 +152,10 @@ export const resolvers = {
       _,
       { loaders, user }
     ) => {
-      console.log({ assignment });
       if (assignment.hasOwnProperty("hasUnassignedContactsForTexter")) {
         return assignment.hasUnassignedContactsForTexter;
       }
       const campaign = await loaders.campaign.load(assignment.campaign_id);
-      console.log({ campaign });
       if (campaign.is_archived) {
         return 0;
       }
@@ -169,7 +167,6 @@ export const resolvers = {
         organization,
         campaign
       });
-      console.log({ policy });
       if (!policy || !policy.requestNewBatchCount) {
         return 0; // to be safe, default to never
       }
@@ -183,7 +180,6 @@ export const resolvers = {
         assignment,
         texter: user
       });
-      console.log({ availableCount });
       const suggestedCount = Math.min(
         assignment.max_contacts || campaign.batch_size,
         campaign.batch_size,
