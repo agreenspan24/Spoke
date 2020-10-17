@@ -15,6 +15,8 @@ export const sendMessage = async (
   { message, campaignContactId },
   { user }
 ) => {
+  log.info("sendMessage", campaignContactId, message);
+
   // contact is mutated, so we don't use a loader
   let contact = await cacheableData.campaignContact.load(campaignContactId);
   const campaign = await cacheableData.campaign.load(contact.campaign_id);
@@ -134,6 +136,9 @@ export const sendMessage = async (
     organization,
     texter: user
   });
+
+  log.info("save message result", saveResult);
+
   if (!saveResult.message) {
     throw new GraphQLError(saveResult.texterError || "Message send error");
   }
