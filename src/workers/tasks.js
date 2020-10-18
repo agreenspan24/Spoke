@@ -19,22 +19,14 @@ const sendMessage = async ({
   contact,
   trx,
   organization,
-  campaign,
-  oldContactStatus
+  campaign
 }) => {
   const service = serviceMap[message.service];
   if (!service) {
     throw new Error(`Failed to find service for message ${message}`);
   }
 
-  await service.sendMessage(
-    message,
-    contact,
-    trx,
-    organization,
-    campaign,
-    oldContactStatus
-  );
+  await service.sendMessage(message, contact, trx, organization, campaign);
 };
 
 const questionResponseActionHandler = async ({

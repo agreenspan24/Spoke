@@ -107,7 +107,7 @@ export class CampaignContactsForm extends React.Component {
     });
   }
 
-  async handleUploadSuccess(validationStats, contacts, customFields) {
+  handleUploadSuccess(validationStats, contacts, customFields) {
     this.setState({
       validationStats,
       customFields,
@@ -122,21 +122,14 @@ export class CampaignContactsForm extends React.Component {
       contacts
     };
 
+    const self = this;
     // uncomment here to make the data uncompresed on-upload
     // occasionally useful for debugging to see decoded data in-transit
     // return this.props.onChange(JSON.stringify(contactCollection));
 
-    let zippedData = "";
-    for (var i = 0; i < contactCollection.length; i += 50000) {
-      const subCollection = contactCollection.slice(i, i + 50000);
-
-      gzippedData = await gzip(JSON.stringify(subCollection));
-
-      zippedData += gzippedData.toString("base64");
-      console.log({ gzippedData, zippedData });
-    }
-
-    this.props.onChange(zippedData);
+    gzip(JSON.stringify(contactCollection)).then(gzippedData => {
+      self.props.onChange(gzippedData.toString("base64"));
+    });
   }
 
   renderContactStats() {

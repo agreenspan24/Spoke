@@ -55,13 +55,7 @@ const MessageList = function MessageList(props) {
           style={message.isFromContact ? received : sent}
           key={message.id}
           primaryText={message.text}
-          secondaryText={
-            <div
-              style={{ color: message.errorMessage ? theme.colors.red : null }}
-            >
-              {message.errorMessage || moment.utc(message.createdAt).fromNow()}
-            </div>
-          }
+          secondaryText={moment.utc(message.createdAt).fromNow()}
         />
       ))}
       {optOutItem}

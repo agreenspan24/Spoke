@@ -143,7 +143,6 @@ class AdminCampaignStats extends React.Component {
   renderErrorCounts() {
     const { errorCounts } = this.props.data.campaign.stats;
     const { contactsCount } = this.props.data.campaign;
-    console.log("errorcounts", contactsCount, errorCounts);
     if (!errorCounts.length) {
       return null;
     }
@@ -200,6 +199,10 @@ class AdminCampaignStats extends React.Component {
     } = this.props.organizationData.organization;
     const showReleaseNumbers =
       campaign.isArchived && campaignPhoneNumbersEnabled;
+
+    const replyRate =
+      campaign.stats.receivedMessagesCount / campaign.stats.sentMessagesCount;
+
     return (
       <div>
         <div className={css(styles.container)}>
@@ -361,10 +364,19 @@ class AdminCampaignStats extends React.Component {
               count={campaign.stats.needsResponseCount}
             />
           </div>
-          <div className={css(styles.flexColumn)}>
+          <div className={css(styles.flexColumn, styles.spacer)}>
             <Stat
               title="Unassigned Needs Response"
               count={campaign.stats.unassignedNeedsResponseCount}
+            />
+          </div>
+          <div className={css(styles.flexColumn)}>
+            <Stat
+              title="Reply Rate"
+              count={Number(replyRate || 0).toLocaleString(undefined, {
+                style: "percent",
+                maximumFractionDigits: 2
+              })}
             />
           </div>
         </div>

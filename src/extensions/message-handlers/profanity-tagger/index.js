@@ -154,12 +154,6 @@ export const postMessageSave = async ({ message, organization, contact }) => {
       }
 
       if (!message.is_from_contact) {
-        // Revert back to old message status
-        await r
-          .knex("campaign_contact")
-          .where("id", contact.id)
-          .update({ message_status: contact.message_status });
-
         // SUSPENDING TEXTER
         const suspendThreshold = getConfig(
           "PROFANITY_TEXTER_SUSPEND_COUNT",

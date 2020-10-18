@@ -6,14 +6,7 @@ import uuid from "uuid";
 // that end up just in the db appropriately and then using sendReply() graphql
 // queries for the reception (rather than a real service)
 
-async function sendMessage(
-  message,
-  contact,
-  trx,
-  organization,
-  campaign,
-  oldContactStatus
-) {
+async function sendMessage(message, contact, trx, organization, campaign) {
   const errorCode = message.text.match(/error(\d+)/);
   const changes = {
     service: "fakeservice",
@@ -40,11 +33,7 @@ async function sendMessage(
       await r
         .knex("campaign_contact")
         .where("id", message.campaign_contact_id)
-        .update({
-          error_code: errorCode[1],
-          message_status:
-            oldContactStatus === "needsMessage" ? "messaged" : oldContactStatus
-        });
+        .update({ error_code: errorCode[1] });
     }
   }
 

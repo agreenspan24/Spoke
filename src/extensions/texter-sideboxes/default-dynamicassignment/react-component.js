@@ -74,7 +74,6 @@ export class TexterSideboxClass extends React.Component {
       await this.props.mutations.findNewCampaignContact(75, "needsResponse")
     ).data.findNewCampaignContact;
 
-    console.log(messageStatusFilter);
     if (didAddContacts && didAddContacts.found) {
       if (messageStatusFilter === "needsResponse") {
         this.props.refreshData();
