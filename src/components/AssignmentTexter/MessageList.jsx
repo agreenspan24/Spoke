@@ -5,6 +5,7 @@ import moment from "moment";
 import ProhibitedIcon from "material-ui/svg-icons/av/not-interested";
 import Divider from "material-ui/Divider";
 import { red300 } from "material-ui/styles/colors";
+import theme from "../../styles/theme";
 
 const defaultStyles = {
   optOut: {

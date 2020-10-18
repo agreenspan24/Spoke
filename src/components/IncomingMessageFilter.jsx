@@ -128,14 +128,13 @@ class IncomingMessageFilter extends Component {
         return texter.displayName === selection;
       });
       if (texter) {
-        texterUserId = texter.id;
+        texterUserId = parseInt(texter.id, 10);
       }
-    } else {
-      texterUserId = selection.value.key;
+    } else if (selection && "rawValue" in selection) {
+      texterUserId = selection.rawValue;
     }
-    if (texterUserId) {
-      this.props.onTexterChanged(parseInt(texterUserId, 10));
-    }
+
+    this.props.onTexterChanged(texterUserId);
   };
 
   onTagsFilterChanged = tagsFilter => {
@@ -206,6 +205,8 @@ class IncomingMessageFilter extends Component {
     texterNodes.sort((left, right) => {
       return left.text.localeCompare(right.text, "en", { sensitivity: "base" });
     });
+
+    texterNodes.unshift(dataSourceItem("Unassigned", null));
 
     const campaignNodes = CAMPAIGN_TYPE_FILTERS.map(campaignTypeFilter =>
       dataSourceItem(campaignTypeFilter[1], campaignTypeFilter[0])
@@ -313,6 +314,7 @@ class IncomingMessageFilter extends Component {
                 filter={AutoComplete.caseInsensitiveFilter}
                 maxSearchResults={8}
                 onFocus={() => this.setState({ texterSearchText: "" })}
+                onBlur={this.onTexterSelected}
                 onUpdateInput={texterSearchText =>
                   this.setState({ texterSearchText })
                 }

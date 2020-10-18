@@ -121,23 +121,17 @@ export class AssignmentTexterContact extends React.Component {
     // we want to replace status codes with Apollo 2 error codes.
     if (e.status === 402) {
       this.goBackToTodos();
-    } else if (e.status === 400) {
+    } else if (
+      e.status === 400 &&
+      e.message === "Your assignment has changed"
+    ) {
       const newState = {
         snackbarError: e.message
       };
 
-      if (e.message === "Your assignment has changed") {
-        newState.snackbarActionTitle = "Back to todos";
-        newState.snackbarOnTouchTap = this.goBackToTodos;
-        this.setState(newState);
-      } else {
-        // opt out or send message Error
-        this.props.setDisabled();
-        this.setState({
-          disabledText: e.message
-        });
-        this.skipContact();
-      }
+      newState.snackbarActionTitle = "Back to todos";
+      newState.snackbarOnTouchTap = this.goBackToTodos;
+      this.setState(newState);
     } else {
       console.error(e);
       this.props.setDisabled();
@@ -157,6 +151,8 @@ export class AssignmentTexterContact extends React.Component {
         return; // stops from multi-send
       }
       this.props.setDisabled();
+      this.setState({ snackbarError: null });
+
       console.log("sendMessage", contact.id);
       if (
         messageStatusFilter === "needsMessage" &&
@@ -170,7 +166,13 @@ export class AssignmentTexterContact extends React.Component {
           console.log("sentMessage", contact.id);
         });
       } else {
-        await this.props.mutations.sendMessage(message, contact.id);
+        const sendMessageResult = await this.props.mutations.sendMessage(
+          message,
+          contact.id
+        );
+
+        console.log({ sendMessageResult });
+
         await this.handleSubmitSurveys();
         await this.handleSubmitCannedResponse(message);
 
@@ -321,7 +323,10 @@ export class AssignmentTexterContact extends React.Component {
     if (this.props.disabled) {
       return; // stops from multi-send
     }
+
     this.props.setDisabled();
+    this.setState({ snackbarError: null });
+
     try {
       if (optOutMessageText.length) {
         await this.props.mutations.sendMessage(message, contact.id);

@@ -148,7 +148,7 @@ const rootSchema = gql`
 
   type CampaignIdAssignmentId {
     campaignId: String!
-    assignmentId: String!
+    assignmentId: String
   }
 
   input TagInput {
@@ -325,6 +325,7 @@ const rootSchema = gql`
     findNewCampaignContact(
       assignmentId: String!
       numberContacts: Int!
+      messageStatus: String
     ): FoundContact
     releaseContacts(
       assignmentId: String!
@@ -334,7 +335,7 @@ const rootSchema = gql`
     reassignCampaignContacts(
       organizationId: String!
       campaignIdsContactIds: [CampaignIdContactId]!
-      newTexterUserId: String!
+      newTexterUserId: String
     ): [CampaignIdAssignmentId]
     bulkReassignCampaignContacts(
       organizationId: String!
@@ -342,7 +343,7 @@ const rootSchema = gql`
       assignmentsFilter: AssignmentsFilter
       contactsFilter: ContactsFilter
       messageTextFilter: String
-      newTexterUserId: String!
+      newTexterUserId: String
     ): [CampaignIdAssignmentId]
     importCampaignScript(campaignId: String!, url: String!): Int
     createTag(organizationId: String!, tagData: TagInput!): Tag

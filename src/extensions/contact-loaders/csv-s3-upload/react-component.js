@@ -116,6 +116,7 @@ export class CampaignContactsForm extends React.Component {
       contactUploadError: null,
       contactsCount: contacts.length
     });
+
     const contactCollection = {
       contactsCount: contacts.length,
       customFields,

@@ -128,6 +128,7 @@ export const dataQuery = gql`
       todos(organizationId: $organizationId) {
         id
         hasUnassignedContactsForTexter
+        hasUnassignedRepliesForTexter
         campaign {
           id
           title
@@ -162,15 +163,21 @@ export const dataQuery = gql`
 `;
 
 const mutations = {
-  findNewCampaignContact: ownProps => (assignmentId, numberContacts) => ({
+  findNewCampaignContact: ownProps => (
+    assignmentId,
+    numberContacts,
+    messageStatus
+  ) => ({
     mutation: gql`
       mutation findNewCampaignContact(
         $assignmentId: String!
         $numberContacts: Int!
+        $messageStatus: String
       ) {
         findNewCampaignContact(
           assignmentId: $assignmentId
           numberContacts: $numberContacts
+          messageStatus: $messageStatus
         ) {
           found
         }
@@ -178,7 +185,8 @@ const mutations = {
     `,
     variables: {
       assignmentId,
-      numberContacts
+      numberContacts,
+      messageStatus
     }
   })
 };

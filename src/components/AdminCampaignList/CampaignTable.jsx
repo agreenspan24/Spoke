@@ -124,19 +124,7 @@ export class CampaignTable extends React.Component {
 
   prepareTableColumns(organization, campaigns) {
     const extraRows = [];
-    const needsResponseCol = campaigns.some(
-      c => c.completionStats.needsResponseCount
-    );
-    if (needsResponseCol) {
-      extraRows.push({
-        label: "Needs Response",
-        render: (columnKey, row) =>
-          row.completionStats.needsResponseCount || "",
-        style: {
-          width: "5em"
-        }
-      });
-    }
+
     if (this.props.adminPerms) {
       extraRows.push({
         label: "Archive",

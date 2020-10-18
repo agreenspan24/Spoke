@@ -187,6 +187,44 @@ export const resolvers = {
       );
       return suggestedCount;
     },
+    hasUnassignedRepliesForTexter: async (assignment, _, { loaders, user }) => {
+      if (assignment.hasOwnProperty("hasUnassignedRepliesForTexter")) {
+        return assignment.hasUnassignedRepliesForTexter;
+      }
+      const campaign = await loaders.campaign.load(assignment.campaign_id);
+      if (campaign.is_archived) {
+        return 0;
+      }
+
+      const organization = await loaders.organization.load(
+        campaign.organization_id
+      );
+      const policy = getDynamicAssignmentBatchPolicy({
+        organization,
+        campaign
+      });
+      if (!policy || !policy.requestNewBatchCount) {
+        return 0; // to be safe, default to never
+      }
+      // default is finished-replies
+      const availableCount = await policy.requestNewBatchCount({
+        r,
+        loaders,
+        cacheableData,
+        organization,
+        campaign,
+        assignment,
+        texter: user,
+        messageStatus: "needsResponse"
+      });
+      const suggestedCount = Math.min(
+        assignment.max_contacts || campaign.batch_size,
+        campaign.batch_size,
+        availableCount
+      );
+
+      return suggestedCount;
+    },
     contactsCount: async (
       assignment,
       { contactsFilter },

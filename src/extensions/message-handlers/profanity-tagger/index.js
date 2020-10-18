@@ -152,6 +152,7 @@ export const postMessageSave = async ({ message, organization, contact }) => {
           [{ id: tagId }]
         );
       }
+
       if (!message.is_from_contact) {
         // SUSPENDING TEXTER
         const suspendThreshold = getConfig(

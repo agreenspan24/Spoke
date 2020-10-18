@@ -18,7 +18,9 @@ export const prepareDataTableData = conversations =>
   conversations.map(conversation => ({
     campaignTitle: conversation.campaign.title,
     texter:
-      conversation.texter.displayName +
+      (conversation.texter.id
+        ? conversation.texter.displayName
+        : "Unassigned") +
       (getHighestRole(conversation.texter.roles) === "SUSPENDED"
         ? " (Suspended)"
         : ""),

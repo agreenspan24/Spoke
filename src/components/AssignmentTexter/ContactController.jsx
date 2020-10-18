@@ -567,7 +567,10 @@ export class ContactController extends React.Component {
     };
     const enabledSideboxes = getSideboxes(sideboxProps, "TexterTodo");
     return (
-      <div className={css(styles.container)} key="contactController">
+      <div
+        className={contacts.length !== 0 ? css(styles.container) : null}
+        key="contactController"
+      >
         {contacts.length === 0
           ? this.renderEmpty(enabledSideboxes, sideboxProps)
           : this.renderTexter(enabledSideboxes)}

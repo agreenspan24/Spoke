@@ -10,6 +10,7 @@ export const schema = `
     contacts(contactsFilter: ContactsFilter): [CampaignContact]
     contactsCount(contactsFilter: ContactsFilter): Int
     hasUnassignedContactsForTexter: Int
+    hasUnassignedRepliesForTexter: Int
     userCannedResponses: [CannedResponse]
     campaignCannedResponses: [CannedResponse]
     maxContacts: Int

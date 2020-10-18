@@ -7,7 +7,8 @@ export const requestNewBatchCount = async ({
   texter,
   r,
   cacheableData,
-  loaders
+  loaders,
+  messageStatus
 }) => {
   // START WITH SOME BASE-LINE THINGS EVERY POLICY SHOULD HAVE
   if (!campaign.use_dynamic_assignment || campaign.is_archived) {
@@ -31,7 +32,7 @@ export const requestNewBatchCount = async ({
       .knex("campaign_contact")
       .where({
         campaign_id: campaign.id,
-        message_status: "needsMessage"
+        message_status: messageStatus || "needsMessage"
       })
       .whereNull("assignment_id")
   );

@@ -354,23 +354,30 @@ export const resolvers = {
         true
       );
 
-      const messageCountsQuery = r
+      const campaignContactsQuery = r
         .knex("campaign_contact")
-        .leftJoin(
-          "message",
-          "message.campaign_contact_id",
-          "campaign_contact.id"
-        )
         .where({ campaign_id: campaign.id })
         .select(
           r.knex.raw(
-            "SUM(CASE WHEN NOT is_from_contact THEN 1 ELSE 0 END) AS sent_count"
-          ),
-          r.knex.raw(
-            "SUM(CASE WHEN is_from_contact THEN 1 ELSE 0 END) AS received_count"
-          ),
-          r.knex.raw(
             "SUM(CASE WHEN is_opted_out THEN 1 ELSE 0 END) AS opt_out_count"
+          ),
+          r.knex.raw(
+            "SUM(CASE WHEN message_status = 'needsMessage' THEN 1 ELSE 0 END) AS needs_message_count"
+          ),
+          r.knex.raw(
+            "SUM(CASE WHEN message_status = 'needsResponse' THEN 1 ELSE 0 END) AS needs_response_count"
+          ),
+          r.knex.raw(
+            "SUM(CASE WHEN assignment_id IS NULL AND message_status = 'needsMessage' THEN 1 ELSE 0 END) AS unassigned_needs_message_count"
+          ),
+          r.knex.raw(
+            "SUM(CASE WHEN assignment_id IS NULL AND message_status = 'needsResponse' THEN 1 ELSE 0 END) AS unassigned_needs_response_count"
+          ),
+          r.knex.raw(
+            "SUM(CASE WHEN message_status IN ('messaged', 'needsResponse', 'convo', 'closed') THEN 1 ELSE 0 END) AS sent_count"
+          ),
+          r.knex.raw(
+            "SUM(CASE WHEN message_status IN ('needsResponse', 'convo', 'closed') THEN 1 ELSE 0 END) AS received_count"
           )
         );
 
@@ -387,22 +394,30 @@ export const resolvers = {
       );
 
       const [
-        messageCountsResult,
+        campaignContactsResult,
         errorCounts,
         organization
       ] = await Promise.all([
-        messageCountsQuery,
+        campaignContactsQuery,
         errorCountsQuery,
         organizationPromise
       ]);
 
-      const [messageCounts] = messageCountsResult;
+      const [campaignContacts] = campaignContactsResult;
       const isTwilio = getConfig("DEFAULT_SERVICE", organization) === "twilio";
 
       return {
-        sentMessagesCount: Number(messageCounts.sent_count),
-        receivedMessagesCount: Number(messageCounts.received_count),
-        optOutsCount: Number(messageCounts.opt_out_count),
+        sentMessagesCount: Number(campaignContacts.sent_count),
+        receivedMessagesCount: Number(campaignContacts.received_count),
+        optOutsCount: Number(campaignContacts.opt_out_count),
+        needsMessageCount: Number(campaignContacts.needs_message_count),
+        unassignedNeedsMessageCount: Number(
+          campaignContacts.unassigned_needs_message_count
+        ),
+        needsResponseCount: Number(campaignContacts.needs_response_count),
+        unassignedNeedsResponseCount: Number(
+          campaignContacts.unassigned_needs_response_count
+        ),
         errorCounts: errorCounts.map(e => ({
           code: String(e.error_code),
           count: e.error_count,

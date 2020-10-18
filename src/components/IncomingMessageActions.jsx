@@ -67,12 +67,12 @@ class IncomingMessageActions extends Component {
         texterUserId = texter.id;
       }
     } else {
-      texterUserId = selection.value.key;
+      texterUserId = selection.rawValue;
     }
     if (texterUserId) {
       this.setState({ reassignTo: parseInt(texterUserId, 10) });
     } else {
-      this.setState({ reassignTo: undefined });
+      this.setState({ reassignTo: texterUserId });
     }
   }
 
@@ -96,6 +96,8 @@ class IncomingMessageActions extends Component {
     texterNodes.sort((left, right) => {
       return left.text.localeCompare(right.text, "en", { sensitivity: "base" });
     });
+
+    texterNodes.unshift(dataSourceItem("Unassigned", null));
 
     const confirmDialogActions = [
       <FlatButton
@@ -129,6 +131,7 @@ class IncomingMessageActions extends Component {
                     texterSearchText: ""
                   })
                 }
+                onBlur={this.onReassignChanged}
                 onUpdateInput={texterSearchText =>
                   this.setState({ texterSearchText })
                 }
@@ -144,7 +147,7 @@ class IncomingMessageActions extends Component {
               <FlatButton
                 label={"Reassign selected"}
                 onClick={this.onReassignmentClicked}
-                disabled={!this.state.reassignTo}
+                disabled={this.state.reassignTo === undefined}
               />
             </div>
             {this.props.conversationCount ? (
@@ -152,7 +155,7 @@ class IncomingMessageActions extends Component {
                 <FlatButton
                   label={`Reassign all ${this.props.conversationCount} matching`}
                   onClick={this.onReassignAllMatchingClicked}
-                  disabled={!this.state.reassignTo}
+                  disabled={this.state.reassignTo === undefined}
                 />
               </div>
             ) : (

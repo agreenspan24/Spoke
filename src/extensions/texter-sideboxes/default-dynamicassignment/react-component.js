@@ -6,7 +6,7 @@ import Badge from "material-ui/Badge";
 import RaisedButton from "material-ui/RaisedButton";
 import { withRouter } from "react-router";
 import gql from "graphql-tag";
-
+import Toggle from "material-ui/Toggle";
 import loadData from "../../../containers/hoc/load-data";
 import { inlineStyles } from "../../../components/AssignmentSummary";
 
@@ -29,7 +29,8 @@ export const showSidebox = ({
     campaign.useDynamicAssignment &&
     (assignment.hasUnassignedContactsForTexter ||
       messageStatusFilter === "needsMessage" ||
-      assignment.unmessagedCount) &&
+      assignment.unmessagedCount ||
+      assignment.hasUnassignedRepliesForTexter) &&
     (messageStatusFilter === "needsMessage" ||
       messageStatusFilter === "needsResponse")
   ) {
@@ -39,24 +40,43 @@ export const showSidebox = ({
 
 export const showSummary = ({ campaign, assignment, settingsData }) =>
   campaign.useDynamicAssignment &&
-  assignment.hasUnassignedContactsForTexter &&
+  (assignment.hasUnassignedContactsForTexter ||
+    assignment.hasUnassignedRepliesForTexter) &&
   !assignment.unmessagedCount &&
   assignment.maxContacts !== 0;
 
 export class TexterSideboxClass extends React.Component {
   requestNewContacts = async () => {
-    const { assignment, messageStatusFilter } = this.props;
-    const didAddContacts = (await this.props.mutations.findNewCampaignContact())
-      .data.findNewCampaignContact;
+    const { assignment, messageStatusFilter, campaign } = this.props;
+    const didAddContacts = (
+      await this.props.mutations.findNewCampaignContact(campaign.batchSize)
+    ).data.findNewCampaignContact;
+
     console.log(
       "default-dynamicassignment:requestNewContacts added?",
       didAddContacts
     );
+
     if (didAddContacts && didAddContacts.found) {
       if (messageStatusFilter !== "needsMessage") {
         this.gotoInitials();
       } else {
         this.props.refreshData();
+      }
+    }
+  };
+
+  requestNewReplies = async () => {
+    const { messageStatusFilter } = this.props;
+    const didAddContacts = (
+      await this.props.mutations.findNewCampaignContact(75, "needsResponse")
+    ).data.findNewCampaignContact;
+
+    if (didAddContacts && didAddContacts.found) {
+      if (messageStatusFilter === "needsResponse") {
+        this.props.refreshData();
+      } else {
+        this.gotoReplies();
       }
     }
   };
@@ -103,16 +123,28 @@ export class TexterSideboxClass extends React.Component {
       assignment.allContactsCount === 0
         ? "Start texting"
         : settingsData.dynamicAssignmentRequestMoreLabel || "Send more texts";
+
     const headerStyle = messageStatusFilter ? { textAlign: "center" } : {};
     return (
       <div style={headerStyle}>
-        {assignment.hasUnassignedContactsForTexter ? (
-          <div>
+        {assignment.hasUnassignedContactsForTexter &&
+        !settingsData.dynamicAssignmentAssignRepliesOnly ? (
+          <div style={{ marginBottom: "8px", paddingLeft: "12px" }}>
             <h3>{nextBatchMessage}</h3>
             <RaisedButton
               label={nextBatchMoreLabel}
               primary
               onClick={this.requestNewContacts}
+            />
+          </div>
+        ) : null}
+        {assignment.hasUnassignedRepliesForTexter &&
+        settingsData.dynamicAssignmentAssignRepliesOnly ? (
+          <div style={{ marginBottom: "8px", paddingLeft: "12px" }}>
+            <RaisedButton
+              label="Send Unanswered Replies"
+              primary
+              onClick={this.requestNewReplies}
             />
           </div>
         ) : null}
@@ -171,27 +203,31 @@ TexterSideboxClass.propTypes = {
 };
 
 export const mutations = {
-  findNewCampaignContact: ownProps => () => ({
+  findNewCampaignContact: ownProps => (numberContacts, messageStatus) => ({
     mutation: gql`
       mutation findNewCampaignContact(
         $assignmentId: String!
         $numberContacts: Int!
+        $messageStatus: String
       ) {
         findNewCampaignContact(
           assignmentId: $assignmentId
           numberContacts: $numberContacts
+          messageStatus: $messageStatus
         ) {
           found
           assignment {
             id
             hasUnassignedContactsForTexter
+            hasUnassignedRepliesForTexter
           }
         }
       }
     `,
     variables: {
       assignmentId: ownProps.assignment.id,
-      numberContacts: ownProps.campaign.batchSize
+      numberContacts,
+      messageStatus
     }
   })
 };
@@ -207,6 +243,7 @@ export const TexterSidebox = loadData({ mutations })(
 export const SummaryComponent = TexterSidebox;
 
 export const adminSchema = () => ({
+  dynamicAssignmentAssignRepliesOnly: yup.boolean(),
   dynamicAssignmentRequestMoreLabel: yup.string(),
   dynamicAssignmentRequestMoreMessage: yup.string()
 });
@@ -215,6 +252,13 @@ export class AdminConfig extends React.Component {
   render() {
     return (
       <div>
+        <Toggle
+          label="Assign Replies Only"
+          toggled={this.props.settingsData.dynamicAssignmentAssignRepliesOnly}
+          onToggle={(toggler, val) =>
+            this.props.onToggle("dynamicAssignmentAssignRepliesOnly", val)
+          }
+        />
         <Form.Field
           name="dynamicAssignmentRequestMoreLabel"
           label="Request More Label"
