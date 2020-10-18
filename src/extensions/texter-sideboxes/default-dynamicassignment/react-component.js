@@ -47,11 +47,9 @@ export const showSummary = ({ campaign, assignment, settingsData }) =>
 
 export class TexterSideboxClass extends React.Component {
   requestNewContacts = async () => {
-    const { assignment, messageStatusFilter } = this.props;
+    const { assignment, messageStatusFilter, campaign } = this.props;
     const didAddContacts = (
-      await this.props.mutations.findNewCampaignContact(
-        ownProps.campaign.batchSize
-      )
+      await this.props.mutations.findNewCampaignContact(campaign.batchSize)
     ).data.findNewCampaignContact;
 
     console.log(
