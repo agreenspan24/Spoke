@@ -377,7 +377,7 @@ export const resolvers = {
             "SUM(CASE WHEN message_status IN ('messaged', 'needsResponse', 'convo', 'closed') THEN 1 ELSE 0 END) AS sent_count"
           ),
           r.knex.raw(
-            "SUM(CASE WHEN message_status IN ('needsResponse', 'convo', 'closed') AND NOT is_opted_out THEN 1 ELSE 0 END) AS received_count"
+            "SUM(CASE WHEN message_status IN ('needsResponse', 'convo', 'closed') THEN 1 ELSE 0 END) AS received_count"
           )
         );
 
