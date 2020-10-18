@@ -6,7 +6,7 @@ import Badge from "material-ui/Badge";
 import RaisedButton from "material-ui/RaisedButton";
 import { withRouter } from "react-router";
 import gql from "graphql-tag";
-
+import Toggle from "material-ui/Toggle";
 import loadData from "../../../containers/hoc/load-data";
 import { inlineStyles } from "../../../components/AssignmentSummary";
 
@@ -74,8 +74,9 @@ export class TexterSideboxClass extends React.Component {
       await this.props.mutations.findNewCampaignContact(75, "needsResponse")
     ).data.findNewCampaignContact;
 
+    console.log(messageStatusFilter);
     if (didAddContacts && didAddContacts.found) {
-      if (messageStatusFilter !== "needsMessage") {
+      if (messageStatusFilter === "needsResponse") {
         this.props.refreshData();
       } else {
         this.gotoReplies();
@@ -129,7 +130,8 @@ export class TexterSideboxClass extends React.Component {
     const headerStyle = messageStatusFilter ? { textAlign: "center" } : {};
     return (
       <div style={headerStyle}>
-        {assignment.hasUnassignedContactsForTexter ? (
+        {assignment.hasUnassignedContactsForTexter &&
+        !settingsData.dynamicAssignmentAssignRepliesOnly ? (
           <div style={{ marginBottom: "8px", paddingLeft: "12px" }}>
             <h3>{nextBatchMessage}</h3>
             <RaisedButton
@@ -139,7 +141,8 @@ export class TexterSideboxClass extends React.Component {
             />
           </div>
         ) : null}
-        {assignment.hasUnassignedRepliesForTexter ? (
+        {assignment.hasUnassignedRepliesForTexter &&
+        settingsData.dynamicAssignmentAssignRepliesOnly ? (
           <div style={{ marginBottom: "8px", paddingLeft: "12px" }}>
             <RaisedButton
               label="Send Unanswered Replies"
@@ -243,6 +246,7 @@ export const TexterSidebox = loadData({ mutations })(
 export const SummaryComponent = TexterSidebox;
 
 export const adminSchema = () => ({
+  dynamicAssignmentAssignRepliesOnly: yup.boolean(),
   dynamicAssignmentRequestMoreLabel: yup.string(),
   dynamicAssignmentRequestMoreMessage: yup.string()
 });
@@ -251,6 +255,13 @@ export class AdminConfig extends React.Component {
   render() {
     return (
       <div>
+        <Toggle
+          label="Assign Replies Only"
+          toggled={this.props.settingsData.dynamicAssignmentAssignRepliesOnly}
+          onToggle={(toggler, val) =>
+            this.props.onToggle("dynamicAssignmentAssignRepliesOnly", val)
+          }
+        />
         <Form.Field
           name="dynamicAssignmentRequestMoreLabel"
           label="Request More Label"

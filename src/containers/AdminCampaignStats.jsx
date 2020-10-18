@@ -36,9 +36,11 @@ const inlineStyles = {
 const styles = StyleSheet.create({
   container: {
     ...theme.layouts.multiColumn.container,
-    marginBottom: 40,
     justifyContent: "space-around",
     flexWrap: "wrap"
+  },
+  marginBottom: {
+    marginBottom: 40
   },
   archivedBanner: {
     backgroundColor: "#FFFBE6",
@@ -340,7 +342,7 @@ class AdminCampaignStats extends React.Component {
             <Stat title="Opt-outs" count={campaign.stats.optOutsCount} />
           </div>
         </div>
-        <div className={css(styles.container)}>
+        <div className={css(styles.container, styles.marginBottom)}>
           <div className={css(styles.flexColumn, styles.spacer)}>
             <Stat
               title="Needs Message"

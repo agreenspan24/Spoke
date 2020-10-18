@@ -446,18 +446,14 @@ export class ContactController extends React.Component {
           //   Maybe they don't have access to that contact, etc
           // Strategy: see if we can just skip to the next one
 
-          // console.log(
-          //   "try something",
-          //   self.state.currentContactIndex,
-          //   self.state.reloadDelay,
-          //   self.props.contacts[self.state.currentContactIndex + 1],
-          //   (self.props.contacts[self.state.currentContactIndex + 1] || {}).id,
-          //   self.props.contacts,
-          //   self.state.contactCache[
-          //     (self.props.contacts[self.state.currentContactIndex + 1] || {}).id
-          //   ]
-          // );
-
+          // console.log('try something',
+          //             self.state.currentContactIndex,
+          //             self.state.reloadDelay,
+          //             self.props.contacts[self.state.currentContactIndex + 1],
+          //             (self.props.contacts[self.state.currentContactIndex + 1]||{}).id,
+          //             self.props.contacts,
+          //             self.state.contactCache[
+          //               (self.props.contacts[self.state.currentContactIndex + 1]||{}).id])
           if (
             this.state.contactCache[contact.id] === null &&
             self.props.contacts.length > self.state.currentContactIndex + 1
@@ -528,7 +524,6 @@ export class ContactController extends React.Component {
             <RaisedButton
               label="Back To Todos"
               onClick={this.handleExitTexter}
-              style={{ marginBottom: 8 }}
             />
           }
         />
