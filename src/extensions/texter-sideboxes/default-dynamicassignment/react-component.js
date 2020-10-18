@@ -141,6 +141,9 @@ export class TexterSideboxClass extends React.Component {
         {assignment.hasUnassignedRepliesForTexter &&
         settingsData.dynamicAssignmentAssignRepliesOnly ? (
           <div style={{ marginBottom: "8px", paddingLeft: "12px" }}>
+            <h3>
+              Get a batch of up to 75 unassigned conversations that need a reply
+            </h3>
             <RaisedButton
               label="Send Unanswered Replies"
               primary
