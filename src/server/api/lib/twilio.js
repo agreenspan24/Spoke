@@ -349,7 +349,6 @@ export function postMessageSend(
     hasError = true;
 
     log.warn("ERROR SENDING MESSAGE", {
-      err,
       message,
       response
     });
@@ -412,7 +411,7 @@ export function postMessageSend(
     updateQuery = updateQuery.update(changesToSave);
 
     Promise.all([updateQuery, contactUpdateQuery]).then(() => {
-      console.log("Saved message error status", changesToSave, err);
+      // console.log("Saved message error status", changesToSave, err);
       reject(
         err ||
           (response

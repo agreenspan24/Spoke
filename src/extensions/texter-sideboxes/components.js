@@ -113,6 +113,7 @@ export const renderSidebox = (
         parentComponent.setState({ [`sideboxState${name}`]: state });
       }}
       persistedState={parentComponent.state[`sideboxState${name}`]}
+      style={{ marginTop: 12 }}
     />
   );
 };

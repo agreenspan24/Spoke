@@ -36,9 +36,11 @@ const inlineStyles = {
 const styles = StyleSheet.create({
   container: {
     ...theme.layouts.multiColumn.container,
-    marginBottom: 40,
     justifyContent: "space-around",
     flexWrap: "wrap"
+  },
+  marginBottom: {
+    marginBottom: 40
   },
   archivedBanner: {
     backgroundColor: "#FFFBE6",
@@ -141,7 +143,6 @@ class AdminCampaignStats extends React.Component {
   renderErrorCounts() {
     const { errorCounts } = this.props.data.campaign.stats;
     const { contactsCount } = this.props.data.campaign;
-    console.log("errorcounts", contactsCount, errorCounts);
     if (!errorCounts.length) {
       return null;
     }
@@ -198,6 +199,10 @@ class AdminCampaignStats extends React.Component {
     } = this.props.organizationData.organization;
     const showReleaseNumbers =
       campaign.isArchived && campaignPhoneNumbersEnabled;
+
+    const replyRate =
+      campaign.stats.receivedMessagesCount / campaign.stats.sentMessagesCount;
+
     return (
       <div>
         <div className={css(styles.container)}>
@@ -340,6 +345,41 @@ class AdminCampaignStats extends React.Component {
             <Stat title="Opt-outs" count={campaign.stats.optOutsCount} />
           </div>
         </div>
+        <div className={css(styles.container, styles.marginBottom)}>
+          <div className={css(styles.flexColumn, styles.spacer)}>
+            <Stat
+              title="Needs Message"
+              count={campaign.stats.needsMessageCount}
+            />
+          </div>
+          <div className={css(styles.flexColumn, styles.spacer)}>
+            <Stat
+              title="Unassigned Needs Message"
+              count={campaign.stats.unassignedNeedsMessageCount}
+            />
+          </div>
+          <div className={css(styles.flexColumn, styles.spacer)}>
+            <Stat
+              title="Needs Response"
+              count={campaign.stats.needsResponseCount}
+            />
+          </div>
+          <div className={css(styles.flexColumn, styles.spacer)}>
+            <Stat
+              title="Unassigned Needs Response"
+              count={campaign.stats.unassignedNeedsResponseCount}
+            />
+          </div>
+          <div className={css(styles.flexColumn)}>
+            <Stat
+              title="Reply Rate"
+              count={Number(replyRate || 0).toLocaleString(undefined, {
+                style: "percent",
+                maximumFractionDigits: 2
+              })}
+            />
+          </div>
+        </div>
         {window.HIDE_BRANCHED_SCRIPTS ? (
           ""
         ) : (
@@ -425,6 +465,10 @@ const queries = {
             sentMessagesCount
             receivedMessagesCount
             optOutsCount
+            needsMessageCount
+            needsResponseCount
+            unassignedNeedsMessageCount
+            unassignedNeedsResponseCount
             errorCounts {
               code
               count

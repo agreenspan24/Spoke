@@ -32,6 +32,10 @@ export const schema = gql`
     sentMessagesCount: Int
     receivedMessagesCount: Int
     optOutsCount: Int
+    needsMessageCount: Int
+    needsResponseCount: Int
+    unassignedNeedsMessageCount: Int
+    unassignedNeedsResponseCount: Int
     errorCounts: [ErrorStat]
   }
 

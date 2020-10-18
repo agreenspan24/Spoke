@@ -115,15 +115,18 @@ export class CampaignContactsForm extends React.Component {
       contactUploadError: null,
       contactsCount: contacts.length
     });
+
     const contactCollection = {
       contactsCount: contacts.length,
       customFields,
       contacts
     };
+
     const self = this;
     // uncomment here to make the data uncompresed on-upload
     // occasionally useful for debugging to see decoded data in-transit
     // return this.props.onChange(JSON.stringify(contactCollection));
+
     gzip(JSON.stringify(contactCollection)).then(gzippedData => {
       self.props.onChange(gzippedData.toString("base64"));
     });

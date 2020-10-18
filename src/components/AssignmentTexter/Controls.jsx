@@ -853,6 +853,7 @@ export class AssignmentTexterContactControls extends React.Component {
 
   renderMessagingRowSendSkip(contact) {
     const firstMessage = this.props.messageStatusFilter === "needsMessage";
+
     return (
       <div
         className={css(flexStyles.sectionSend)}
@@ -1018,8 +1019,7 @@ export class AssignmentTexterContactControls extends React.Component {
         <Empty
           title={`This is your first message to ${this.props.contact.firstName} ${this.props.contact.lastName}`}
           icon={<CreateIcon color={theme.colors.coreBackgroundColor} />}
-        />,
-        enabledSideboxes
+        />
       ),
       this.renderMessagingRowMessage(),
       this.renderMessagingRowSendSkip(this.props.contact)
@@ -1042,8 +1042,7 @@ export class AssignmentTexterContactControls extends React.Component {
                   contact={this.props.contact}
                   messages={this.props.contact.messages}
                   styles={messageListStyles}
-                />,
-                enabledSideboxes
+                />
               )}
               {this.renderMessageControls(enabledSideboxes)}
             </div>

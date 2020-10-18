@@ -135,7 +135,7 @@ export class AdminIncomingMessageList extends Component {
 
   handleTexterChanged = async texterId => {
     const assignmentsFilter = {};
-    if (texterId >= 0) {
+    if (texterId >= 0 || texterId === null) {
       assignmentsFilter.texterId = texterId;
     }
     await this.setState({
@@ -434,7 +434,7 @@ export class AdminIncomingMessageList extends Component {
 export const bulkReassignCampaignContactsMutation = gql`
   mutation bulkReassignCampaignContacts(
     $organizationId: String!
-    $newTexterUserId: String!
+    $newTexterUserId: String
     $contactsFilter: ContactsFilter
     $campaignsFilter: CampaignsFilter
     $assignmentsFilter: AssignmentsFilter
@@ -458,7 +458,7 @@ export const reassignCampaignContactsMutation = gql`
   mutation reassignCampaignContacts(
     $organizationId: String!
     $campaignIdsContactIds: [CampaignIdContactId]!
-    $newTexterUserId: String!
+    $newTexterUserId: String
   ) {
     reassignCampaignContacts(
       organizationId: $organizationId

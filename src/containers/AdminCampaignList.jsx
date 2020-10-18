@@ -15,7 +15,8 @@ import { MenuItem } from "material-ui/Menu";
 import { dataTest } from "../lib/attributes";
 import IconButton from "material-ui/IconButton/IconButton";
 import SortBy, {
-  DUE_DATE_DESC_SORT
+  DUE_DATE_DESC_SORT,
+  ID_DESC_SORT
 } from "../components/AdminCampaignList/SortBy";
 import Paper from "material-ui/Paper";
 import Search from "../components/Search";
@@ -35,7 +36,7 @@ const INITIAL_FILTER = {
   isArchived: false,
   searchString: ""
 };
-const INITIAL_SORT_BY = DUE_DATE_DESC_SORT.value;
+const INITIAL_SORT_BY = ID_DESC_SORT.value;
 
 export class AdminCampaignList extends React.Component {
   static propTypes = {
@@ -381,7 +382,6 @@ const campaignInfoFragment = `
     contactsCount
     errorCount
     messagedCount
-    needsResponseCount
   }
 `;
 
