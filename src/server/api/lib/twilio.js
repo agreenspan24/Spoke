@@ -402,7 +402,7 @@ export function postMessageSend(
       contactUpdateQuery = r
         .knex("campaign_contact")
         .where("id", message.campaign_contact_id)
-        .update({ error_code: changesToSave.error_code });
+        .update("error_code", changesToSave.error_code);
       if (trx) {
         contactUpdateQuery = contactUpdateQuery.transacting(trx);
       }
