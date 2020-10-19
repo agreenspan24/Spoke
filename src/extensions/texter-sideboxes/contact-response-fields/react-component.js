@@ -8,7 +8,7 @@ import { withRouter } from "react-router";
 import loadData from "../../../containers/hoc/load-data";
 import gql from "graphql-tag";
 
-export const displayName = () => "Contact Note Fields";
+export const displayName = () => "Contact Response Fields";
 
 export const showSidebox = ({ contact, messageStatusFilter, settingsData }) => {
   // Return anything False-y to not show
@@ -16,8 +16,8 @@ export const showSidebox = ({ contact, messageStatusFilter, settingsData }) => {
   // Return 'popup' to force a popup on mobile screens (instead of letting it hide behind a button)
   return (
     contact &&
-    settingsData.contactNoteFields &&
-    settingsData.contactNoteFields.length &&
+    settingsData.contactResponseFields &&
+    settingsData.contactResponseFields.length &&
     messageStatusFilter !== "needsMessage"
   );
 };
@@ -36,11 +36,11 @@ class TexterSideboxClass extends React.Component {
     super(props);
 
     const { contact, settingsData } = props;
-    const { contactNoteFields } = settingsData;
+    const { contactResponseFields } = settingsData;
     const savedResponses =
       (contact.responses && JSON.parse(contact.responses)) || {};
 
-    const defaultValues = contactNoteFields.map(f => ({
+    const defaultValues = contactResponseFields.map(f => ({
       field: f,
       response: savedResponses[f] || ""
     }));
@@ -52,7 +52,7 @@ class TexterSideboxClass extends React.Component {
     };
   }
 
-  saveContactNoteFields = async formValues => {
+  saveContactResponseFields = async formValues => {
     await this.props.mutations.saveContactResponses(formValues.responses);
 
     // After saving, update the current saved responses
@@ -76,17 +76,17 @@ class TexterSideboxClass extends React.Component {
   };
 
   render() {
-    const { contactNoteFields } = this.props.settingsData;
+    const { contactResponseFields } = this.props.settingsData;
 
     return (
       <GSForm
         schema={schema}
-        onSubmit={this.saveContactNoteFields}
+        onSubmit={this.saveContactResponseFields}
         value={this.state.formValues}
         onChange={formValues => this.setState({ formValues })}
       >
-        {contactNoteFields &&
-          contactNoteFields.map((field, index) => (
+        {contactResponseFields &&
+          contactResponseFields.map((field, index) => (
             <div key={index}>
               {/* Hidden Field for Field Name */}
               <Form.Field
@@ -149,35 +149,44 @@ TexterSidebox.propTypes = {
 };
 
 export const adminSchema = () => ({
-  contactNoteFields: yup.array().of(yup.string())
+  contactResponseFields: yup.array().of(yup.string())
 });
 
 export class AdminConfig extends React.Component {
   // This function creates a dynamic set of inputs, where if an input is cleared, it disappears
-  updateNoteFields(index, val) {
-    let { contactNoteFields } = this.props.settingsData;
+  updateResponseFields(index, val) {
+    const { contactResponseFields } = this.props.settingsData;
 
-    contactNoteFields = contactNoteFields || [];
-    contactNoteFields[index] = val;
-    contactNoteFields = contactNoteFields.filter(f => !!f);
+    let newResponseFields = contactResponseFields
+      ? contactResponseFields.slice(0)
+      : [];
+    newResponseFields[index] = val;
 
-    this.props.onToggle("contactNoteFields", contactNoteFields);
+    // Filter out empty fields
+    newResponseFields = newResponseFields.filter(f => !!f);
+
+    this.props.onToggle("contactResponseFields", newResponseFields);
   }
 
   render() {
     const { settingsData } = this.props;
-    const { contactNoteFields } = settingsData;
+    const { contactResponseFields } = settingsData;
+
+    const contactResponseFieldsWithExtra = contactResponseFields
+      ? contactResponseFields.slice(0)
+      : [];
 
     // We always want to show one extra input, so you can start a new one
-    const contactNoteFieldsWithExtra = (contactNoteFields || []).push("");
+    contactResponseFieldsWithExtra.push("");
+
     return (
       <div>
-        {contactNoteFieldsWithExtra &&
-          contactNoteFieldsWithExtra.map((field, index) => (
+        {contactResponseFieldsWithExtra &&
+          contactResponseFieldsWithExtra.map((field, index) => (
             <GSTextField
               key={index}
               value={field}
-              onChange={val => this.updateNoteFields(index, val)}
+              onChange={val => this.updateResponseFields(index, val)}
               fullWidth
               hintText="Field Name"
             />
