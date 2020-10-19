@@ -59,6 +59,10 @@ class TexterSideboxClass extends React.Component {
     this.setState({
       savedResponses: formValues.responses
     });
+
+    if (this.props.refreshCurrentContact) {
+      await this.props.refreshCurrentContact();
+    }
   };
 
   shouldDisableButton = () => {

@@ -316,8 +316,8 @@ export class ContactController extends React.Component {
         window.ASSIGNMENT_CONTACTS_SIDEBAR &&
         this.props.messageStatusFilter !== "needsMessage"
       ) {
-        // Refresh the data on the current person, forcing it
-        await this.getContactData(this.state.currentContactIndex, true);
+        // Refresh the data on the current person
+        await this.refreshCurrentContact();
 
         // Re-scroll the message container to the most recent message
         var messageScrollContainer = document.getElementById(
@@ -329,6 +329,11 @@ export class ContactController extends React.Component {
         }
       }
     }
+  };
+
+  refreshCurrentContact = async () => {
+    // Refresh the data on the current person, forcing it
+    await this.getContactData(this.state.currentContactIndex, true);
   };
 
   clearContactIdOldData = contactId => {
@@ -495,6 +500,7 @@ export class ContactController extends React.Component {
         updateCurrentContactById={this.updateCurrentContactById}
         setDisabled={this.setDisabled}
         disabled={this.state.loading}
+        refreshCurrentContact={this.refreshCurrentContact}
       />
     );
   }
