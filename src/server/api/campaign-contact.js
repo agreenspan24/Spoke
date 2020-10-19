@@ -23,7 +23,8 @@ export const resolvers = {
         "zip",
         "customFields",
         "assignmentId",
-        "external_id"
+        "external_id",
+        "responses"
       ],
       CampaignContact
     ),

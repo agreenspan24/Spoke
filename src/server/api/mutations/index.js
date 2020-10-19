@@ -9,6 +9,7 @@ import { startCampaign } from "./startCampaign";
 import { updateContactTags } from "./updateContactTags";
 import { updateQuestionResponses } from "./updateQuestionResponses";
 import { releaseCampaignNumbers } from "./releaseCampaignNumbers";
+import { saveContactResponses } from "./saveContactResponses";
 
 export {
   bulkSendMessages,
@@ -21,5 +22,6 @@ export {
   startCampaign,
   updateContactTags,
   updateQuestionResponses,
-  releaseCampaignNumbers
+  releaseCampaignNumbers,
+  saveContactResponses
 };

@@ -200,6 +200,11 @@ const rootSchema = gql`
     TIMEZONE
   }
 
+  input ContactResponse {
+    field: String!
+    response: String
+  }
+
   type RootQuery {
     currentUser: User
     organization(id: String!, utc: String): Organization
@@ -321,6 +326,10 @@ const rootSchema = gql`
       assignmentId: String!
       numberContacts: Int!
     ): FoundContact
+    saveContactResponses(
+      campaignContactId: String!
+      responses: [ContactResponse]
+    ): Boolean
     releaseContacts(
       assignmentId: String!
       releaseConversations: Boolean
