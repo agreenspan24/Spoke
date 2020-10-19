@@ -74,8 +74,8 @@ export class TexterSideboxClass extends React.Component {
           </div>
         ) : null}
         {showReleaseConvos ? (
-          <div style={{ marginTop: "12px" }}>
-            <div>
+          <div style={{ marginTop: assignment.unmessagedCount ? 12 : null }}>
+            <div style={{ marginBottom: 12 }}>
               {settingsData.releaseContactsConvosTitle
                 ? settingsData.releaseContactsConvosTitle
                 : "Need to give up?"}
