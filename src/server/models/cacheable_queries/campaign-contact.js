@@ -75,7 +75,8 @@ const generateCacheRecord = (
   // updated_at -- because we will not update it
   timezone_offset: dbRecord.timezone_offset,
   city: dbRecord.city,
-  state: dbRecord.state
+  state: dbRecord.state,
+  responses: dbRecord.responses
 });
 
 export const setCacheContactAssignment = async (id, campaignId, contactObj) => {
@@ -281,6 +282,7 @@ const campaignContactCache = {
         "campaign_contact.external_id",
         "campaign_contact.message_status",
         "campaign_contact.timezone_offset",
+        "campaign_contact.responses",
         "zip_code.city",
         "zip_code.state"
       );
@@ -502,6 +504,30 @@ const campaignContactCache = {
       }
     } catch (err) {
       log.error("contact updateStatus Error", newStatus, contact, err);
+    }
+  },
+  updateResponses: async (id, responses) => {
+    // Update responses in the database
+    await r
+      .knex("campaign_contact")
+      .where("id", id)
+      .update({ responses });
+
+    // Update the responses in the Redis Cache
+    if (r.redis && CONTACT_CACHE_ENABLED) {
+      const contactKey = cacheKey(id);
+      const cacheRecord = await r.redis.getAsync(contactKey);
+      if (cacheRecord) {
+        const cacheData = JSON.parse(cacheRecord);
+
+        cacheData.responses = JSON.stringify(responses);
+
+        await r.redis
+          .multi()
+          .set(contactKey, JSON.stringify(cacheData))
+          .expire(contactKey, 43200)
+          .execAsync();
+      }
     }
   }
 };
