@@ -45,6 +45,7 @@ class TexterSideboxClass extends React.Component {
       response: savedResponses[f] || ""
     }));
 
+    // Track the responses that are currently saved, so we can know if the Save button should be enabled.
     this.state = {
       savedResponses: defaultValues,
       formValues: { responses: defaultValues }
@@ -54,13 +55,10 @@ class TexterSideboxClass extends React.Component {
   saveContactNoteFields = async formValues => {
     await this.props.mutations.saveContactResponses(formValues.responses);
 
+    // After saving, update the current saved responses
     this.setState({
       savedResponses: formValues.responses
     });
-  };
-
-  onChange = formValues => {
-    this.setState({ formValues });
   };
 
   shouldDisableButton = () => {
@@ -85,11 +83,12 @@ class TexterSideboxClass extends React.Component {
         schema={schema}
         onSubmit={this.saveContactNoteFields}
         value={this.state.formValues}
-        onChange={this.onChange}
+        onChange={formValues => this.setState({ formValues })}
       >
         {contactNoteFields &&
           contactNoteFields.map((field, index) => (
             <div key={index}>
+              {/* Hidden Field for Field Name */}
               <Form.Field
                 style={{ display: "none" }}
                 name={`responses[${index}].field`}
@@ -154,6 +153,7 @@ export const adminSchema = () => ({
 });
 
 export class AdminConfig extends React.Component {
+  // This function creates a dynamic set of inputs, where if an input is cleared, it disappears
   updateNoteFields(index, val) {
     let { contactNoteFields } = this.props.settingsData;
 
@@ -168,16 +168,8 @@ export class AdminConfig extends React.Component {
     const { settingsData } = this.props;
     const { contactNoteFields } = settingsData;
 
-    const currentCount = (contactNoteFields && contactNoteFields.length) || 0;
-    const lastField =
-      contactNoteFields && contactNoteFields[contactNoteFields.length - 1];
-
-    const emptyArray = [""];
-    const contactNoteFieldsWithExtra = !currentCount
-      ? emptyArray
-      : lastField
-      ? contactNoteFields.concat(emptyArray)
-      : contactNoteFields;
+    // We always want to show one extra input, so you can start a new one
+    const contactNoteFieldsWithExtra = (contactNoteFields || []).push("");
     return (
       <div>
         {contactNoteFieldsWithExtra &&

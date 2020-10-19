@@ -484,11 +484,13 @@ const campaignContactCache = {
     }
   },
   updateResponses: async (id, responses) => {
+    // Update responses in the database
     await r
       .knex("campaign_contact")
       .where("id", id)
       .update({ responses });
 
+    // Update the responses in the Redis Cache
     if (r.redis && CONTACT_CACHE_ENABLED) {
       const contactKey = cacheKey(id);
       const cacheRecord = await r.redis.getAsync(contactKey);
