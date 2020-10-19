@@ -18,7 +18,7 @@ export const showSidebox = ({
   // Return anything Truth-y to show
   // Return 'popup' to force a popup on mobile screens (instead of letting it hide behind a button)
   if (
-    (contact && finished) ||
+    (contact && finished && messageStatusFilter === "needsMessage") ||
     (messageStatusFilter === "needsMessage" &&
       assignment.allContactsCount &&
       assignment.unmessagedCount === 0)

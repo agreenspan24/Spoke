@@ -37,5 +37,6 @@ export const schema = `
     messageStatus: String
     assignmentId: String
     updated_at: Date
+    responses: JSON
   }
 `;

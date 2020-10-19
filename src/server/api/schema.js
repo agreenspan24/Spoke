@@ -64,7 +64,8 @@ import {
   updateContactTags,
   updateQuestionResponses,
   releaseCampaignNumbers,
-  submitCannedResponse
+  submitCannedResponse,
+  saveContactResponses
 } from "./mutations";
 
 const ActionHandlers = require("../../extensions/action-handlers");
@@ -959,6 +960,7 @@ const rootMutations = {
       return cannedResponseInstance;
     },
     submitCannedResponse,
+    saveContactResponses,
     createOrganization: async (_, { name, userId, inviteId }, { user }) => {
       authRequired(user);
       const invite = await Invite.get(inviteId);

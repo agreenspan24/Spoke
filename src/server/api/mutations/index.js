@@ -10,6 +10,7 @@ import { updateContactTags } from "./updateContactTags";
 import { updateQuestionResponses } from "./updateQuestionResponses";
 import { releaseCampaignNumbers } from "./releaseCampaignNumbers";
 import { submitCannedResponse } from "./submitCannedResponse";
+import { saveContactResponses } from "./saveContactResponses";
 
 export {
   bulkSendMessages,
@@ -23,5 +24,6 @@ export {
   updateContactTags,
   updateQuestionResponses,
   releaseCampaignNumbers,
-  submitCannedResponse
+  submitCannedResponse,
+  saveContactResponses
 };
