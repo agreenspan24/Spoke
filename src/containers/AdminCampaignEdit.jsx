@@ -379,6 +379,16 @@ export class AdminCampaignEdit extends React.Component {
 
   sections() {
     const pendingJobs = this.props.campaignData.campaign.pendingJobs;
+    const vanIntegrationEnabled =
+      (this.props.campaignData.campaign.ingestMethodsAvailable &&
+        this.props.campaignData.campaign.ingestMethodsAvailable.some(
+          x => x.name == "ngpvan"
+        )) ||
+      (this.props.campaignData.campaign.availableActions &&
+        this.props.campaignData.campaign.availableActions.some(
+          x => x.name == "ngpvan-action"
+        ));
+
     const finalSections = [
       {
         title: "Basics",
@@ -398,17 +408,11 @@ export class AdminCampaignEdit extends React.Component {
         checkCompleted: () =>
           this.state.campaignFormValues.title !== "" &&
           this.state.campaignFormValues.description !== "" &&
-          this.state.campaignFormValues.dueBy !== null,
+          this.state.campaignFormValues.dueBy !== null &&
+          (!vanIntegrationEnabled ||
+            this.state.campaignFormValues.vanDatabaseMode >= 0),
         extraProps: {
-          vanIntegrationEnabled:
-            (this.props.campaignData.campaign.ingestMethodsAvailable &&
-              this.props.campaignData.campaign.ingestMethodsAvailable.some(
-                x => x.name == "ngpvan"
-              )) ||
-            (this.props.campaignData.campaign.availableActions &&
-              this.props.campaignData.campaign.availableActions.some(
-                x => x.name == "ngpvan-action"
-              ))
+          vanIntegrationEnabled: vanIntegrationEnabled
         }
       },
       {
