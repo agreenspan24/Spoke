@@ -63,7 +63,8 @@ import {
   startCampaign,
   updateContactTags,
   updateQuestionResponses,
-  releaseCampaignNumbers
+  releaseCampaignNumbers,
+  saveContactResponses
 } from "./mutations";
 
 const ActionHandlers = require("../../extensions/action-handlers");
@@ -968,6 +969,7 @@ const rootMutations = {
       });
       return cannedResponseInstance;
     },
+    saveContactResponses,
     createOrganization: async (_, { name, userId, inviteId }, { user }) => {
       authRequired(user);
       const invite = await Invite.get(inviteId);

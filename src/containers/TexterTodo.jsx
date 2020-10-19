@@ -14,6 +14,7 @@ export const contactDataFragment = `
         cell
         zip
         customFields
+        responses
         optOut {
           id
         }

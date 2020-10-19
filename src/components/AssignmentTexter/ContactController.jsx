@@ -166,11 +166,14 @@ export class ContactController extends React.Component {
     const BATCH_FORWARD = 25; // when to reach out and get more
     let getIds = [];
     // if we don't have current data, get that
-    if (contacts[newIndex] && !this.state.contactCache[contacts[newIndex].id]) {
+    if (
+      contacts[newIndex] &&
+      (!this.state.contactCache[contacts[newIndex].id] || force)
+    ) {
       getIds = contacts
         .slice(newIndex, newIndex + BATCH_GET)
         .map(c => c.id)
-        .filter(cId => !force || !this.state.contactCache[cId]);
+        .filter(cId => force || !this.state.contactCache[cId]);
       // console.log('getContactData missing current', newIndex, getIds)
     }
     // if we DO have current data, but don't have data base BATCH_FORWARD...
@@ -182,7 +185,7 @@ export class ContactController extends React.Component {
       getIds = contacts
         .slice(newIndex + BATCH_FORWARD, newIndex + BATCH_FORWARD + BATCH_GET)
         .map(c => c.id)
-        .filter(cId => !force || !this.state.contactCache[cId]);
+        .filter(cId => force || !this.state.contactCache[cId]);
       // console.log('getContactData batch forward ', getIds)
     }
     if (getIds.length) {
@@ -287,6 +290,11 @@ export class ContactController extends React.Component {
         }
       });
     }
+  };
+
+  refreshCurrentContact = async () => {
+    // Refresh the data on the current person, forcing it
+    await this.getContactData(this.state.currentContactIndex, true);
   };
 
   clearContactIdOldData = contactId => {
@@ -445,6 +453,7 @@ export class ContactController extends React.Component {
         refreshData={this.props.refreshData}
         onExitTexter={this.handleExitTexter}
         messageStatusFilter={this.props.messageStatusFilter}
+        refreshCurrentContact={this.refreshCurrentContact}
       />
     );
   }

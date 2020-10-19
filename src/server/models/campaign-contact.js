@@ -36,7 +36,8 @@ const CampaignContact = thinky.createModel(
       timezone_offset: type
         .string()
         .default("")
-        .required()
+        .required(),
+      responses: requiredString().default("{}")
     })
     .allowExtra(false),
   { noAutoCreation: true }
