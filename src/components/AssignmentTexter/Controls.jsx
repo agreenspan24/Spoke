@@ -1010,7 +1010,8 @@ AssignmentTexterContactControls.propTypes = {
   onExitTexter: PropTypes.func,
   onEditStatus: PropTypes.func,
   refreshData: PropTypes.func,
-  getMessageTextFromScript: PropTypes.func
+  getMessageTextFromScript: PropTypes.func,
+  refreshCurrentContact: PropTypes.func
 };
 
 export default AssignmentTexterContactControls;
