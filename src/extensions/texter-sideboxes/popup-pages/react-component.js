@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     zIndex: 5000
   },
   dialogContentStyle: {
-    width: "100%" // Still exists a maxWidth of 768px
+    width: "100%" // Still exists a maxWidth of 768px on desktop
   },
   iframe: {
     height: "80vh",
@@ -48,24 +48,11 @@ export class TexterSidebox extends React.Component {
     };
   }
 
-  openDialog = () => {
-    this.setState({
-      dialogOpen: true
-    });
-  };
-
   closeDialog = () => {
     this.setState({
       dialogOpen: false,
       iframeLoading: true
     });
-  };
-
-  buildUrlParamString = urlParams => {
-    return _.map(
-      urlParams,
-      (val, key) => `${key}=${encodeURIComponent(val)}`
-    ).join("&");
   };
 
   render() {
@@ -142,7 +129,6 @@ export class AdminConfig extends React.Component {
           fullWidth
         />
         <Form.Field
-          type="script"
           name="popupPageIframeUrl"
           label="Set the url for your popup page. Please add any custom contact fields you need."
           fullWidth
