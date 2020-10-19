@@ -379,15 +379,12 @@ export class AdminCampaignEdit extends React.Component {
 
   sections() {
     const pendingJobs = this.props.campaignData.campaign.pendingJobs;
+    const { campaign } = this.props.campaignData;
     const vanIntegrationEnabled =
-      (this.props.campaignData.campaign.ingestMethodsAvailable &&
-        this.props.campaignData.campaign.ingestMethodsAvailable.some(
-          x => x.name == "ngpvan"
-        )) ||
-      (this.props.campaignData.campaign.availableActions &&
-        this.props.campaignData.campaign.availableActions.some(
-          x => x.name == "ngpvan-action"
-        ));
+      (campaign.ingestMethodsAvailable &&
+        campaign.ingestMethodsAvailable.some(x => x.name == "ngpvan")) ||
+      (campaign.availableActions &&
+        campaign.availableActions.some(x => x.name == "ngpvan-action"));
 
     const finalSections = [
       {
@@ -410,7 +407,7 @@ export class AdminCampaignEdit extends React.Component {
           this.state.campaignFormValues.description !== "" &&
           this.state.campaignFormValues.dueBy !== null &&
           (!vanIntegrationEnabled ||
-            this.state.campaignFormValues.vanDatabaseMode >= 0),
+            Number.isInteger(this.state.campaignFormValues.vanDatabaseMode)),
         extraProps: {
           vanIntegrationEnabled: vanIntegrationEnabled
         }
