@@ -362,16 +362,16 @@ export const resolvers = {
             "SUM(CASE WHEN is_opted_out THEN 1 ELSE 0 END) AS opt_out_count"
           ),
           r.knex.raw(
-            "SUM(CASE WHEN message_status = 'needsMessage' THEN 1 ELSE 0 END) AS needs_message_count"
+            "SUM(CASE WHEN message_status = 'needsMessage' AND NOT is_opted_out THEN 1 ELSE 0 END) AS needs_message_count"
           ),
           r.knex.raw(
-            "SUM(CASE WHEN message_status = 'needsResponse' THEN 1 ELSE 0 END) AS needs_response_count"
+            "SUM(CASE WHEN message_status = 'needsResponse' AND NOT is_opted_out THEN 1 ELSE 0 END) AS needs_response_count"
           ),
           r.knex.raw(
-            "SUM(CASE WHEN assignment_id IS NULL AND message_status = 'needsMessage' THEN 1 ELSE 0 END) AS unassigned_needs_message_count"
+            "SUM(CASE WHEN assignment_id IS NULL AND message_status = 'needsMessage' AND NOT is_opted_out THEN 1 ELSE 0 END) AS unassigned_needs_message_count"
           ),
           r.knex.raw(
-            "SUM(CASE WHEN assignment_id IS NULL AND message_status = 'needsResponse' THEN 1 ELSE 0 END) AS unassigned_needs_response_count"
+            "SUM(CASE WHEN assignment_id IS NULL AND message_status = 'needsResponse' AND NOT is_opted_out THEN 1 ELSE 0 END) AS unassigned_needs_response_count"
           ),
           r.knex.raw(
             "SUM(CASE WHEN message_status IN ('messaged', 'needsResponse', 'convo', 'closed') THEN 1 ELSE 0 END) AS sent_count"

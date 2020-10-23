@@ -304,6 +304,11 @@ const messageCache = {
         messageInstance,
         activeCellFound
       );
+
+      if (matchError) {
+        return;
+      }
+
       const contactId =
         messageInstance.campaign_contact_id ||
         (activeCellFound && activeCellFound.campaign_contact_id);
