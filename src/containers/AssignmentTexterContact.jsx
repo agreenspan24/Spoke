@@ -351,9 +351,6 @@ export class AssignmentTexterContact extends React.Component {
     } catch (err) {
       console.log("handleOptOut Error", err);
       this.handleSendMessageError(err);
-      setTimeout(() => {
-        this.props.onFinishContact(contact.id);
-      }, 750);
     }
   };
 
