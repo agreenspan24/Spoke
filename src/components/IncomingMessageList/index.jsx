@@ -117,7 +117,7 @@ export class IncomingMessageList extends Component {
       style: {
         textOverflow: "ellipsis",
         overflow: "hidden",
-        whiteSpace: "pre-line"
+        whiteSpace: "nowrap"
       },
       render: (columnKey, row) => (
         <span title={row.campaignTitle}>{row.campaignTitle}</span>
