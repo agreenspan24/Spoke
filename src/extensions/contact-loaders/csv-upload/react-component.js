@@ -43,6 +43,26 @@ export const ensureCamelCaseRequiredHeaders = columnHeader => {
   return columnHeader;
 };
 
+const initCap = name => {
+  return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+};
+
+export const rowTransformer = (originalFields, originalRow) => {
+  const row = {
+    ...originalRow
+  };
+
+  if (row.firstName) {
+    row.firstName = row.firstName.replace(/[\w]+/g, initCap);
+  }
+
+  if (row.lastName) {
+    row.lastName = row.lastName.replace(/[\w]+/g, initCap);
+  }
+
+  return { row, addedFields: [] };
+};
+
 const innerStyles = {
   button: {
     margin: "24px 5px 24px 0",
@@ -93,7 +113,10 @@ export class CampaignContactsForm extends React.Component {
             this.handleUploadSuccess(validationStats, contacts, customFields);
           }
         },
-        { headerTransformer: ensureCamelCaseRequiredHeaders }
+        {
+          headerTransformer: ensureCamelCaseRequiredHeaders,
+          rowTransformer: rowTransformer
+        }
       );
     });
   };
