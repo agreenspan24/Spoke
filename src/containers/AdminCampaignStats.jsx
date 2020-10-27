@@ -108,6 +108,15 @@ const texterStatColumns = [
     }
   },
   {
+    key: "percentComplete",
+    label: "Percent Complete",
+    style: {
+      textOverflow: "ellipsis",
+      overflow: "hidden",
+      whiteSpace: "pre-line"
+    }
+  },
+  {
     key: "contactsCount",
     label: "Total Contacts",
     style: {
@@ -227,6 +236,12 @@ class AdminCampaignStats extends React.Component {
         summary.texter.assignment.contactsCount -
         summary.texter.assignment.needsMessageCount,
       unmessagedCount: summary.texter.assignment.needsMessageCount,
+      percentComplete: `${Math.round(
+        ((summary.texter.assignment.contactsCount -
+          summary.texter.assignment.needsMessageCount) *
+          100) /
+          summary.texter.assignment.contactsCount
+      )}%`,
       contactsCount: summary.texter.assignment.contactsCount
     }));
     return (
