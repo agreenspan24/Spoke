@@ -16,7 +16,8 @@ const inlineStyles = {
     overflow: "hidden scroll"
   },
   contactsListSearch: {
-    marginTop: 10
+    marginTop: 10,
+    minHeight: 48
   },
   updatedAt: {
     fontSize: 12,
@@ -70,9 +71,22 @@ class AssignmentContactsList extends React.Component {
 
     // Scroll the list item element to center if possible, so it's always displayed in the sidebar
     if (node) {
-      node.scrollIntoView({
-        block: "center"
-      });
+      const isSafari = /^((?!chrome|android).)*safari/i.test(
+        navigator.userAgent
+      );
+
+      if (node.scrollIntoView) {
+        if (isSafari) {
+          node.scrollIntoView();
+        } else {
+          node.scrollIntoView({
+            block: "center"
+          });
+        }
+      } else {
+        document.getElementById("assignment-contacts-list").scrollTop =
+          node.offsetTop - 300;
+      }
     }
   }
 
@@ -139,7 +153,10 @@ class AssignmentContactsList extends React.Component {
           value={this.state.search}
           style={inlineStyles.contactsListSearch}
         />
-        <List style={inlineStyles.contactListScrollContainer}>
+        <List
+          id="assignment-contacts-list"
+          style={inlineStyles.contactListScrollContainer}
+        >
           {contactList}
         </List>
       </div>

@@ -16,7 +16,7 @@ import { MESSAGE_STATUSES } from "../../components/IncomingMessageFilter";
 
 export const prepareDataTableData = conversations =>
   conversations.map(conversation => ({
-    campaignTitle: conversation.campaign.title,
+    campaignTitle: `${conversation.campaign.id}: ${conversation.campaign.title}`,
     texter:
       (conversation.texter.id
         ? conversation.texter.displayName
@@ -118,7 +118,10 @@ export class IncomingMessageList extends Component {
         textOverflow: "ellipsis",
         overflow: "hidden",
         whiteSpace: "pre-line"
-      }
+      },
+      render: (columnKey, row) => (
+        <span title={row.campaignTitle}>{row.campaignTitle}</span>
+      )
     },
     {
       key: "texter",

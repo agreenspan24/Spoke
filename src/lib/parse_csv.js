@@ -121,6 +121,41 @@ export const parseCSV = (file, onCompleteCallback, options) => {
         }
       }
 
+      let hasVanIdCol = false;
+      let hasContactsPhoneCol = false;
+      for (const field of fields) {
+        const van_id_fields = [
+          "VanID",
+          "vanid",
+          "van_id",
+          "myc_van_id",
+          "myv_van_id"
+        ];
+        const contacts_phone_id_fields = [
+          "contactsPhoneId",
+          "contacts_phone_id",
+          "contactsphoneid",
+          "phone_id",
+          "phoneid"
+        ];
+
+        if (van_id_fields.indexOf(field) > -1) {
+          hasVanIdCol = true;
+        }
+
+        if (contacts_phone_id_fields.indexOf(field) > -1) {
+          hasContactsPhoneCol = true;
+        }
+      }
+
+      if (!hasVanIdCol) {
+        missingFields.push("van_id");
+      }
+
+      if (!hasContactsPhoneCol) {
+        missingFields.push("contacts_phone_id");
+      }
+
       if (missingFields.length > 0) {
         const error = `Missing fields: ${missingFields.join(", ")}`;
         onCompleteCallback({ error });
