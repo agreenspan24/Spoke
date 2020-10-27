@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "absolute",
-    top: 0,
+    top: 56,
     bottom: 0,
     left: 0,
     right: 0,
@@ -56,10 +56,14 @@ export class AssignmentTexterContact extends React.Component {
       snackbarError = "Your assignment has changed";
       snackbarOnTouchTap = this.goBackToTodos;
       snackbarActionTitle = "Back to Todos";
-    } else if (contact.optOut && !this.props.reviewContactId) {
+    } else if (
+      contact.optOut &&
+      !this.props.reviewContactId &&
+      !window.ASSIGNMENT_CONTACTS_SIDEBAR
+    ) {
       disabledText = "Skipping opt-out...";
     } else if (!this.isContactBetweenTextingHours(contact)) {
-      disabledText = "Refreshing ...";
+      disabledText = "Outside of Texting Hours ...";
     }
 
     this.state = {
@@ -73,7 +77,7 @@ export class AssignmentTexterContact extends React.Component {
 
   componentDidMount() {
     const { contact } = this.props;
-    if (contact.optOut) {
+    if (contact.optOut && !window.ASSIGNMENT_CONTACTS_SIDEBAR) {
       if (!this.props.reviewContactId) {
         this.skipContact();
       }
@@ -427,7 +431,11 @@ export class AssignmentTexterContact extends React.Component {
 
     if (assignment.id !== contact.assignmentId || campaign.isArchived) {
       disabled = true;
-    } else if (contact.optOut && !this.props.reviewContactId) {
+    } else if (
+      contact.optOut &&
+      !this.props.reviewContactId &&
+      !window.ASSIGNMENT_CONTACTS_SIDEBAR
+    ) {
       disabled = true;
     } else if (!this.isContactBetweenTextingHours(contact)) {
       disabled = true;
