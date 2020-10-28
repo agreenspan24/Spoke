@@ -4,7 +4,7 @@ import RaisedButton from "material-ui/RaisedButton";
 import Chart from "../components/Chart";
 import { Card, CardTitle, CardText } from "material-ui/Card";
 import LinearProgress from "material-ui/LinearProgress";
-import TexterStats from "../components/TexterStats";
+import DataTables from "material-ui-datatables";
 import OrganizationJoinLink from "../components/OrganizationJoinLink";
 import Snackbar from "material-ui/Snackbar";
 import { withRouter } from "react-router";
@@ -78,6 +78,54 @@ const styles = StyleSheet.create({
     ...theme.text.secondaryHeader
   }
 });
+
+const texterStatColumns = [
+  {
+    key: "texter",
+    label: "Texter",
+    style: {
+      textOverflow: "ellipsis",
+      overflow: "hidden",
+      whiteSpace: "pre-line"
+    }
+  },
+  {
+    key: "messagedCount",
+    label: "Messaged",
+    style: {
+      textOverflow: "ellipsis",
+      overflow: "hidden",
+      whiteSpace: "pre-line"
+    }
+  },
+  {
+    key: "unmessagedCount",
+    label: "Not Messaged",
+    style: {
+      textOverflow: "ellipsis",
+      overflow: "hidden",
+      whiteSpace: "pre-line"
+    }
+  },
+  {
+    key: "percentComplete",
+    label: "Percent Complete",
+    style: {
+      textOverflow: "ellipsis",
+      overflow: "hidden",
+      whiteSpace: "pre-line"
+    }
+  },
+  {
+    key: "contactsCount",
+    label: "Total Contacts",
+    style: {
+      textOverflow: "ellipsis",
+      overflow: "hidden",
+      whiteSpace: "pre-line"
+    }
+  }
+];
 
 const Stat = ({ title, count }) => (
   <Card key={title} style={inlineStyles.stat}>
@@ -177,6 +225,32 @@ class AdminCampaignStats extends React.Component {
         onTouchTap={async () =>
           await this.props.mutations.copyCampaign(this.props.params.campaignId)
         }
+      />
+    );
+  }
+
+  renderTexterStats() {
+    const data = (this.props.data.campaign.assignments || []).map(summary => ({
+      texter: `${summary.texter.firstName} ${summary.texter.lastName}`,
+      messagedCount:
+        summary.texter.assignment.contactsCount -
+        summary.texter.assignment.needsMessageCount,
+      unmessagedCount: summary.texter.assignment.needsMessageCount,
+      percentComplete: `${Math.round(
+        ((summary.texter.assignment.contactsCount -
+          summary.texter.assignment.needsMessageCount) *
+          100) /
+          summary.texter.assignment.contactsCount
+      )}%`,
+      contactsCount: summary.texter.assignment.contactsCount
+    }));
+    return (
+      <DataTables
+        data={_.sortBy(data, d => d.texter)}
+        columns={texterStatColumns}
+        rowSize={data.length}
+        count={data.length}
+        showRowHover={true}
       />
     );
   }
@@ -393,8 +467,7 @@ class AdminCampaignStats extends React.Component {
           </div>
         ) : null}
         <div className={css(styles.header)}>Texter stats</div>
-        <div className={css(styles.secondaryHeader)}>% of first texts sent</div>
-        <TexterStats campaign={campaign} />
+        {this.renderTexterStats()}
         <Snackbar
           open={this.state.exportMessageOpen}
           message="Export started - we'll e-mail you when it's done"
@@ -440,9 +513,14 @@ const queries = {
               roles(organizationId: $organizationId)
               firstName
               lastName
+              assignment(campaignId: $campaignId) {
+                contactsCount
+                needsMessageCount: contactsCount(
+                  contactsFilter: { messageStatus: "needsMessage" }
+                )
+              }
             }
-            unmessagedCount: contactsCount(contactsFilter: $contactsFilter)
-            contactsCount
+            sentMessagesCount: contactsCount(contactsFilter: $contactsFilter)
           }
           pendingJobs {
             id
