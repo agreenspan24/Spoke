@@ -94,7 +94,7 @@ export const postCanvassResponse = async (
   });
 
   const retries =
-    getConfig("NGP_VAN_ACTION_REQUEST_RETRIES", organization) || 0;
+    parseInt(getConfig("NGP_VAN_ACTION_REQUEST_RETRIES", organization)) || 0;
 
   return httpRequest(url, {
     method: "POST",
