@@ -93,9 +93,12 @@ export const postCanvassResponse = async (
     body: JSON.stringify(body)
   });
 
+  const retries =
+    getConfig("NGP_VAN_ACTION_REQUEST_RETRIES", organization) || 0;
+
   return httpRequest(url, {
     method: "POST",
-    retries: 0,
+    retries: retries,
     timeout: 32000,
     headers: {
       Authorization: Van.getAuth(
