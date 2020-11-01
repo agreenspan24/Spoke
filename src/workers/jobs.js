@@ -881,8 +881,15 @@ export async function sendMessages(queryFunc, defaultStatus) {
     let messages = [];
     try {
       let messageQuery = trx("message")
+        .leftJoin(
+          "campaign_contact",
+          "campaign_contact.id",
+          "message.campaign_contact_id"
+        )
+        .leftJoin("campaign", "campaign_contact.campaign_id", "campaign.id")
         .forUpdate()
-        .where({ send_status: defaultStatus || "QUEUED" });
+        .where({ send_status: defaultStatus || "QUEUED" })
+        .select("message.*", "campaign.organization_id");
       if (queryFunc) {
         messageQuery = queryFunc(messageQuery);
       }
@@ -912,7 +919,12 @@ export async function sendMessages(queryFunc, defaultStatus) {
           `Sending (${message.service}): ${message.user_number} -> ${message.contact_number}\nMessage: ${message.text}`
         );
         try {
-          await service.sendMessage(message, null, trx);
+          await service.sendMessage(
+            message,
+            { id: message.campaign_contact_id },
+            trx,
+            { id: message.organization_id }
+          );
           pastMessages.push(message.id);
           pastMessages = pastMessages.slice(-100); // keep the last 100
         } catch (err) {

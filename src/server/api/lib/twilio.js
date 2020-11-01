@@ -176,7 +176,6 @@ async function getContactUserNumber(organization, contactNumber) {
       contactNumber
     );
 
-    console.log({ phoneNumber });
     return phoneNumber && phoneNumber.phone_number;
   }
 
@@ -215,7 +214,7 @@ async function sendMessage(message, contact, trx, organization, campaign) {
   let userNumber;
   if (
     organization &&
-    (getConfig("EXPERIMENTAL_STICKY_SENDER"), organization, { truthy: true })
+    getConfig("EXPERIMENTAL_STICKY_SENDER", organization, { truthy: true })
   ) {
     userNumber = await getContactUserNumber(
       organization,
