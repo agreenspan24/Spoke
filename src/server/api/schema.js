@@ -1144,7 +1144,12 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+      await accessRequired(
+        user,
+        organizationId,
+        "SUPERVOLUNTEER",
+        /* superadmin*/ true
+      );
 
       // group contactIds by campaign
       // group messages by campaign
@@ -1177,7 +1182,12 @@ const rootMutations = {
       { user }
     ) => {
       // verify permissions
-      await accessRequired(user, organizationId, "ADMIN", /* superadmin*/ true);
+      await accessRequired(
+        user,
+        organizationId,
+        "SUPERVOLUNTEER",
+        /* superadmin*/ true
+      );
       const { campaignIdContactIdsMap } = await getCampaignIdContactIdsMaps(
         organizationId,
         {
