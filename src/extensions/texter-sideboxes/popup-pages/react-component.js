@@ -68,6 +68,7 @@ export class TexterSidebox extends React.Component {
           onClick={() => this.setState({ dialogOpen: true })}
           className={css(flexStyles.flatButton)}
           labelStyle={inlineStyles.flatButtonLabel}
+          style={{ width: "100%" }}
         />
         <Dialog
           actions={[
