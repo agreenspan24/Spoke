@@ -60,7 +60,7 @@ class TopNav extends React.Component {
     return (
       <div>
         <img
-          src="https://codems-spoke-public.s3.us-east-2.amazonaws.com/2020+Victory+Colorado+Logo.png"
+          src="https://datastudio.google.com/2e54ce39-c8e3-498f-a554-f74a0be9892a"
           height="50"
           style={{ marginRight: 16 }}
         />

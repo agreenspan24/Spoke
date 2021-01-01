@@ -67,7 +67,7 @@ export default function makeRoutes(requireAuth = () => {}) {
             main: () => <DashboardLoader path="/app" />,
             topNav: p => (
               <TopNav
-                title="Colorado Dems Spoke Texting"
+                title="GA Dems Spoke Texting"
                 orgId={p.params.organizationId}
               />
             )
@@ -104,7 +104,7 @@ export default function makeRoutes(requireAuth = () => {}) {
                 main: TexterTodoList,
                 topNav: p => (
                   <TopNav
-                    title="Colorado Dems Spoke Texting"
+                    title="GA Dems Spoke Texting"
                     orgId={p.params.organizationId}
                   />
                 )
@@ -116,7 +116,7 @@ export default function makeRoutes(requireAuth = () => {}) {
                 main: TexterTodoList,
                 topNav: p => (
                   <TopNav
-                    title="Colorado Dems Spoke Texting"
+                    title="GA Dems Spoke Texting"
                     orgId={p.params.organizationId}
                   />
                 )
