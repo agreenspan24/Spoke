@@ -28,6 +28,7 @@ class Search extends React.Component {
       onChange={this.handleSearchStringChanged}
       value={this.props.searchString}
       hintText={this.props.hintText}
+      style={this.props.style}
     />
   );
 }
