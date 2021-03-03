@@ -13,6 +13,7 @@ import {
 } from "../../models";
 import wrap from "../../wrap";
 import { getConfig } from "./config";
+import ownedPhoneNumber from "./owned-phone-number";
 import { saveNewIncomingMessage } from "./message-sending";
 
 // TWILIO error_codes:
@@ -243,6 +244,21 @@ async function getOrganizationContactUserNumber(organization, contactNumber) {
     return organizationContact.user_number;
   }
 
+  if (
+    (getConfig("EXPERIMENTAL_PHONE_INVENTORY", organization, {
+      truthy: true
+    }) ||
+      getConfig("PHONE_INVENTORY", organization, { truthy: true })) &&
+    getConfig("SKIP_TWILIO_MESSAGING_SERVICE", organization, { truthy: true })
+  ) {
+    const phoneNumber = await ownedPhoneNumber.getOwnedPhoneNumberForStickySender(
+      organization.id,
+      contactNumber
+    );
+
+    return phoneNumber && phoneNumber.phone_number;
+  }
+
   return null;
 }
 
@@ -276,7 +292,10 @@ async function sendMessage(message, contact, trx, organization, campaign) {
   );
 
   let userNumber;
-  if (process.env.EXPERIMENTAL_STICKY_SENDER) {
+  if (
+    organization &&
+    getConfig("EXPERIMENTAL_STICKY_SENDER", organization, { truthy: true })
+  ) {
     userNumber = await getOrganizationContactUserNumber(
       organization,
       contact.cell
@@ -653,10 +672,13 @@ async function addNumberToMessagingService(
  * Buy a phone number and add it to the owned_phone_number table
  */
 async function buyNumber(organization, twilioInstance, phoneNumber, opts = {}) {
+  const twilioBaseUrl =
+    getConfig("TWILIO_BASE_CALLBACK_URL", organization) || "";
   const response = await twilioInstance.incomingPhoneNumbers.create({
     phoneNumber,
     friendlyName: `Managed by Spoke [${process.env.BASE_URL}]: ${phoneNumber}`,
-    voiceUrl: getConfig("TWILIO_VOICE_URL", organization) // will use default twilio recording if undefined
+    voiceUrl: getConfig("TWILIO_VOICE_URL", organization), // will use default twilio recording if undefined
+    smsUrl: urlJoin(twilioBaseUrl, "twilio", organization.id.toString())
   });
 
   if (response.error) {
@@ -775,6 +797,14 @@ async function deleteNumber(twilioInstance, phoneSid, phoneNumber) {
       }
     });
   log.debug(`Deleted number ${phoneNumber} [${phoneSid}]`);
+
+  if (process.env.EXPERIMENTAL_STICKY_SENDER) {
+    await cacheableData.organizationContact.remove({
+      organizationId,
+      contactNumber: cell
+    });
+  }
+
   return await r
     .knex("owned_phone_number")
     .del()

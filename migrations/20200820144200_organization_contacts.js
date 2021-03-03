@@ -3,6 +3,13 @@ exports.up = async function up(knex, Promise) {
     t.index(["contact_number", "user_number"], "cell_user_number_idx");
   });
 
+  await knex.schema.table("owned_phone_number", table => {
+    table
+      .integer("stuck_contacts")
+      .notNullable()
+      .defaultTo(0);
+  });
+
   if (!(await knex.schema.hasTable("organization_contact"))) {
     await knex.schema.createTable("organization_contact", t => {
       t.increments("id");
@@ -18,6 +25,18 @@ exports.up = async function up(knex, Promise) {
       t.unique(["organization_id", "contact_number"]);
     });
   }
+
+  if (!(await knex.schema.hasTable("area_code"))) {
+    await knex.schema.createTable("area_code", t => {
+      t.text("area_code")
+        .notNullable()
+        .primary();
+      t.text("location");
+      t.text("country");
+      t.text("overlay_area_codes");
+      t.text("state_area_codes");
+    });
+  }
 };
 
 exports.down = async function down(knex, Promise) {
@@ -25,5 +44,10 @@ exports.down = async function down(knex, Promise) {
     t.dropIndex("cell_user_number_idx");
   });
 
+  await knex.schema.alterTable("owned_phone_number", t => {
+    t.dropColumn("stuck_contacts");
+  });
+
   await knex.schema.dropTableIfExists("organization_contact");
+  await knex.schema.dropTableIfExists("area_code");
 };

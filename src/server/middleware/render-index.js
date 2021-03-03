@@ -115,7 +115,14 @@ export default function renderIndex(html, css, assetMap) {
         100};
       window.CONTACTS_PER_PHONE_NUMBER=${getConfig(
         "CONTACTS_PER_PHONE_NUMBER"
-      ) || 200};      
+      ) || 200};
+      window.SKIP_TWILIO_MESSAGING_SERVICE=${getConfig(
+        "SKIP_TWILIO_MESSAGING_SERVICE",
+        null,
+        {
+          truthy: 1
+        }
+      ) || false};
       window.MOBILIZE_EVENT_SHIFTER_URL='${getConfig(
         "MOBILIZE_EVENT_SHIFTER_URL"
       )}';

@@ -44,6 +44,11 @@ const organizationContactCache = {
 
     await r.knex("organization_contact").insert(organizationContact);
 
+    await r
+      .knex("owned_phone_number")
+      .where({ phone_number: userNumber })
+      .increment("stuck_contacts", 1);
+
     if (r.redis) {
       const cacheKey = getCacheKey(organizationId, contactNumber);
 
@@ -52,6 +57,30 @@ const organizationContactCache = {
         .set(cacheKey, JSON.stringify(organizationContact))
         .expire(cacheKey, 43200) // 12 hours
         .execAsync();
+    }
+  },
+  remove: async ({ organizationId, contactNumber }) => {
+    const [organizationContact] = await r
+      .knex("organization_contact")
+      .where({
+        organization_id: organizationId,
+        contact_number: contactNumber
+      })
+      .limit(1);
+
+    await r
+      .knex("organization_contact")
+      .where({
+        organization_id: organizationId,
+        contact_number: contactNumber
+      })
+      .delete();
+
+    if (organizationContact) {
+      await r
+        .knex("owned_phone_number")
+        .where({ phone_number: organizationContact.user_number })
+        .increment("stuck_contacts", -1);
     }
   }
 };
