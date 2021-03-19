@@ -26,7 +26,12 @@ export const available = organization =>
 
 // export const preMessageSave = async () => {};
 
-export const postMessageSave = async ({ message, contact, organization }) => {
+export const postMessageSave = async ({
+  message,
+  contact,
+  organization,
+  campaign
+}) => {
   if (!exports.available(organization)) {
     return {};
   }
@@ -56,7 +61,7 @@ export const postMessageSave = async ({ message, contact, organization }) => {
 
   const body = JSON.parse(texted.details);
 
-  return Van.postCanvassResponse(contact, organization, body)
+  return Van.postCanvassResponse(contact, organization, body, campaign)
     .then(() => ({}))
     .catch(caughtError => {
       // eslint-disable-next-line no-console

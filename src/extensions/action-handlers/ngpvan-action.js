@@ -33,11 +33,16 @@ export const DEFAULT_NGP_VAN_CONTACT_TYPE = "SMS Text";
 export const DEFAULT_NGP_VAN_INPUT_TYPE = "API";
 export const DEFAULT_NGP_VAN_ACTION_HANDLER_CACHE_TTL = 600;
 
-export function clientChoiceDataCacheKey() {
-  return "";
+export function clientChoiceDataCacheKey(user, campaign) {
+  return (campaign || {}).features.van_database_mode;
 }
 
-export const postCanvassResponse = async (contact, organization, bodyInput) => {
+export const postCanvassResponse = async (
+  contact,
+  organization,
+  bodyInput,
+  campaign
+) => {
   let vanId;
   let vanPhoneId;
   try {
@@ -80,7 +85,7 @@ export const postCanvassResponse = async (contact, organization, bodyInput) => {
     retries: 0,
     timeout: Van.getNgpVanTimeout(organization),
     headers: {
-      Authorization: Van.getAuth(organization),
+      Authorization: Van.getAuth(organization, campaign),
       "Content-Type": "application/json"
     },
     body: JSON.stringify(body),
@@ -94,7 +99,8 @@ export const postCanvassResponse = async (contact, organization, bodyInput) => {
 export async function processAction({
   interactionStep,
   contact,
-  organization
+  organization,
+  campaign
 }) {
   try {
     const answerActionsData = JSON.parse(
@@ -103,7 +109,7 @@ export async function processAction({
 
     const body = JSON.parse(answerActionsData.value);
 
-    return postCanvassResponse(contact, organization, body);
+    return postCanvassResponse(contact, organization, body, campaign);
   } catch (caughtError) {
     // eslint-disable-next-line no-console
     console.error("Encountered exception in ngpvan.processAction", caughtError);
@@ -111,14 +117,14 @@ export async function processAction({
   }
 }
 
-async function getContactTypeIdAndInputTypeId(organization) {
+async function getContactTypeIdAndInputTypeId(organization, campaign) {
   const contactTypesPromise = httpRequest(
     Van.makeUrl(`v4/canvassResponses/contactTypes`),
     {
       method: "GET",
       timeout: Van.getNgpVanTimeout(organization),
       headers: {
-        Authorization: Van.getAuth(organization)
+        Authorization: Van.getAuth(organization, campaign)
       }
     }
   )
@@ -136,7 +142,7 @@ async function getContactTypeIdAndInputTypeId(organization) {
       method: "GET",
       timeout: Van.getNgpVanTimeout(organization),
       headers: {
-        Authorization: Van.getAuth(organization)
+        Authorization: Van.getAuth(organization, campaign)
       }
     }
   )
@@ -194,9 +200,10 @@ async function getContactTypeIdAndInputTypeId(organization) {
   return { contactTypeId, inputTypeId };
 }
 
-export async function getClientChoiceData(organization) {
+export async function getClientChoiceData(organization, user, campaign) {
   const { contactTypeId, inputTypeId } = await getContactTypeIdAndInputTypeId(
-    organization
+    organization,
+    campaign
   );
 
   if (inputTypeId === -1 || !contactTypeId) {
@@ -219,7 +226,7 @@ export async function getClientChoiceData(organization) {
       method: "GET",
       timeout: Van.getNgpVanTimeout(organization),
       headers: {
-        Authorization: Van.getAuth(organization)
+        Authorization: Van.getAuth(organization, campaign)
       }
     }
   )
@@ -237,7 +244,7 @@ export async function getClientChoiceData(organization) {
       method: "GET",
       timeout: Van.getNgpVanTimeout(organization),
       headers: {
-        Authorization: Van.getAuth(organization)
+        Authorization: Van.getAuth(organization, campaign)
       }
     }
   )
@@ -255,7 +262,7 @@ export async function getClientChoiceData(organization) {
       method: "GET",
       timeout: Van.getNgpVanTimeout(organization),
       headers: {
-        Authorization: Van.getAuth(organization)
+        Authorization: Van.getAuth(organization, campaign)
       }
     }
   )

@@ -1,18 +1,6 @@
 import gql from "graphql-tag";
 
 export const schema = gql`
-  type ActionChoice {
-    name: String!
-    details: String!
-  }
-
-  type Action {
-    name: String
-    displayName: String
-    instructions: String
-    clientChoiceData: [ActionChoice]
-  }
-
   type PhoneNumberCounts {
     areaCode: String!
     state: String!
@@ -63,7 +51,6 @@ export const schema = gql`
     profileFields: [ProfileField]
     optOuts: [OptOut]
     allowSendAll: Boolean
-    availableActions: [Action]
     settings: OrgSettings
     batchPolicies: [String]
     optOutMessage: String

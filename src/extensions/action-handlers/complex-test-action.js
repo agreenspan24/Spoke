@@ -23,7 +23,7 @@ export function serverAdministratorInstructions() {
   };
 }
 
-export function clientChoiceDataCacheKey(organization, user) {
+export function clientChoiceDataCacheKey() {
   return "";
 }
 

@@ -182,6 +182,7 @@ export class CampaignContactsChoiceForm extends React.Component {
               jobResultMessage={null}
               contactsPerPhoneNumber={contactsPerPhoneNumber}
               maxNumbersPerCampaign={maxNumbersPerCampaign}
+              additionalRequiredFields={[]}
             />
           )}
         </div>

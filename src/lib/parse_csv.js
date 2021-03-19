@@ -86,8 +86,12 @@ export const parseCSV = (file, onCompleteCallback, options) => {
   //   returns the header that should be used for the column. An example
   //   would be to transform first_name to firstName, which is a required
   //   field in Spoke.
-  const { rowTransformer, headerTransformer, additionalCustomFields = [] } =
-    options || {};
+  const {
+    rowTransformer,
+    headerTransformer,
+    additionalCustomFields = [],
+    additionalRequiredFields
+  } = options || {};
   Papa.parse(file, {
     header: true,
     ...(headerTransformer && { transformHeader: headerTransformer }),
@@ -116,7 +120,9 @@ export const parseCSV = (file, onCompleteCallback, options) => {
         data = transformerResults.rows;
       }
 
-      for (const field of requiredUploadFields) {
+      for (const field of requiredUploadFields.concat(
+        additionalRequiredFields
+      )) {
         if (fields.indexOf(field) === -1) {
           missingFields.push(field);
         }

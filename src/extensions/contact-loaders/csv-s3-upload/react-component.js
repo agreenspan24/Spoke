@@ -300,5 +300,7 @@ CampaignContactsForm.propTypes = {
   saveLabel: type.string,
 
   clientChoiceData: type.string,
-  jobResultMessage: type.string
+  jobResultMessage: type.string,
+
+  additionalRequiredFields: type.array
 };

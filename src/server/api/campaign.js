@@ -13,6 +13,10 @@ import { getConfig, getFeatures } from "./lib/config";
 import ownedPhoneNumber from "./lib/owned-phone-number";
 const title = 'lower("campaign"."title")';
 import { camelizeKeys } from "humps";
+import {
+  getAvailableActionHandlers,
+  getActionChoiceData
+} from "../../extensions/action-handlers";
 
 export function addCampaignsFilterToQuery(
   queryParam,
@@ -694,6 +698,35 @@ export const resolvers = {
         campaign.use_own_messaging_service &&
         !campaign.messageservice_sid
       );
+    },
+    availableActions: async (campaign, _, { user, loaders }) => {
+      await accessRequired(
+        user,
+        campaign.organization_id,
+        "SUPERVOLUNTEER",
+        true
+      );
+
+      const organization = loaders.organization.load(campaign.organization_id);
+      const availableHandlers = await getAvailableActionHandlers(
+        organization,
+        user
+      );
+
+      const promises = availableHandlers.map(handler => {
+        return getActionChoiceData(handler, organization, user, campaign).then(
+          clientChoiceData => {
+            return {
+              name: handler.name,
+              displayName: handler.displayName(),
+              instructions: handler.instructions(),
+              clientChoiceData
+            };
+          }
+        );
+      });
+
+      return Promise.all(promises);
     }
   }
 };

@@ -312,5 +312,7 @@ CampaignContactsForm.propTypes = {
   jobResultMessage: type.string,
 
   maxNumbersPerCampaign: type.number,
-  contactsPerPhoneNumber: type.number
+  contactsPerPhoneNumber: type.number,
+
+  additionalRequiredFields: type.array
 };

@@ -86,6 +86,18 @@ export const schema = gql`
     campaignMessagesExportUrl: String
   }
 
+  type ActionChoice {
+    name: String!
+    details: String!
+  }
+
+  type Action {
+    name: String
+    displayName: String
+    instructions: String
+    clientChoiceData: [ActionChoice]
+  }
+
   type Campaign {
     id: ID
     organization: Organization
@@ -133,6 +145,7 @@ export const schema = gql`
     useOwnMessagingService: Boolean
     phoneNumbers: [String]
     inventoryPhoneNumberCounts: [CampaignPhoneNumberCount]
+    availableActions: [Action]
   }
 
   type CampaignsList {

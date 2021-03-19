@@ -211,9 +211,11 @@ export async function processSqsMessages(TWILIO_SQS_QUEUE_URL) {
   return p;
 }
 
-export async function dispatchContactIngestLoad(job, organization) {
+export async function dispatchContactIngestLoad(job, organization, campaign) {
+  if (!campaign) {
+    campaign = await Campaign.get(job.campaign_id);
+  }
   if (!organization) {
-    const campaign = await Campaign.get(job.campaign_id);
     organization = await Organization.get(campaign.organization_id);
   }
   const ingestMethod = rawIngestMethod(job.job_type.replace("ingest.", ""));
@@ -231,7 +233,12 @@ export async function dispatchContactIngestLoad(job, organization) {
       : process.env.MAX_CONTACTS || 0,
     10
   );
-  await ingestMethod.processContactLoad(job, maxContacts, organization);
+  await ingestMethod.processContactLoad(
+    job,
+    maxContacts,
+    organization,
+    campaign
+  );
 }
 
 export async function failedContactLoad(

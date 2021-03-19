@@ -154,7 +154,12 @@ export async function getAvailableActionHandlers(organization, user) {
   return actionHandlers.filter(x => x);
 }
 
-export async function getActionChoiceData(actionHandler, organization, user) {
+export async function getActionChoiceData(
+  actionHandler,
+  organization,
+  user,
+  campaign
+) {
   const cacheKeyFunc = actionHandler.clientChoiceDataCacheKey || (() => "");
   const clientChoiceDataFunc =
     actionHandler.getClientChoiceData || (() => ({ data: "{}" }));
@@ -164,7 +169,7 @@ export async function getActionChoiceData(actionHandler, organization, user) {
     cacheKey = exports.choiceDataCacheKey(
       actionHandler.name,
       organization,
-      cacheKeyFunc(user)
+      cacheKeyFunc(user, campaign)
     );
   } catch (caughtException) {
     log.error(
@@ -176,7 +181,7 @@ export async function getActionChoiceData(actionHandler, organization, user) {
   try {
     returned =
       (await exports.getSetCacheableResult(cacheKey, async () =>
-        clientChoiceDataFunc(organization, user)
+        clientChoiceDataFunc(organization, user, campaign)
       )) || {};
   } catch (caughtException) {
     log.error(
