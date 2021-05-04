@@ -96,6 +96,7 @@ export default function renderIndex(html, css, assetMap) {
       window.CONVERSATION_LIST_ROW_SIZES="${process.env
         .CONVERSATION_LIST_ROW_SIZES || ""}"
       window.CORE_BACKGROUND_COLOR="${process.env.CORE_BACKGROUND_COLOR || ""}"
+      window.CORE_TEXT_COLOR="${process.env.CORE_TEXT_COLOR || ""}"
       window.CAN_GOOGLE_IMPORT=${canGoogleImport}
       window.DOWNTIME="${process.env.DOWNTIME || ""}"
       window.DOWNTIME_TEXTER="${process.env.DOWNTIME_TEXTER || ""}"

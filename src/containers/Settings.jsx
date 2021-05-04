@@ -194,7 +194,9 @@ class Settings extends React.Component {
         <CardHeader
           title="Twilio Credentials"
           style={{
-            backgroundColor: allSet ? theme.colors.green : theme.colors.yellow
+            backgroundColor: allSet
+              ? theme.colors.coreBackgroundColor
+              : theme.colors.yellow
           }}
         />
         {allSet && (
@@ -272,7 +274,9 @@ class Settings extends React.Component {
         <Card>
           <CardHeader
             title="Settings"
-            style={{ backgroundColor: theme.colors.green }}
+            titleStyle={{ color: theme.colors.coreTextColor }}
+            style={{ backgroundColor: theme.colors.coreBackgroundColor }}
+            iconStyle={{ color: theme.colors.coreTextColor }}
           />
           <CardText>
             <div className={css(styles.section)}>
@@ -344,7 +348,9 @@ class Settings extends React.Component {
           <Card>
             <CardHeader
               title="Texter UI Defaults"
-              style={{ backgroundColor: theme.colors.green }}
+              titleStyle={{ color: theme.colors.coreTextColor }}
+              style={{ backgroundColor: theme.colors.coreBackgroundColor }}
+              iconStyle={{ color: theme.colors.coreTextColor }}
               actAsExpander={true}
               showExpandableButton={true}
             />
@@ -374,7 +380,9 @@ class Settings extends React.Component {
           <Card>
             <CardHeader
               title="Overriding default settings"
-              style={{ backgroundColor: theme.colors.green }}
+              titleStyle={{ color: theme.colors.coreTextColor }}
+              style={{ backgroundColor: theme.colors.coreBackgroundColor }}
+              iconStyle={{ color: theme.colors.coreTextColor }}
               actAsExpander={true}
               showExpandableButton={true}
             />
