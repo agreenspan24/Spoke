@@ -108,6 +108,9 @@ export default function renderIndex(html, css, assetMap) {
           ? 'window.TEXTER_SIDEBOXES="' + process.env.TEXTER_SIDEBOXES + '"'
           : ""
       }
+      window.HOLD_ENTER_KEY=${getConfig("HOLD_ENTER_KEY", null, {
+        truthy: 1
+      }) || false}
       window.TEXTER_TWOCLICK=${getConfig("TEXTER_TWOCLICK", null, {
         truthy: 1
       }) || false}
@@ -115,7 +118,10 @@ export default function renderIndex(html, css, assetMap) {
         100};
       window.CONTACTS_PER_PHONE_NUMBER=${getConfig(
         "CONTACTS_PER_PHONE_NUMBER"
-      ) || 200};      
+      ) || 200};
+      window.HIDE_BRANCHED_SCRIPTS=${getConfig("HIDE_BRANCHED_SCRIPTS", null, {
+        truthy: 1
+      }) || false};
       window.MOBILIZE_EVENT_SHIFTER_URL='${getConfig(
         "MOBILIZE_EVENT_SHIFTER_URL"
       )}';
